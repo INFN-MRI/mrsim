@@ -12,7 +12,7 @@
 
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
 
-<img src="https://github.com/INFN-PREDATOR/deepmr/blob/main/docs/source/_static/deepmr_logo.png" width="200">
+<img src="https://github.com/INFN-PREDATOR/deepmr/blob/main/docs/source/_static/deepmr_logo.png" width="300">
 
 --------------------------------------------------------------------------------
 
