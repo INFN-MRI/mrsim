@@ -15,7 +15,6 @@
 <p align="center">
 <img src="https://github.com/INFN-PREDATOR/deepmr/blob/main/docs/source/_static/deepmr_logo.png" width="300">
 </p>
---------------------------------------------------------------------------------------------------------
 
 A feature-complete MR simulator supporting massive parallelization on GPU and automatic differentiation.
 
