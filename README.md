@@ -15,9 +15,9 @@
 <p align="center">
 <img src="https://github.com/INFN-PREDATOR/deepmr/blob/main/docs/source/_static/deepmr_logo.png" width="300">
 </p>
---------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
 
-A framework to accelerate the development of modern MR acquisition and reconstruction methods, focused on quantitative MRI.
+A feature-complete MR simulator supporting massive parallelization on GPU and automatic differentiation.
 
 A longer description of your project goes here...
 
