@@ -3,10 +3,9 @@ EPG signal recording operator.
 
 Can be used to record signal during simulation.
 """
-__all__ = ["observe", "susceptibility"]
+__all__ = ["observe", "susceptibility", "t1sat"]
 
 import torch
-
 
 def observe(states, phi=None):
     """
@@ -35,17 +34,17 @@ def observe(states, phi=None):
 
     return mxy
 
-
 def susceptibility(signal, time, z):
     """
     Apply static susceptibility effects (bulk decay and dephasing).
 
     Args:
-        (torch.Tensor): net observable magnetization.
+        signal (torch.Tensor): net observable magnetization.
         time (torch.Tensor): effective phase for signal demodulation.
+        z (torch.Tensor): complex field R2star + 1j deltaB0.
 
     Returns:
-        (torch.Tensor): net observable magnetization at current timepoint.
+        (torch.Tensor): damped and dephased net observable magnetization.
 
     """
     if time.shape[-1] != 1:  # multiecho
@@ -55,5 +54,29 @@ def susceptibility(signal, time, z):
     #  apply effect
     if time.shape[-1] == 1 and time != 0:
         signal = signal * torch.exp(-time * (z[..., 0] + 1j * z[..., 1]))
+
+    return signal
+
+def t1sat(signal, time, t1):
+    """
+    Apply t1 saturation effect.
+
+    Args:
+        signal (torch.Tensor): net observable magnetization.
+        time (torch.Tensor): effective phase for signal demodulation.
+        t1 (torch.Tensor): longitudinal magnetization time.
+
+    Returns:
+        (torch.Tensor): saturated net observable.
+
+    """
+    if time.shape[-1] != 1:  # multiecho
+        if signal.shape[-1] != time.shape[-1]:  # assume echo must be broadcasted
+            signal = [..., None]
+
+    #  apply effect
+    if time.shape[-1] == 1 and time != 0:
+        E1 = torch.exp(-time / (t1 + 0.000000000000001))
+        signal = signal * (1 - E1) / (1 - signal * E1)
 
     return signal

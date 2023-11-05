@@ -2,17 +2,16 @@
 Bloch simulation utils
 =====================
 
-The subpackage bloch contains a the main simulation 
+The subpackage bloch contains the main simulation 
 routines:
     
 
-
 """
-
-from .seq import ssfp as _ssfp
+from . import model as _model
 from . import ops
+from . import blocks
 
-from .seq.ssfp import *  # noqa
+from .model import *  # noqa
 
 __all__ = []
-__all__.extend(_ssfp.__all__)
+__all__.extend(_model.__all__)

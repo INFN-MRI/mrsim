@@ -10,10 +10,7 @@ from typing import Tuple, Union
 
 import numpy as np
 
-from deepmr import utils
-
 from . import tissue_classes
-
 
 def mr_shepp_logan(npix: Union[int, Tuple[int]], nslices: int, B0=3.0, model="single"):
     """

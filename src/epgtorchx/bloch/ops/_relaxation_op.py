@@ -11,7 +11,6 @@ import torch
 
 from ._abstract_op import Operator
 
-
 class Relaxation(Operator):
     """
     The "decay operator" applying relaxation and "regrowth" of the magnetization components.

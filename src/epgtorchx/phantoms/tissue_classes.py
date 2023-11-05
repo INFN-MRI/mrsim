@@ -1,4 +1,5 @@
 """Utils to generate MR parameters distributions and handle physical dimensions."""
+
 __all__ = [
     "Air",
     "Fat",
@@ -20,13 +21,18 @@ import numpy.typing as npt
 # reproducibility
 np.random.seed(42)
 
-from deepmr import utils
+# Speed of light [m/s].
+c0 = 299792458.0
 
-# get quantities
-eps0 = utils.eps0.magnitude
-gamma = utils.gamma().magnitude
-gamma_bar = utils.gamma_bar().magnitude
+# Vacuum permeability [H/m].
+mu0 = 4.0e-7 * np.pi
 
+# Vacuum permeability [F/m].
+eps0 = 1.0 / mu0 / c0**2
+
+# gyromagnetic factors
+gamma_bar = 42.575 * 1e6 # MHz / T -> Hz / T
+gamma = 2 * np.pi * gamma_bar # rad / T / s
 
 def _default_bm(n_atoms, model):
     if "bm" in model:
@@ -41,14 +47,12 @@ def _default_bm(n_atoms, model):
     else:
         return {}
 
-
 def _default_mt(n_atoms, model):
     if "mt" in model:
         z = np.zeros((n_atoms, 1), dtype=np.float32)
         return {"k": z.copy(), "weight": z.copy()}
     else:
         return {}
-
 
 @dataclass
 class AbstractTissue:
@@ -69,9 +73,6 @@ class AbstractTissue:
     # motion properties
     D: Union[float, npt.NDArray] = None  # um**2 / ms
     v: Union[float, npt.NDArray] = None  # cm / s
-
-    # multi-component related properties
-    # k: Union[float, npt.NDArray] = None  # 1 / s
 
     # smaller pools
     bm: dict = None
@@ -98,23 +99,7 @@ class AbstractTissue:
                 setattr(self, field.name, _default_bm(n_atoms, model))
             elif field.name == "mt" and "mt" in model and value is None:
                 setattr(self, field.name, _default_mt(n_atoms, model))
-            # elif field.name == "k" and value is None:
-            #     if model == "single":
-            #         setattr(
-            #             self, field.name, np.zeros((n_atoms, 1, 1), dtype=np.float32)
-            #         )
-            #     if model == "bm":
-            #         setattr(
-            #             self, field.name, np.zeros((n_atoms, 2, 2), dtype=np.float32)
-            #         )
-            #     if model == "mt":
-            #         setattr(
-            #             self, field.name, np.zeros((n_atoms, 2, 2), dtype=np.float32)
-            #         )
-            #     if model == "bm-mt":
-            #         setattr(
-            #             self, field.name, np.zeros((n_atoms, 3, 3), dtype=np.float32)
-            #         )
+
 
     # utils
     def _calculate_t1(self, B0, A):
@@ -128,7 +113,6 @@ class AbstractTissue:
             return 1e3 / R2star  # s -> ms
 
         return None
-
 
 class Air(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
@@ -152,7 +136,6 @@ class Air(AbstractTissue):
         self.T2 = np.zeros(n_atoms, dtype=np.float32)
 
         super().__init__(n_atoms, model)
-
 
 class Fat(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
@@ -186,7 +169,6 @@ class Fat(AbstractTissue):
         self.chemshift = gamma_bar * B0 * chemshift  # Hz
 
         super().__init__(n_atoms, model)
-
 
 class WhiteMatter(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
@@ -253,13 +235,6 @@ class WhiteMatter(AbstractTissue):
             self.bm["chemshift"] = (
                 15.0 / 3.0 * B0 * np.ones((n_atoms, 1), dtype=np.float32)
             )
-        # set semisolid pool T1 and T2
-        # if "mt" in str(simulate_multipool).lower():
-        #     self.mt = {}
-        #     # semisolid zeeman # from https://onlinelibrary.wiley.com/doi/10.1002/mrm.22131
-        #     self.mt["T1"] = np.atleast_1d(self.T1)[
-        #         ..., None
-        #     ]  # assume same T1 for water and zeeman components
 
         # set Bloch-McConnell pool weight
         if "bm" in str(simulate_multipool).lower():
@@ -268,6 +243,7 @@ class WhiteMatter(AbstractTissue):
             self.bm["weight"] = wmw * np.ones(
                 (n_atoms, 1), dtype=np.float32
             )  # myelin water
+            
         # set semisolid pool weight
         if "mt" in str(simulate_multipool).lower():
             self.mt = {}
@@ -285,48 +261,7 @@ class WhiteMatter(AbstractTissue):
             kmw_ss = 200
             self.mt["k"] = np.atleast_1d(rand(kmw_ss, 0.5 * kmw_ss, n_atoms))[:, None]
 
-        # # set exchange
-        # if simulate_multipool:
-        #     # myelin water / semisolid nondirectional exchange rate # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7478173/table/T1/?report=objectonly
-        #     kmw_ss = 200
-        #     kmw_ss = np.atleast_1d(rand(kmw_ss, 0.5 * kmw_ss, n_atoms))
-
-        #     # myelin water / intra-/extra-cellular water nondirectional exchange rate # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7478173/table/T1/?report=objectonly
-        #     kmw_iew = 13.3
-        #     kmw_iew = np.atleast_1d(rand(kmw_iew, 0.5 * kmw_iew, n_atoms))
-
-        #     # zero
-        #     k0 = np.zeros(n_atoms)
-
-        # if str(simulate_multipool).lower() == "bm":
-        #     # build exchange matrix rows
-        #     kmw = np.stack((kmw_iew, k0), axis=-1)  # myelin water
-        #     kiew = np.stack((k0, kmw_iew), axis=-1)  # intra-/extra-cellular water
-        #     self.k = np.stack((kiew, kmw), axis=-1)
-        # if str(simulate_multipool).lower() == "mt":
-        #     # build exchange matrix rows
-        #     kss = np.stack(
-        #         (kmw_ss, k0), axis=-1
-        #     )  # semisolid (exchange with myelin water only)
-        #     kmw = np.stack(
-        #         (k0, kmw_ss), axis=-1
-        #     )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
-        #     self.k = np.stack((kmw, kss), axis=-1)
-        # if str(simulate_multipool).lower() == "bm-mt":
-        #     # build exchange matrix rows
-        #     kss = np.stack(
-        #         (k0, kmw_ss, k0), axis=-1
-        #     )  # semisolid (exchange with myelin water only)
-        #     kmw = np.stack(
-        #         (kmw_iew, k0, kmw_ss), axis=-1
-        #     )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
-        #     kiew = np.stack(
-        #         (k0, kmw_iew, k0), axis=-1
-        #     )  # intra-/extra-cellular water (exchange with myelin water only)
-        #     self.k = np.stack((kiew, kmw, kss), axis=-1)
-
         super().__init__(n_atoms, model)
-
 
 class GrayMatter(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
@@ -392,14 +327,7 @@ class GrayMatter(AbstractTissue):
             self.bm["chemshift"] = (
                 5.0 / 3.0 * B0 * np.ones((n_atoms, 1), dtype=np.float32)
             )
-        # set semisolid pool T1 and T2
-        # if "mt" in str(simulate_multipool).lower():
-        #     self.mt = {}
-        #     # semisolid zeeman # from https://onlinelibrary.wiley.com/doi/10.1002/mrm.22131
-        #     self.mt["T1"] = np.atleast_1d(self.T1)[
-        #         ..., None
-        #     ]  # assume same T1 for water and zeeman components
-
+       
         # set Bloch-McConnell pool weight
         if "bm" in str(simulate_multipool).lower():
             w0 = 0.03
@@ -407,6 +335,7 @@ class GrayMatter(AbstractTissue):
             self.bm["weight"] = wmw * np.ones(
                 (n_atoms, 1), dtype=np.float32
             )  # myelin water
+            
         # set semisolid pool weight
         if "mt" in str(simulate_multipool).lower():
             self.mt = {}
@@ -423,46 +352,6 @@ class GrayMatter(AbstractTissue):
         if "mt" in str(simulate_multipool).lower():
             kmw_ss = 3333.3
             self.mt["k"] = np.atleast_1d(rand(kmw_ss, 0.5 * kmw_ss, n_atoms))[:, None]
-
-        # # set exchange
-        # if simulate_multipool:
-        #     # myelin water / semisolid nondirectional exchange rate # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7478173/table/T1/?report=objectonly
-        #     kmw_ss = 3333.3
-        #     kmw_ss = np.atleast_1d(rand(kmw_ss, 0.5 * kmw_ss, n_atoms))
-
-        #     # myelin water / intra-/extra-cellular water nondirectional exchange rate # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7478173/table/T1/?report=objectonly
-        #     kmw_iew = 53.2
-        #     kmw_iew = np.atleast_1d(rand(kmw_iew, 0.5 * kmw_iew, n_atoms))
-
-        #     # zero
-        #     k0 = np.zeros(n_atoms)
-
-        # if str(simulate_multipool).lower() == "bm":
-        #     # build exchange matrix rows
-        #     kmw = np.stack((kmw_iew, k0), axis=-1)  # myelin water
-        #     kiew = np.stack((k0, kmw_iew), axis=-1)  # intra-/extra-cellular water
-        #     self.k = np.stack((kiew, kmw), axis=-1)
-        # if str(simulate_multipool).lower() == "mt":
-        #     # build exchange matrix rows
-        #     kss = np.stack(
-        #         (kmw_ss, k0), axis=-1
-        #     )  # semisolid (exchange with myelin water only)
-        #     kmw = np.stack(
-        #         (k0, kmw_ss), axis=-1
-        #     )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
-        #     self.k = np.stack((kmw, kss), axis=-1)
-        # if str(simulate_multipool).lower() == "bm-mt":
-        #     # build exchange matrix rows
-        #     kss = np.stack(
-        #         (k0, kmw_ss, k0), axis=-1
-        #     )  # semisolid (exchange with myelin water only)
-        #     kmw = np.stack(
-        #         (kmw_iew, k0, kmw_ss), axis=-1
-        #     )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
-        #     kiew = np.stack(
-        #         (k0, kmw_iew, k0), axis=-1
-        #     )  # intra-/extra-cellular water (exchange with myelin water only)
-        #     self.k = np.stack((kiew, kmw, kss), axis=-1)
 
         super().__init__(n_atoms, model)
 
@@ -505,7 +394,6 @@ class CSF(AbstractTissue):
 
         super().__init__(n_atoms, model)
 
-
 class Muscle(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
         """
@@ -538,7 +426,6 @@ class Muscle(AbstractTissue):
 
         super().__init__(n_atoms, model)
 
-
 class Skin(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
         """
@@ -569,7 +456,6 @@ class Skin(AbstractTissue):
 
         super().__init__(n_atoms, model)
 
-
 class Bone(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
         """
@@ -598,7 +484,6 @@ class Bone(AbstractTissue):
         )
 
         super().__init__(n_atoms, model)
-
 
 class Blood(AbstractTissue):
     def __init__(self, n_atoms, B0, model="single"):
@@ -634,7 +519,6 @@ class Blood(AbstractTissue):
 
         super().__init__(n_atoms, model)
 
-
 # %% local utils
 def rand(mean, hwidth, n_atoms, seed=42):
     """
@@ -657,8 +541,7 @@ def rand(mean, hwidth, n_atoms, seed=42):
     # delta peak case
     return mean
 
-
-# 4 Cole-Cole model parameters (N De Geeter et al 2012 Phys. Med. Biol. 57 2169)
+# 4th order Cole-Cole model parameters (N De Geeter et al 2012 Phys. Med. Biol. 57 2169)
 brain_params = {
     "wm": {
         "epsInf": 4.0,
@@ -683,9 +566,7 @@ brain_params = {
     },
 }
 
-
 cole_cole_model_params = {"brain": brain_params}
-
 
 def _get_complex_dielectric_properties(field_strength, anatomic_region="brain"):
     """Calculate theoretical complex dielectric properties.

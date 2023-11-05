@@ -24,10 +24,7 @@ import nibabel as nib
 import numpy as np
 from scipy.ndimage import zoom
 
-from deepmr import utils
-
 from . import tissue_classes
-
 
 def create_brainweb(
     npix: int,

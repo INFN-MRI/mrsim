@@ -28,7 +28,7 @@ def ExcPulse(states, B1, rf_props):
 
     return ops.RFPulse(device, nlocs=nlocs, B1=B1, name="Excitation Pulse", **rf_props)
 
-def FSEStep(states, TE, T1, T2, weight, k, chemshift, D, v, grad_props):
+def FSEStep(states, ESP, T1, T2, weight=None, k=None, chemshift=None, D=None, v=None, grad_props=None):
     """
     (Unbalanced) SSFP propagator.
     
@@ -36,7 +36,7 @@ def FSEStep(states, TE, T1, T2, weight, k, chemshift, D, v, grad_props):
     
     Args:
         states (tensor): EPG states matrix.
-        TE (float): Echo Time in ms.
+        ESP (float): Echo Spacing in ms.
         T1 (tensor): T1 relaxation time of shape (..., npools) in [ms].
         T2 (tensor): T2 relaxation time of shape (..., npools) in [ms].
         weight (tensor): Pool relative fraction.
@@ -51,7 +51,7 @@ def FSEStep(states, TE, T1, T2, weight, k, chemshift, D, v, grad_props):
         TETRop (epgtorch.Operator): Propagator until next TR.
 
     """
-    X, S = _free_precess(states, TE, T1, T2, weight, k, chemshift, D, v, grad_props) 
+    X, S = _free_precess(states, 0.5 * ESP, T1, T2, weight, k, chemshift, D, v, grad_props) 
     
     # build Xpre and Xpost
     Xpre = ops.CompositeOperator(S, X, name="FSEpre")
@@ -59,7 +59,7 @@ def FSEStep(states, TE, T1, T2, weight, k, chemshift, D, v, grad_props):
 
     return Xpre, Xpost
 
-def bSSFPStep(states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props):
+def bSSFPStep(states, TE, TR, T1, T2, weight=None, k=None, chemshift=None):
     """
     (Balanced) SSFP propagator.
     
@@ -83,11 +83,11 @@ def bSSFPStep(states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props):
         TETRop (epgtorch.Operator): Propagator until next TR.
 
     """
-    XTE, _ = _free_precess(states, TE, T1, T2, weight, k, chemshift, D, v, grad_props)
-    XTETR, _ = _free_precess(states, TR-TE, T1, T2, weight, k, chemshift, D, v, grad_props)
+    XTE, _ = _free_precess(states, TE, T1, T2, weight, k, chemshift, None, None, None)
+    XTETR, _ = _free_precess(states, TR-TE, T1, T2, weight, k, chemshift, None, None, None)
     return XTE, XTETR
 
-def SSFPFidStep(states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props):
+def SSFPFidStep(states, TE, TR, T1, T2, weight=None, k=None, chemshift=None, D=None, v=None, grad_props=None):
     """
     (Unbalanced) SSFP propagator.
     
@@ -115,7 +115,7 @@ def SSFPFidStep(states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props):
     XTETR, S = _free_precess(states, TR-TE, T1, T2, weight, k, chemshift, D, v, grad_props)
     return XTE, ops.CompositeOperator(S, XTETR, name="SSFPFid TE-TR Propagator")
 
-def SSFPEchoStep(states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props):
+def SSFPEchoStep(states, TE, TR, T1, T2, weight=None, k=None, chemshift=None, D=None, v=None, grad_props=None):
     """
     (Reverse) SSFP propagator.
     

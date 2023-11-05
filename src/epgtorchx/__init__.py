@@ -17,10 +17,12 @@ except PackageNotFoundError:  # pragma: no cover
 finally:
     del version, PackageNotFoundError
 
-from . import bloch
+from . import bloch as _bloch
 from . import phantoms as _phantoms
 
+from .bloch import *  # noqa
 from .phantoms import *  # noqa
 
 __all__ = []
+__all__.extend(_bloch.__all__)
 __all__.extend(_phantoms.__all__)

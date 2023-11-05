@@ -6,7 +6,6 @@ and multiple transmit coil modes.
 """
 __all__ = ["AdiabaticPulse", "RFPulse"]
 
-import copy
 
 import numpy as np
 import scipy.interpolate
@@ -15,7 +14,6 @@ import torch
 from ._abstract_op import Operator
 from ._stats import pulse_analysis
 from ._utils import gamma
-
 
 class BasePulse(Operator):
     """

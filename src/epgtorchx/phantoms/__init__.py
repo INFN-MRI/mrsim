@@ -14,9 +14,6 @@ from .brainweb import create_brainweb
 from .ct_shepp_logan import ct_shepp_logan
 from .mr_shepp_logan import mr_shepp_logan
 
-# from deepmr import utils as _utils
-
-
 def create_shepp_logan(
     npix: int,
     nslices: int = 1,

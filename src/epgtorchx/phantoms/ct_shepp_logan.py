@@ -4,8 +4,8 @@ Functions to generate CT Shepp-Logan phantom.
 References:
     https://sigpy.readthedocs.io/en/latest/_modules/sigpy/sim.html#shepp_logan
 """
-import numpy as np
 
+import numpy as np
 
 def ct_shepp_logan(npix, nslices):
     """

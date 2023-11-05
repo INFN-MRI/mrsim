@@ -1,25 +1,31 @@
-"""
-"""
-__all__ = ["ssfp_sim"]
+"""MPRAGE simulator"""
+
+__all__ = ["mprage"]
 
 import warnings
+import numpy as np
 
 import dacite
 from dacite import Config
 
-from . import blocks
+from .. import blocks
+from .. import ops
+from . import base
 
-DEBUG = False
-
-def ssfp_sim(flip, TR, T1, T2, diff=None, device="cpu", TI=None, **kwargs):
+def mprage(nshots, flip, TR, T1, T2, spoil_inc=117.0, sliceprof=False, diff=None, device="cpu", TI=0.0, **kwargs):
     """
-    Simulate an (inversion-prepared) SSFP sequence (with variable flip angles).
+    Simulate a Magnetization Prepared (MP) Rapid Gradient Echo sequence.
 
     Args:
-        flip (float, array-like): Flip angle in [deg] of shape (npulses,) or (npulses, nmodes).
+        nshots (int): number of pulse in the Inversion block.
+        flip (float): Flip angle in [deg] of shape (,nmodes).
         TR (float): Repetition time in [ms].
         T1 (float, array-like): Longitudinal relaxation time in [ms].
         T2 (float, array-like): Transverse relaxation time in [ms].
+        sliceprof (optional, bool or array-like): excitation slice profile (i.e., flip angle scaling across slice).
+            If False, pulse are non selective. If True, pulses are selective but ideal profile is assumed.
+            If array, flip angle scaling along slice is simulated. Defaults to False.
+        spoil_inc (optional, float): RF spoiling increment in [deg]. Defaults to 117°.
         diff (optional, str, tuple[str]): Arguments to get the signal derivative with respect to.
             Defaults to None (no differentation).
         device (optional, str): Computational device. Defaults to "cpu".
@@ -31,43 +37,33 @@ def ssfp_sim(flip, TR, T1, T2, diff=None, device="cpu", TI=None, **kwargs):
         max_chunk_size (optional, int): Maximum number of atoms to be simulated in parallel.
             High numbers increase speed and memory footprint. Defaults to natoms.
         nlocs (optional, int): Maximum number of spatial locations to be simulated (i.e., for slice profile effects).
-            Defaults to 15 for slice selective and 1 for non-selective acquisitions.
+            Defaults to 15 for slice selective and 1 for non-selective / ideal profile acquisitions.
         verbose (optional, bool): If true, prints execution time for signal (and gradient) calculations.
 
     Kwargs (sequence):
-        TE (optional, float, array-like): Echo time(s) in [ms]. Defaults to 0.0.
-        slice_selective_exc (optional, bool): If True, rf pulse affects only in-slice spins and suffers from slice_profile effect.
-            If false, ignores slice profile and excites moving spins as well.
-        slice_selective_prep (optional, bool): If True, inversion pulse affects only in-slice spins.
-            If false, invert moving spins as well.
-        sliceprof (optional, array-like): excitation slice profile (i.e., flip angle scaling across slice).
-            Ignored if pulses are non-selective. Defaults to None.
-        slice_orient (optionl, str, array-like): slice orientation ("x", "y", "z" or versor).
-            Ignored if pulses are non-selective. Defaults to "z".
-        voxelsize (optional, str, array-like): voxel size (dx, dy, dz) in [mm]. If scalar, assume isotropic voxel.
-            Defaults to "None".
-        inv_tau (float): inversion pulse duration in [ms].
-        inv_b1rms (float): inversion pulse root-mean-squared B1 when flip = 1 [deg].
-        inv_df (optional, float): pulse frequency offset in [Hz]. Defaults to 0.
-        rf_tau (float): pulse duration in [ms].
-        rf_b1rms (float): pulse root-mean-squared B1 when flip = 1 [deg].
-        rf_df (optional, float): pulse frequency offset in [Hz]. Defaults to 0.
-        rf_envelope (array_like): rf time envelope when flip = 1 [deg].
-            Together with "duration", it is Used to compute slice profile
-            and b1rms if these are not provided.
+        TE (optional, float): Echo time in [ms]. Defaults to 0.0.
+        B1sqrdTau (float): pulse energy in [uT**2 * ms].
+        
+        global_inversion (bool): assume nonselective (True) or selective (False) inversion. Defaults to True.
+        inv_B1sqrdTau (float): inversion pulse energy in [uT**2 * ms].
+        
         grad_tau (float): gradient lobe duration in [ms].
-        grad_dephasing (optional, float): Total gradient-induced dephasing across a voxel (in grad direction).
-            If gradient_amplitude is not provided, this is used to compute diffusion and flow effects.
         grad_amplitude (optional, float): gradient amplitude along unbalanced direction in [mT / m].
             If total_dephasing is not provided, this is used to compute diffusion and flow effects.
+        grad_dephasing (optional, float): Total gradient-induced dephasing across a voxel (in grad direction).
+            If gradient_amplitude is not provided, this is used to compute diffusion and flow effects.
+
+        voxelsize (optional, str, array-like): voxel size (dx, dy, dz) in [mm]. If scalar, assume isotropic voxel.
+            Defaults to "None".
+        
         grad_orient (optional, str, array-like): gradient orientation ("x", "y", "z" or versor). Defaults to "z".
+        slice_orient (optionl, str, array-like): slice orientation ("x", "y", "z" or versor).
+            Ignored if pulses are non-selective. Defaults to "z".
 
      Kwargs (System):
          B1 (optional, float, array-like): flip angle scaling factor (1.0 := nominal flip angle).
              Defaults to None (nominal flip angle).
          B0 (optional, float, array-like): Bulk off-resonance in [Hz]. Defaults to None.
-         inversio_efficiency (optional, float, array-like): Inversion efficiency.
-             Defaults to None (perfect inversion).
          B1Tx2 (optional, Union[float, npt.NDArray[float], torch.FloatTensor]): flip angle scaling factor for secondary RF mode (1.0 := nominal flip angle). Defaults to None.
          B1phase (optional, Union[float, npt.NDArray[float], torch.FloatTensor]): B1 relative phase in [deg]. (0.0 := nominal rf phase). Defaults to None.
 
@@ -111,84 +107,52 @@ def ssfp_sim(flip, TR, T1, T2, diff=None, device="cpu", TI=None, **kwargs):
         asnumpy = init_params["asnumpy"]
     else:
         asnumpy = True
-
-    # check if it is 2D
-    if "sliceprof" in init_params:
-        slice_selective_exc = True
+        
+    # get selectivity:
+    if sliceprof:
+        selective_exc = True
     else:
-        slice_selective_exc = None
-
-    # check for conflicts
-    if slice_selective_exc is None:
-        if "slice_selective_exc" in init_params:
-            slice_selective_exc = init_params["slice_selective_exc"]
-        else:
-            slice_selective_exc = False
-    else:
-        if "slice_selective_exc" in init_params:
-            if slice_selective_exc != init_params["slice_selective_exc"]:
-                warnings.warn("Slice profile was provided but acquisition is non-selective - setting to selective")
-    
+        selective_exc = False
+            
     # add moving pool if required
-    if slice_selective_exc and "v" in init_params:
+    if selective_exc and "v" in init_params:
         init_params["moving"] = True
 
     # check for global inversion
-    if "slice_selective_inv" in init_params:
-        slice_selective_inv = init_params["slice_selective_inv"]
+    if "global_inversion" in init_params:
+        selective_inv = not(init_params["global_inversion"])
     else:
-        slice_selective_inv = False
+        selective_inv = False
 
     # check for conflicts in inversion selectivity
-    if slice_selective_exc is False and slice_selective_inv is True:
+    if selective_exc is False and selective_inv is True:
         warnings.warn('3D acquisition - forcing inversion pulse to global.')
-        slice_selective_inv = False
+        selective_inv = False
     
     # inversion pulse properties
     if TI is None:
         inv_props = {}
     else:
-        inv_props = {"slice_selective": slice_selective_inv}
+        inv_props = {"slice_selective": selective_inv}
 
-    if "inv_tau" in kwargs:
-        inv_props["duration"] = kwargs["inv_tau"]
-    if "inv_df" in kwargs:
-        inv_props["freq_offset"] = kwargs["inv_df"]
-    if "inv_b1rms" in kwargs:
-        inv_props["b1rms"] = kwargs["inv_b1rms"]
-
-    # check conflicts in inversion settings
-    if TI is None:
-        if inv_props:
-            warnings.warn('Inversion not enabled - ignoring inversion pulse properties.')
-            inv_props = {}
+    if "inv_B1sqrdTau" in kwargs:
+        inv_props["b1rms"] = kwargs["inv_B1sqrdTau"] ** 0.5
+        inv_props["duration"] = 1.0
 
     # excitation pulse properties
-    rf_props = {"slice_selective": slice_selective_exc}
-    if "rf_tau" in kwargs:
-        rf_props["duration"] = kwargs["rf_tau"]
-    if "rf_df" in kwargs:
-        rf_props["freq_offset"] = kwargs["rf_df"]
-    if "rf_b1rms" in kwargs:
-        rf_props["b1rms"] = kwargs["rf_b1rms"]
-    if "rf_envelope" in kwargs:
-        rf_props["rf_envelope"] = kwargs["rf_envelope"]
-    if "rf_envelope" in kwargs:
-        rf_props["rf_envelope"] = kwargs["rf_envelope"]
-    if "sliceprof" in kwargs:
+    rf_props = {"slice_selective": selective_exc}
+    if "B1sqrdTau" in kwargs:
+        inv_props["b1rms"] = kwargs["B1sqrdTau"] ** 0.5
+        inv_props["duration"] = 1.0
+        
+    if np.isscalar(sliceprof) is False:
         rf_props["slice_profile"] = kwargs["sliceprof"]
-
-    # check for possible inconsistencies:
-    if "sliceprof" in rf_props and "rf_envelope" in rf_props:
-        warnings.warn("Both slice profile and rf_envelope are provided - using the first")
-    if "b1rms" in rf_props and "rf_envelope" in rf_props:
-        warnings.warn("Both b1rms and rf_envelope are provided - using the first")
         
     # get nlocs
     if "nlocs" in init_params:
         nlocs = init_params["nlocs"]
     else:
-        if slice_selective_exc:
+        if selective_exc:
             nlocs = 15
         else:
             nlocs = 1
@@ -222,13 +186,10 @@ def ssfp_sim(flip, TR, T1, T2, diff=None, device="cpu", TI=None, **kwargs):
         warnings.warn("Both total_dephasing and grad_amplitude are provided - using the first")
 
     # put all properties together
-    props = {"inv_props": inv_props, "rf_props": rf_props, "grad_props": grad_props}
+    props = {"inv_props": inv_props, "rf_props": rf_props, "grad_props": grad_props, "nshots": nshots, "spoil_inc": spoil_inc}
 
     # initialize simulator
-    if slice_selective_exc:
-        simulator = dacite.from_dict(SSFP2D, init_params, config=Config(check_types=False))
-    else:
-        simulator = dacite.from_dict(SSFP3D, init_params, config=Config(check_types=False))
+    simulator = dacite.from_dict(MPRAGE, init_params, config=Config(check_types=False))
             
     # run simulator
     if diff:
@@ -243,13 +204,13 @@ def ssfp_sim(flip, TR, T1, T2, diff=None, device="cpu", TI=None, **kwargs):
         # prepare info
         info = {"trun": simulator.trun, "tgrad": simulator.tgrad}
         if verbose:
-            print(f"Elapsed time for simulation: {info['trun']} s")
-            print(f"Elapsed time for gradient computation: {info['tgrad']} s")
-
-        return sig, dsig, info
+            return sig, dsig, info
+        else:
+            return sig, dsig
     else:
         # actual simulation
         sig = simulator(flip=flip, TR=TR, TI=TI, TE=TE, props=props)
+        
         # post processing
         if asnumpy:
             sig = sig.cpu().numpy()
@@ -257,21 +218,19 @@ def ssfp_sim(flip, TR, T1, T2, diff=None, device="cpu", TI=None, **kwargs):
             # prepare info
             info = {"trun": simulator.trun}
             if verbose:
-                print(f"Elapsed time for simulation: {info['trun']} s")
-
-        return sig, info["trun"]
-
+                return sig, info
+            else:
+                return sig
 
 #%% utils
 spin_defaults = {"T2star": None, "D": None, "v": None}
 
-class SSFP2D(base.BaseSimulator):
-    """Class to simulate slice-selective inversion-prepared (variable flip angle) SSFP."""
+class MPRAGE(base.BaseSimulator):
+    """Class to simulate inversion-prepared Rapid Gradient Echo."""
 
     @staticmethod
     def sequence(
         flip,
-        phase
         TR,
         TI,
         TE,
@@ -292,10 +251,8 @@ class SSFP2D(base.BaseSimulator):
         inv_props = props["inv_props"]
         rf_props = props["rf_props"]
         grad_props = props["grad_props"]
-
-        # get number of frames and echoes
-        npulses = flip.shape[0]
-        nechoes = len(TE)
+        spoil_inc = props["spoil_inc"]
+        npulses = props["nshots"]
 
         # define preparation
         Prep = blocks.InversionPrep(TI, T1, T2, weight, k, inv_props)
@@ -304,94 +261,33 @@ class SSFP2D(base.BaseSimulator):
         RF = blocks.ExcPulse(states, B1, rf_props)
 
         # prepare free precession period
-        XTE, XSTETR = blocks.SSFPFidStep(
+        X, XS = blocks.SSFPFidStep(
             states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props
         )
+        
+        # initialize phase
+        phi = 0
+        dphi = 0
 
         # magnetization prep
         states = Prep(states)
 
         # actual sequence loop
         for n in range(npulses):
+            
+            # update phase
+            dphi = (phi + spoil_inc) %  360.0
+            phi = (phi + dphi) % 360.0
+            
             # apply pulse
-            states = RF(states, flip[n])
+            states = RF(states, flip, phi)
 
             # relax, recover and record signal for each TE
-            if nechoes == 1:  # single-echo case
-                states = SSFPFidTE(states)
-                signal[n] = ops.observe(states, RF.phi)
-            else:
-                for e in range(len(TE)):
-                    states = SSFPFidTE[e](states)
-                    signal[n, e] = ops.observe(states, RF.phi)
+            states = X(states)
+            signal[n] = ops.observe(states, RF.phi)
 
             # relax, recover and spoil
-            states = SSFPFidTETR(states)
-
-        return signal
-
-
-class SSFP3D(base.BaseSimulator):
-    """Class to simulate non-selective inversion-prepared (variable flip angle) SSFP."""
-
-    @staticmethod
-    def sequence(
-        flip,
-        TR,
-        TI,
-        TE,
-        props,
-        T1,
-        T2,
-        B1,
-        df,
-        weight,
-        k,
-        chemshift,
-        D,
-        v,
-        states,
-        signal,
-    ):
-        # parsing pulses and grad parameters
-        inv_props = props["inv_props"]
-        rf_props = props["rf_props"]
-        grad_props = props["grad_props"]
-
-        # get number of frames and echoes
-        npulses = flip.shape[0]
-        nechoes = len(TE)
-
-        # define preparation
-        Prep = InversionPrep(TI, T1, T2, weight, k, inv_props)
-
-        # prepare RF pulse
-        RF = ExcPulse(states, B1, rf_props)
-
-        # prepare free precession period
-        SSFPFidTE, SSFPFidTETR = SSFPFidStep(
-            states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props
-        )
-
-        for r in range(2):
-            # magnetization prep
-            states = Prep(states)
-
-            # actual sequence loop
-            for n in range(npulses):
-                # apply pulse
-                states = RF(states, flip[n])
-
-                # # relax, recover and record signal for each TE
-                if nechoes == 1:  # single-echo case
-                    states = SSFPFidTE(states)
-                    signal[n] = ops.observe(states, RF.phi)
-                else:
-                    for e in range(len(TE)):
-                        states = SSFPFidTE[e](states)
-                        signal[n, e] = ops.observe(states, RF.phi)
-
-                # # relax, recover and spoil
-                states = SSFPFidTETR(states)
+            states = XS(states)
 
         return ops.susceptibility(signal, TE, df)
+

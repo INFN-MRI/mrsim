@@ -15,7 +15,7 @@ import numpy.typing as npt
 import torch
 from torch.func import jacfwd, vmap
 
-from . import ops
+from .. import ops
 
 eps = torch.finfo(torch.float32).eps
 spin_properties = (
@@ -400,15 +400,6 @@ class BaseSimulator:
             self.model,
             self.moving,
         )
-        # device,
-        # batch_size,
-        # nstates,
-        # nlocs,
-        # npulses,
-        # npools=1,
-        # weight=None,
-        # model="single",
-        # moving=False,
 
     def get_sim_inputs(self, modelsig):  # noqa
         output = {
@@ -563,10 +554,8 @@ def _particle_conservation(k):
 
     return k
 
-
 def inspect_signature(input):
     return list(inspect.signature(input).parameters)
-
 
 def jacadapt(func):
     @wraps(func)
@@ -583,7 +572,6 @@ def jacadapt(func):
         return complex2real(output)
 
     return wrapper
-
 
 def real2complex(input, what):
     if what == "signal":
@@ -606,10 +594,8 @@ def real2complex(input, what):
 
         return out
 
-
 def complex2real(input):
     return torch.stack((input.real, input.imag), dim=-1)
-
 
 def _sort_signature(input, reference):
     out = {k: input[k] for k in reference if k in input}
