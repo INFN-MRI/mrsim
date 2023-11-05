@@ -11,7 +11,6 @@ from dacite import Config
 from .. import blocks
 from .. import ops
 from . import base
-from .mprage import MPRAGE
 
 def memprage(nshots, nechoes, flip, ESP, TR, T1, T2, spoil_inc=117.0, sliceprof=False, diff=None, device="cpu", TI=0.0, **kwargs):
     """

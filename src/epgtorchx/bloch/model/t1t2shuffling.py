@@ -2,7 +2,6 @@
 
 __all__ = ["t1t2shuffling"]
 
-import warnings
 import numpy as np
 
 import dacite
