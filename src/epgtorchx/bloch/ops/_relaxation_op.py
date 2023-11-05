@@ -118,8 +118,8 @@ def _transverse_relax_apply(states, E2):
     F = states["F"]
 
     # apply
-    F[..., 0] = F[..., 0] * E2  # F+
-    F[..., 1] = F[..., 1] * E2.conj()  # F-
+    F[..., 0] = F[..., 0].clone() * E2  # F+
+    F[..., 1] = F[..., 1].clone() * E2.conj()  # F-
 
     # prepare for output
     states["F"] = F
