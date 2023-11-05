@@ -279,34 +279,34 @@ class BaseSimulator:
             # build exchange matrix rows
             k0 = 0 * self.kbm
             kiew = torch.cat(
-                (k0, self.kbm * self.weight[..., 0]), axis=-1
+                (k0, self.kbm * self.weight[..., [0]]), axis=-1
             )  # intra-/extra-cellular water
             kmw = torch.cat(
-                (self.kbm * self.weight[..., 1], k0), axis=-1
+                (self.kbm * self.weight[..., [1]], k0), axis=-1
             )  # myelin water
             self.k = torch.stack((kiew, kmw), axis=-2)
-        if self.model == "mt":
+        elif self.model == "mt":
             k0 = 0 * self.kmt
             # build exchange matrix rows
             kfree = torch.cat(
-                (k0, self.kmt * self.weight[..., 0]), axis=-1
+                (k0, self.kmt * self.weight[..., [0]]), axis=-1
             )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
             kbound = torch.cat(
-                (self.kmt * self.weight[..., 1], k0), axis=-1
+                (self.kmt * self.weight[..., [1]], k0), axis=-1
             )  # semisolid (exchange with myelin water only)
             self.k = torch.stack((kfree, kbound), axis=-2)
-        if self.model == "bm-mt":
+        elif self.model == "bm-mt":
             k0 = 0 * self.kbm
             # build exchange matrix rows
             kiew = torch.cat(
-                (k0, self.kbm * self.weight[..., 1], k0), axis=-1
+                (k0, self.kbm * self.weight[..., [1]], k0), axis=-1
             )  # intra-/extra-cellular water (exchange with myelin water only)
             kmw = torch.cat(
-                (self.kbm * self.weight[..., 0], k0, self.kmt * self.weight[..., 2]),
+                (self.kbm * self.weight[..., [0]], k0, self.kmt * self.weight[..., 2]),
                 axis=-1,
             )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
             kbound = torch.cat(
-                (k0, self.kmt * self.weight[..., 1], k0), axis=-1
+                (k0, self.kmt * self.weight[..., [1]], k0), axis=-1
             )  # semisolid (exchange with myelin water only)
             self.k = np.stack((kiew, kmw, kbound), axis=-2)
         else:
@@ -319,7 +319,7 @@ class BaseSimulator:
             # single pool voxels do not exchange
             idx = (self.weight == 1).sum(axis=-1) == 1
             self.k[idx, :, :] = 0.0
-
+            
         # chemical shift
         if self.model is not None and "bm" in self.model:
             if self.chemshift is not None and self.chemshift_bm is None:

@@ -10,6 +10,7 @@ __all__ = ["Relaxation"]
 import torch
 
 from ._abstract_op import Operator
+from ._utils import matrix_exp
 
 class Relaxation(Operator):
     """
@@ -262,7 +263,7 @@ def _transverse_relax_exchange_prep(time, T2, k, df=None):
         )  # assume MT pool is the last
 
         # actual operators
-        E2 = torch.matrix_exp(lambda2 * time)
+        E2 = matrix_exp(lambda2 * time)
 
         return E2, _transverse_relax_exchange_apply
 
@@ -289,7 +290,7 @@ def _longitudinal_relax_exchange_prep(time, T1, weight, k):
     lambda1 = k * 1e-3 - R1 * Id
 
     # actual operators
-    E1 = torch.matrix_exp(lambda1 * time)
+    E1 = matrix_exp(lambda1 * time)
     rE1 = torch.einsum("...ij,...j->...i", (E1 - Id), torch.linalg.solve(lambda1, C))
 
     return E1, rE1

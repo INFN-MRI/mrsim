@@ -197,7 +197,7 @@ def fse(flip, phases, ESP, T1, T2, sliceprof=False, diff=None, device="cpu", **k
             # prepare info
             info = {"trun": simulator.trun}
             if verbose:
-                return sig, info
+                return sig, info["trun"]
             else:
                 return sig
 
@@ -258,8 +258,8 @@ class FSE(base.BaseSimulator):
 
             # relax, recover and spoil for half echo spacing
             states = Xpost(states)
-            
+                        
             # observe magnetization
             signal[n] = ops.observe(states, RF.phi)
 
-        return signal
+        return signal * 1j

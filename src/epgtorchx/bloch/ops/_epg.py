@@ -42,7 +42,7 @@ def EPGstates(
     Z[:, 0, ...] = 1.0
 
     if weight is not None:
-        Z = Z * weight[:, :npools][:, None]
+        Z = Z * weight[:, :npools][:, None, None]
     Z = {"real": Z.real, "imag": Z.imag}
 
     # append
@@ -65,7 +65,7 @@ def EPGstates(
         )
         Zmoving[:, 0, ...] = 1.0
         if weight is not None:
-            Zmoving = Zmoving * weight[:, :npools][:, None]
+            Zmoving = Zmoving * weight[:, :npools][:, None, None]
         Zmoving = {"real": Zmoving.real, "imag": Zmoving.imag}
 
         # append

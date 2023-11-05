@@ -191,6 +191,6 @@ class T1T2Shuffling(base.BaseSimulator):
             # observe magnetization
             signal[n] = ops.observe(states, RF.phi)
 
-        return ops.t1sat(signal, rectime, T1)
+        return ops.t1sat(signal  * 1j, rectime, T1)
 
 
