@@ -215,12 +215,12 @@ def mprage(nshots, flip, TR, T1, T2, spoil_inc=117.0, sliceprof=False, diff=None
         if asnumpy:
             sig = sig.cpu().numpy()
 
-            # prepare info
-            info = {"trun": simulator.trun}
-            if verbose:
-                return sig, info
-            else:
-                return sig
+        # prepare info
+        info = {"trun": simulator.trun}
+        if verbose:
+            return sig, info
+        else:
+            return sig
 
 #%% utils
 spin_defaults = {"T2star": None, "D": None, "v": None}

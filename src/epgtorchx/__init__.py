@@ -20,6 +20,7 @@ finally:
 from . import bloch as _bloch
 from . import phantoms as _phantoms
 from . import optim
+from . import regression
 
 from .bloch import *  # noqa
 from .phantoms import *  # noqa

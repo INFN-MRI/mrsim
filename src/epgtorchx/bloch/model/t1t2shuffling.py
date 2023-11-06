@@ -140,12 +140,12 @@ def t1t2shuffling(flip, phases, ESP, TR, T1, T2, sliceprof=False, diff=None, dev
         if asnumpy:
             sig = sig.cpu().numpy()
 
-            # prepare info
-            info = {"trun": simulator.trun}
-            if verbose:
-                return sig, info
-            else:
-                return sig
+        # prepare info
+        info = {"trun": simulator.trun}
+        if verbose:
+            return sig, info
+        else:
+            return sig
 
 #%% utils
 class T1T2Shuffling(base.BaseSimulator):

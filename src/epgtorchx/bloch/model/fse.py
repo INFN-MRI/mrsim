@@ -194,12 +194,12 @@ def fse(flip, phases, ESP, T1, T2, sliceprof=False, diff=None, device="cpu", **k
         if asnumpy:
             sig = sig.cpu().numpy()
 
-            # prepare info
-            info = {"trun": simulator.trun}
-            if verbose:
-                return sig, info["trun"]
-            else:
-                return sig
+        # prepare info
+        info = {"trun": simulator.trun}
+        if verbose:
+            return sig, info["trun"]
+        else:
+            return sig
 
 #%% utils
 spin_defaults = {"D": None, "v": None}

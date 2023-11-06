@@ -187,7 +187,7 @@ def memprage(nshots, nechoes, flip, ESP, TR, T1, T2, spoil_inc=117.0, sliceprof=
         warnings.warn("Both total_dephasing and grad_amplitude are provided - using the first")
 
     # put all properties together
-    props = {"inv_props": inv_props, "rf_props": rf_props, "grad_props": grad_props, "nechoes": nechoes, "nshots": nshots, "spoil_inc": spoil_inc, "DE": DE}
+    props = {"inv_props": inv_props, "rf_props": rf_props, "grad_props": grad_props, "nechoes": nechoes, "nshots": nshots, "spoil_inc": spoil_inc}
 
     # initialize simulator
     simulator = dacite.from_dict(MEMPRAGE, init_params, config=Config(check_types=False))
@@ -216,12 +216,12 @@ def memprage(nshots, nechoes, flip, ESP, TR, T1, T2, spoil_inc=117.0, sliceprof=
         if asnumpy:
             sig = sig.cpu().numpy()
 
-            # prepare info
-            info = {"trun": simulator.trun}
-            if verbose:
-                return sig, info
-            else:
-                return sig
+        # prepare info
+        info = {"trun": simulator.trun}
+        if verbose:
+            return sig, info
+        else:
+            return sig
 
 #%% utils
 spin_defaults = {"T2star": None, "D": None, "v": None}

@@ -182,12 +182,12 @@ def bssfpmrf(flip, TR, T1, T2, sliceprof=False, DE=False, diff=None, device="cpu
         if asnumpy:
             sig = sig.cpu().numpy()
 
-            # prepare info
-            info = {"trun": simulator.trun}
-            if verbose:
-                return sig, info
-            else:
-                return sig
+        # prepare info
+        info = {"trun": simulator.trun}
+        if verbose:
+            return sig, info
+        else:
+            return sig
 
 
 #%% utils

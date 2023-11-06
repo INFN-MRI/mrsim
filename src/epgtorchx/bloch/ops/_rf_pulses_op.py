@@ -397,7 +397,7 @@ def _apply_saturation(states, sat_mat):
     Zbound = states["Zbound"]
     
     # prepare
-    Zbound = sat_mat * Zbound
+    Zbound = sat_mat * Zbound.clone()
 
     # prepare for output
     states["Zbound"] = Zbound

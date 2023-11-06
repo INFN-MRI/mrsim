@@ -53,7 +53,7 @@ def susceptibility(signal, time, z):
 
     #  apply effect
     if time.shape[-1] == 1 and time != 0:
-        signal = signal * torch.exp(-time * (z[..., 0] + 1j * z[..., 1]))
+        signal = signal.clone() * torch.exp(-time * (z[..., 0] + 1j * z[..., 1]))
 
     return signal
 
@@ -77,6 +77,6 @@ def t1sat(signal, time, t1):
     #  apply effect
     if time.shape[-1] == 1 and time != 0:
         E1 = torch.exp(-time / (t1 + 0.000000000000001))
-        signal = signal * (1 - E1) / (1 - signal * E1)
+        signal = signal.clone() * (1 - E1) / (1 - signal.clone() * E1)
 
     return signal

@@ -318,9 +318,9 @@ def diffusion_damp_apply(states, D1, D2):
     F, Z = states["F"], states["Z"]
 
     # apply
-    F[..., 0] = F[..., 0] * D2  # Transverse damping
-    F[..., 1] = F[..., 1] * D2  # Transverse damping
-    Z = Z * D1  # Longitudinal damping
+    F[..., 0] = F[..., 0].clone() * D2  # Transverse damping
+    F[..., 1] = F[..., 1].clone() * D2  # Transverse damping
+    Z = Z.clone() * D1  # Longitudinal damping
 
     # prepare for output
     states["F"], states["Z"] = F, Z
@@ -383,9 +383,9 @@ def flow_dephase_apply(states, J1, J2):
     F, Z = states["F"], states["Z"]
 
     # apply
-    F[..., 0] = F[..., 0] * J2  # Transverse dephasing
-    F[..., 1] = F[..., 1] * J2.conj()  # Transverse dephasing
-    Z = Z * J1  # Longitudinal dephasing
+    F[..., 0] = F[..., 0].clone() * J2  # Transverse dephasing
+    F[..., 1] = F[..., 1].clone() * J2.conj()  # Transverse dephasing
+    Z = Z.clone() * J1  # Longitudinal dephasing
 
     # prepare for output
     states["F"], states["Z"] = F, Z
@@ -428,9 +428,9 @@ def flow_washout_apply(states, Win, Wout):
     Fmoving, Zmoving = states["moving"]["F"], states["moving"]["Z"]
 
     # apply
-    F[..., 0] = Wout * F[..., 0] + Win * Fmoving[..., 0]
-    F[..., 1] = Wout * F[..., 1] + Win * Fmoving[..., 1]
-    Z = Wout * Z + Win * Zmoving
+    F[..., 0] = Wout * F[..., 0].clone() + Win * Fmoving[..., 0]
+    F[..., 1] = Wout * F[..., 1].clone() + Win * Fmoving[..., 1]
+    Z = Wout * Z.clone()+ Win * Zmoving
 
     # prepare for output
     states["F"], states["Z"] = F, Z

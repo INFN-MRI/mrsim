@@ -143,8 +143,8 @@ def _longitudinal_relax_apply(states, E1, rE1):
     Z = states["Z"]
 
     # apply
-    Z = Z * E1  # decay
-    Z[0] = Z[0] + rE1  # regrowth
+    Z = Z.clone() * E1  # decay
+    Z[0] = Z[0].clone() + rE1  # regrowth
 
     # prepare for output
     states["Z"] = Z
@@ -188,8 +188,8 @@ def _transverse_relax_exchange_apply(states, E2):
     F = states["F"]
 
     # apply
-    F[..., 0] = torch.einsum("...ij,...j->...i", E2, F[..., 0])
-    F[..., 1] = torch.einsum("...ij,...j->...i", E2.conj(), F[..., 1])
+    F[..., 0] = torch.einsum("...ij,...j->...i", E2, F[..., 0].clone())
+    F[..., 1] = torch.einsum("...ij,...j->...i", E2.conj(), F[..., 1].clone())
 
     # prepare for output
     states["F"] = F
@@ -220,8 +220,8 @@ def _longitudinal_relax_exchange_apply(states, E1, rE1):
         Ztot = Z
 
     # apply
-    Ztot = torch.einsum("...ij,...j->...i", E1, Ztot)
-    Ztot[0] = Ztot[0] + rE1
+    Ztot = torch.einsum("...ij,...j->...i", E1, Ztot.clone())
+    Ztot[0] = Ztot[0].clone() + rE1
 
     # prepare for output
     if "Zbound" in states:
