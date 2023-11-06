@@ -204,7 +204,7 @@ class WhiteMatter(AbstractTissue):
             A0 = 725
             A = rand(A0, 0.3 * A0, n_atoms)
             self.T1 = super()._calculate_t1(B0, A)
-            T20 = 90
+            T20 = 80
             self.T2 = rand(T20, 0.3 * T20, n_atoms)
         else:
             A0 = 611
@@ -230,7 +230,7 @@ class WhiteMatter(AbstractTissue):
             A = rand(A0, 0.3 * A0, n_atoms)
             self.bm["T1"] = np.atleast_1d(super()._calculate_t1(B0, A))[..., None]
             # myelin water # from https://onlinelibrary.wiley.com/doi/10.1002/mrm.22131
-            T20 = 13
+            T20 = 10
             self.bm["T2"] = np.atleast_1d(rand(T20, 0.3 * T20, n_atoms))[..., None]
             self.bm["chemshift"] = (
                 15.0 / 3.0 * B0 * np.ones((n_atoms, 1), dtype=np.float32)
@@ -293,7 +293,7 @@ class GrayMatter(AbstractTissue):
         # set water T1 and T2
         if simulate_multipool:
             # intra-/extra-cellular water # from https://onlinelibrary.wiley.com/doi/10.1002/mrm.22131
-            A0 = 725
+            A0 = 800
             A = rand(A0, 0.3 * A0, n_atoms)
             self.T1 = super()._calculate_t1(B0, A)
             T20 = 90
@@ -318,11 +318,11 @@ class GrayMatter(AbstractTissue):
         if "bm" in str(simulate_multipool).lower():
             self.bm = {}
             # myelin water # from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7478173/table/T1/?report=objectonly
-            A0 = 275
+            A0 = 300
             A = rand(A0, 0.3 * A0, n_atoms)
             self.bm["T1"] = np.atleast_1d(super()._calculate_t1(B0, A))[..., None]
             # myelin water # from https://onlinelibrary.wiley.com/doi/10.1002/mrm.22131
-            T20 = 13
+            T20 = 20
             self.bm["T2"] = np.atleast_1d(rand(T20, 0.3 * T20, n_atoms))[..., None]
             self.bm["chemshift"] = (
                 5.0 / 3.0 * B0 * np.ones((n_atoms, 1), dtype=np.float32)
