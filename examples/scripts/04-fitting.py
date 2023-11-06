@@ -5,14 +5,17 @@ Created on Mon Nov  6 11:26:38 2023
 
 @author: mcencini
 """
+import time
+
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
 
 import epgtorchx as epgx
 from epgtorchx import regression
 
 # %% actual routine
-def phantom():
+def create_phantom():
     seg, props, _ = epgx.create_shepp_logan(200, 200, True, model="bm")
     
     # maps
@@ -35,9 +38,29 @@ def phantom():
         k[idx] = props["bm"]["k"][n]
         ff[idx] = props["bm"]["weight"][n]
         
-    return np.stack((M0, ff, T2s, T2f, k, T1s, T1f), axis=0)
+    return np.stack((M0, T1s, T2s, T1f, T2f, k, ff), axis=0)
 
 
+def simulate(maps, flip, ESP, phases=None, device="cpu"):
+    # default
+    if phases is None:
+        phases = -np.ones_like(flip) * 90.0
+    
+    # get ishape
+    ishape = maps.shape[1:]    
+    output = epgx.fse(flip, phases, ESP, 
+                      maps[1].flatten(), 
+                      maps[2].flatten(), 
+                      T1bm=maps[3].flatten(), 
+                      T2bm=maps[4].flatten(), 
+                      weight_bm=maps[-1].flatten(),
+                      kbm=maps[5].flatten(), 
+                      device=device)
+    
+    # reshape
+    return output.reshape(-1, *ishape)
+    
+    
 def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, lamda=2**-1.5, rho=2**-20, sigma=0.01, c=2**0.6):
     
     # default
@@ -100,6 +123,15 @@ def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, la
 # %% generate map
 flip = 180.0 * np.ones(50, dtype=np.float32)
 ESP = 5.0
+device="cpu"
+
+# prepare phantom
+gt = create_phantom()
+
+# simulate acquisition
+echo_series = simulate(gt, flip, ESP, device=device)
+
+
 
 
 
