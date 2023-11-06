@@ -10,12 +10,14 @@ def perk_eval(input, train, v=None, nu=None, reg=2**-41):
     ishape = input.shape[1:] # (nz, ny, nx)
     
     # reshape
+    print(input.shape)
     input = input.reshape(input.shape[0], -1)    
     if nu is not None:
         nu = nu.reshape(nu.shape[0], -1)    
         input = torch.cat((input, nu), axis=0)
         
     # transpose
+    print(input.shape)
     input = input.t() # (nechoes, nvoxels)
     
     # compress
@@ -35,6 +37,7 @@ def perk_eval(input, train, v=None, nu=None, reg=2**-41):
     input = input.real
     
     # feature maps
+    print(input.shape)
     z = rff_map(input, train["H"], train["freq"], train["ph"])
     
     # % kernel ridge regression
@@ -124,7 +127,7 @@ def perk_train(train_x, train_y, train_nu=None, H=10**3, lamda=2**-1.5, c=2**0.6
     tmp = lengthscale * (2 * np.pi * c)
     tmp = 1.0 / (tmp**2 + 0.000000000000001)
     cov = torch.diag(tmp) # (nechoes+nknown, nechoes+nknown)
-    freq = torch.randn(H, Q) @ torch.cholesky(cov)
+    freq = torch.randn(H, Q) @ torch.linalg.cholesky(cov)
     ph = torch.rand(H)
 
     # Feature maps
@@ -154,7 +157,7 @@ def rff_map(train_y, H, freq, ph):
     Feature mapping via random Fourier features.
 
     Args:
-        q (Tensor): Input data of shape [D+N, K].
+        q (Tensor): Input data of shape [K, D+N].
         rff (dict): Random Fourier features object with the following fields:
             - 'std' (float): Noise standard deviation in training data.
             - 'len' (Tensor): Kernel input length scales of shape [D+N].

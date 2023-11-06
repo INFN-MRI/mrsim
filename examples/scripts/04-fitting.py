@@ -15,28 +15,32 @@ import epgtorchx as epgx
 from epgtorchx import regression
 
 # %% actual routine
-def create_phantom():
-    seg, props, _ = epgx.create_shepp_logan(200, 200, True, model="bm")
+def create_phantom(shape):
+    seg, props, _ = epgx.create_shepp_logan(shape[0], shape[-1], True, model="bm")
     
     # maps
-    M0 = np.zeros((200, 200, 200), dtype=np.float32)
-    T1s = np.zeros((200, 200, 200), dtype=np.float32)
-    T2s = np.zeros((200, 200, 200), dtype=np.float32)
-    T1f = np.zeros((200, 200, 200), dtype=np.float32)
-    T2f = np.zeros((200, 200, 200), dtype=np.float32)
-    k = np.zeros((200, 200, 200), dtype=np.float32)
-    ff = np.zeros((200, 200, 200), dtype=np.float32)
+    M0 = np.zeros(shape, dtype=np.float32).T
+    T1s = np.zeros(shape, dtype=np.float32).T
+    T2s = np.zeros(shape, dtype=np.float32).T
+    T1f = np.zeros(shape, dtype=np.float32).T
+    T2f = np.zeros(shape, dtype=np.float32).T
+    k = np.zeros(shape, dtype=np.float32).T
+    ff = np.zeros(shape, dtype=np.float32).T
     
     # fill phantoms
-    for n in range(len(props)):
-        idx = (seg == n)
-        M0[idx] = props["M0"][n]
-        T1s[idx] = props["T1"][n] * 1.2
-        T2s[idx] = props["T2"][n]  * 1.2
-        T1f[idx] = props["bm"]["T1"][n] * 0.8
-        T2f[idx] = props["bm"]["T2"][n] * 0.8
-        k[idx] = props["bm"]["k"][n]
-        ff[idx] = props["bm"]["weight"][n]
+    tissues = np.unique(seg)
+    idx = [0, -1, 4, 3, 6, 1]
+    idx2 = [0, -1, 6, 2, 3, 1]
+
+    for n in tissues:
+        mask = (seg == n)
+        M0[mask] = props["M0"][idx[n]]
+        T1s[mask] = props["T1"][idx[n]] * 1.2
+        T2s[mask] = props["T2"][idx[n]]  * 1.2
+        T1f[mask] = props["bm"]["T1"][idx2[n]] * 0.8
+        T2f[mask] = props["bm"]["T2"][idx2[n]] * 0.8
+        k[mask] = props["bm"]["k"][idx2[n]]
+        ff[mask] = props["bm"]["weight"][idx2[n]]
         
     return np.stack((M0, T1s, T2s, T1f, T2f, k, ff), axis=0)
 
@@ -58,7 +62,7 @@ def simulate(maps, flip, ESP, phases=None, device="cpu"):
                       device=device)
     
     # reshape
-    return output.reshape(-1, *ishape)
+    return maps[0] * output.T.reshape(-1, *ishape)
     
     
 def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, lamda=2**-1.5, rho=2**-20, sigma=0.01, c=2**0.6):
@@ -111,9 +115,19 @@ def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, la
     kernel = regression.perk_train(train_x, train_y, H=H, lamda=lamda)
     
     # inference
-    input = torch.as_tensor(input, dtype=signal.dtype, device=signal.device)
+    input = torch.as_tensor(input.copy())
+    
+    # compress
+    print(input.shape)
+    ishape = input.shape[1:]
+    print(ggg)
+    # input = input.
+    input = input.reshape(-1, input.shape[-1]) # (nvoxels, nechoes)
+    input = input @ v
+    input = input.reshape(*ishape, -1).permute(3, 2, 1, 0) # (ncoeff, nvoxels)
+    input = input.to(signal.device) 
         
-    output = regression.perk_eval(input, kernel, v, rho)
+    output = regression.perk_eval(input, kernel, reg=rho)
     
     # output as numpy
     output = output.detach().cpu().numpy()
@@ -126,10 +140,12 @@ ESP = 5.0
 device="cpu"
 
 # prepare phantom
-gt = create_phantom()
+gt = create_phantom([200, 200, 8])
 
 # simulate acquisition
 echo_series = simulate(gt, flip, ESP, device=device)
+
+omaps = fitting(echo_series, flip, ESP, device=device)
 
 
 
