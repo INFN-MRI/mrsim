@@ -6,7 +6,7 @@ import numpy as np
 
 import torch
 
-def perk_eval(input, train, nu=None, reg=2**-41):
+def perk_eval(input, train, v=None, nu=None, reg=2**-41):
     ishape = input.shape[1:] # (nz, ny, nx)
     
     # reshape
@@ -16,7 +16,23 @@ def perk_eval(input, train, nu=None, reg=2**-41):
         input = torch.cat((input, nu), axis=0)
         
     # transpose
-    input = input.t()
+    input = input.t() # (nechoes, nvoxels)
+    
+    # compress
+    if v is not None:
+        input = input @ v
+    
+    # unwind phase
+    ph0 = input[0]
+    ph0 = ph0 / (abs(ph0) + 0.000000000001) # keep only phase
+    input = input * ph0.conj()
+    
+    # normalize
+    norm = (input * input.conj()).sum(axis=0)**0.5
+    input = input / (norm + 0.000000000001)
+    
+    # get real part only
+    input = input.real
     
     # feature maps
     z = rff_map(input, train["H"], train["freq"], train["ph"])

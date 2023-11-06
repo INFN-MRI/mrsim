@@ -12,6 +12,32 @@ import epgtorchx as epgx
 from epgtorchx import regression
 
 # %% actual routine
+def phantom():
+    seg, props, _ = epgx.create_shepp_logan(200, 200, True, model="bm")
+    
+    # maps
+    M0 = np.zeros((200, 200, 200), dtype=np.float32)
+    T1s = np.zeros((200, 200, 200), dtype=np.float32)
+    T2s = np.zeros((200, 200, 200), dtype=np.float32)
+    T1f = np.zeros((200, 200, 200), dtype=np.float32)
+    T2f = np.zeros((200, 200, 200), dtype=np.float32)
+    k = np.zeros((200, 200, 200), dtype=np.float32)
+    ff = np.zeros((200, 200, 200), dtype=np.float32)
+    
+    # fill phantoms
+    for n in range(len(props)):
+        idx = (seg == n)
+        M0[idx] = props["M0"][n]
+        T1s[idx] = props["T1"][n] * 1.2
+        T2s[idx] = props["T2"][n]  * 1.2
+        T1f[idx] = props["bm"]["T1"][n] * 0.8
+        T2f[idx] = props["bm"]["T2"][n] * 0.8
+        k[idx] = props["bm"]["k"][n]
+        ff[idx] = props["bm"]["weight"][n]
+        
+    return np.stack((M0, ff, T2s, T2f, k, T1s, T1f), axis=0)
+
+
 def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, lamda=2**-1.5, rho=2**-20, sigma=0.01, c=2**0.6):
     
     # default
@@ -63,8 +89,8 @@ def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, la
     
     # inference
     input = torch.as_tensor(input, dtype=signal.dtype, device=signal.device)
-    
-    output = regression.perk_eval(input, kernel, rho)
+        
+    output = regression.perk_eval(input, kernel, v, rho)
     
     # output as numpy
     output = output.detach().cpu().numpy()
@@ -72,6 +98,10 @@ def fitting(input, flip, ESP, phases=None, device="cpu", H=1000, tsize=10000, la
     return output
     
 # %% generate map
+flip = 180.0 * np.ones(50, dtype=np.float32)
+ESP = 5.0
+
+
 
 
     

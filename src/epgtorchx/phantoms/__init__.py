@@ -342,24 +342,4 @@ class ArbitraryPhantomBuilder:
         emtp["sigma"] = mrtp.pop("sigma")
         emtp["epsilon"] = mrtp.pop("epsilon")
 
-        # assign units
-        # mrtp["T1"] = _utils.assign_unit(mrtp["T1"], "ms")
-        # mrtp["T2"] = _utils.assign_unit(mrtp["T2"], "ms")
-        # mrtp["T2star"] = _utils.assign_unit(mrtp["T2star"], "ms")
-        # mrtp["chemical_shift"] = _utils.assign_unit(mrtp["chemical_shift"], "Hz")
-        # mrtp["diffusivity"] = _utils.assign_unit(mrtp["diffusivity"], "um**2 / ms")
-        # mrtp["velocity"] = _utils.assign_unit(mrtp["velocity"], "cm / s")
-        # mrtp["exchange_rate"] = _utils.assign_unit(mrtp["exchange_rate"], "1 / s")
-        # emtp["sigma"] = _utils.assign_unit(emtp["sigma"], "S / m")
-
-        # if "bm" in mrtp and mrtp["bm"]:
-        #     mrtp["bm"]["T1"] = _utils.assign_unit(mrtp["bm"]["T1"], "ms")
-        #     mrtp["bm"]["T2"] = _utils.assign_unit(mrtp["bm"]["T2"], "ms")
-        #     mrtp["bm"]["chemical_shift"] = _utils.assign_unit(
-        #         mrtp["bm"]["chemical_shift"], "Hz"
-        #     )
-
-        # if "mt" in mrtp and mrtp["mt"]:
-        #     mrtp["mt"]["T1"] = _utils.assign_unit(mrtp["mt"]["T1"], "ms")
-
         return seg, mrtp, emtp
