@@ -1,9 +1,9 @@
 from . import perk as _perk
-from . import lm as _lm
+from . import lma as _lma
 
 from .perk import * # noqa
-from .lm import * # noqa
+from .lma import * # noqa
 
 __all__ = []
-__all__.extend(_lm.__all__)
+__all__.extend(_lma.__all__)
 

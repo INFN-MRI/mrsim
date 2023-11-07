@@ -385,8 +385,9 @@ class BaseSimulator:
             fname = f.name
             if fname in self.diff:
                 fvalue = getattr(self, fname)  # get current value
-                fvalue.requires_grad = True
-                setattr(self, fname, fvalue)
+                if fvalue.requires_grad is False:
+                    fvalue.requires_grad = True
+                    setattr(self, fname, fvalue)
 
     def initialize_buffer(self):  # noqa
         return ops.EPGstates(

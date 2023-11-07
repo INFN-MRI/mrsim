@@ -51,17 +51,20 @@ def simulate(maps, flip, ESP, phases=None, device="cpu"):
     
     # get ishape
     ishape = maps.shape[1:]    
-    output = epgx.fse(flip, phases, ESP, 
-                      1000.0, 
-                      100.0, 
-                      T1bm=maps[3].flatten(), 
-                      T2bm=maps[4].flatten(), 
-                      weight_bm=maps[-1].flatten(),
-                      kbm=0.0, 
-                      device=device)
+    # output = epgx.fse(flip, phases, ESP, 
+    #                   1000.0, 
+    #                   100.0, 
+    #                   T1bm=maps[3].flatten(), 
+    #                   T2bm=maps[4].flatten(), 
+    #                   weight_bm=maps[-1].flatten(),
+    #                   kbm=0.0, 
+    #                   device=device)
+    output = epgx.fse(flip, phases, ESP, 1000.0,  maps[2].flatten(), device=device)
+    
     
     # reshape
-    return maps[0] * output.T.reshape(-1, *ishape)
+    # return maps[0] * output.T.reshape(-1, *ishape)
+    return abs(output.T.reshape(-1, *ishape))
 
 def fitting(input, flip, ESP, device="cpu"):
     
@@ -71,26 +74,28 @@ def fitting(input, flip, ESP, device="cpu"):
     
     # prepare for fit
     input = input.T # (nvoxels, nechoes)
-    input = input / (np.linalg.norm(input, axis=-1)[:, None] + 0.00000001)
+    # input = input / (np.linalg.norm(input, axis=-1)[:, None] + 0.00000001)
     input = torch.as_tensor(input, device=device)
     input = abs(input)
     
     # prepare model
     def model(p):
-        sig, dsig = epgx.fse(flip, 0 * flip, ESP, 1000.0, 
-                             p[:, 1], T1bm=500.0, T2bm=p[:, 2], kbm=0.0, 
-                             weight_bm=p[:, 0], 
-                             diff=["weight", "T2"], 
-                             device=device, asnumpy=False)
+        sig, dsig = epgx.fse(flip, 0 * flip + 90.0, ESP, 1000.0, p[:, 0], diff=["T2"], device=device, asnumpy=False)
+        # sig, dsig = epgx.fse(flip, 0 * flip + 90.0, ESP, 1000.0, 
+        #                      p[:, 1], T1bm=500.0, T2bm=p[:, 2], kbm=0.0, 
+        #                      weight_bm=p[:, 0], 
+        #                      diff=["weight", "T2"], 
+        #                      device=device, assnumpy=False)
         
-        return abs(sig), abs(dsig)
+        return -sig.imag, -dsig.imag[:, None, :]
         
     # initial parameters
-    f0 = 0.1 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)    
-    T20 = 100.0 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)    
-    T2bm0 = 10.0 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)    
-    kbm0 = 10.0 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)
-    p0 = torch.stack((f0, T20, T2bm0), axis=-1)
+    # f0 = 0.1 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)    
+    T20 = 85.0 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)    
+    # T2bm0 = 10.0 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)    
+    # kbm0 = 10.0 * torch.ones(input.shape[0], dtype=input.dtype, device=input.device)
+    # p0 = torch.stack((f0, T20, T2bm0), axis=-1)
+    p0 = T20[:, None]
 
     # actual inference
     prediction = regression.lmdif(model, p0)
@@ -102,18 +107,18 @@ def fitting(input, flip, ESP, device="cpu"):
     return prediction.reshape(-1, *ishape)
     
 # %% generate map
-flip = 180.0 * np.ones(50, dtype=np.float32)
-ESP = 5.0
+flip = 180.0 * np.ones(32, dtype=np.float32)
+ESP = 10.0
 device="cpu"
 
 # prepare phantom
-gt = create_phantom([128, 128, 2])
+gt = create_phantom([32, 32, 2])
 
 # simulate acquisition
 echo_series = simulate(gt, flip, ESP, device=device)
 
 # fit
-omaps = fitting(echo_series, flip, ESP, device=device)
+# omaps = fitting(echo_series, flip, ESP, device=device)
 
 
 
