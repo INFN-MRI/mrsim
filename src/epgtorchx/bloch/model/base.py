@@ -160,7 +160,6 @@ class BaseSimulator:
         B1phase (optional, Union[float, npt.NDArray[float], torch.FloatTensor]): B1 relative phase in [deg]. (0.0 := nominal rf phase). Defaults to None.
 
     """
-
     # main properties
     T1: Union[float, npt.NDArray[float], torch.FloatTensor]  # ms
     T2: Union[float, npt.NDArray[float], torch.FloatTensor]  # ms

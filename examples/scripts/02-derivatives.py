@@ -104,18 +104,53 @@ t1 = time.time()
 tcost = t1 - t0
 
 # plot derivative
+#%%
+fsz = 20
 plt.figure()
-plt.rcParams.update({'font.size': 22})
-plt.plot(abs(grad), '-k'), plt.plot(abs(grad0), '*r')
-plt.xlabel("Echo #", fontsize=40)
+plt.subplot(2,2,1)
+plt.rcParams.update({'font.size': 0.5 * fsz})
+plt.plot(angles, '.')
+plt.xlabel("Echo #", fontsize=fsz)
 plt.xlim([-1, 51])
-plt.ylabel(r"$\frac{\partial signal}{\partial T2}$ [a.u.]", fontsize=40)
+plt.ylabel("Flip Angle [deg]", fontsize=fsz)
+
+plt.subplot(2,2,2)
+plt.rcParams.update({'font.size': 0.5 * fsz})
+plt.plot(abs(grad), '-k'), plt.plot(abs(grad0), '*r')
+plt.xlabel("Echo #", fontsize=fsz)
+plt.xlim([-1, 51])
+plt.ylabel(r"$\frac{\partial signal}{\partial T2}$ [a.u.]", fontsize=fsz)
 plt.legend(["Finite Diff", "Auto Diff"])
 
-plt.figure()
-plt.rcParams.update({'font.size': 22})
+
+plt.subplot(2,2,3)
+plt.rcParams.update({'font.size': 0.5 * fsz})
 plt.plot(abs(dcost), '-k'), plt.plot(abs(dcost0), '*r')
-plt.xlabel("Echo #", fontsize=40)
+plt.xlabel("Echo #", fontsize=fsz)
 plt.xlim([-1, 51])
-plt.ylabel(r"$\frac{\partial CRLB}{\partial FA}$ [a.u.]", fontsize=40)
+plt.ylabel(r"$\frac{\partial CRLB}{\partial FA}$ [a.u.]", fontsize=fsz)
 plt.legend(["Finite Diff", "Auto Diff"])
+
+plt.subplot(2,2,4)
+
+# define labels
+# plot results
+labels = ['derivative of signal', 'CRLB objective gradient']
+time_finite = [round(tgrad0, 2), round(tcost0, 2)]
+time_auto = [round(tgrad, 2), round(tcost, 2)]
+
+
+x = np.arange(len(labels))  # the label locations
+width = 0.35  # the width of the bars
+rects1 = plt.bar(x + width/2, time_finite, width, label='Finite Diff')
+rects2 = plt.bar(x - width/2, time_auto, width, label='Auto Diff')
+
+# Add some text for labels, title and custom x-axis tick labels, etc.
+plt.ylabel('Execution Time [s]', fontsize=fsz)
+plt.xticks(x, labels, fontsize=fsz)
+plt.ylim([0, 25])
+plt.legend()
+
+plt.bar_label(rects1, padding=3, fontsize=fsz)
+plt.bar_label(rects2, padding=3, fontsize=fsz)
+

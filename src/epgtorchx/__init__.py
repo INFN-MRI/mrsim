@@ -23,6 +23,8 @@ from . import optim
 from . import regression
 
 from .bloch import *  # noqa
+from .bloch import base
+from .bloch import ops
 from .phantoms import *  # noqa
 
 __all__ = []
