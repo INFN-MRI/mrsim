@@ -280,7 +280,7 @@ class SSFPMRF(base.BaseSimulator):
             states, TE, TR, T1, T2, weight, k, chemshift, D, v, grad_props
         )
 
-        for r in (nreps):
+        for r in range(nreps):
             # magnetization prep
             states = Prep(states)
     

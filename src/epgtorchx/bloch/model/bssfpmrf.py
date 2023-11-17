@@ -234,7 +234,7 @@ class bSSFPMRF(base.BaseSimulator):
         # prepare free precession period
         Xpre, Xpost = blocks.bSSFPFidStep(states, TE, TR, T1, T2, weight, k, chemshift)
 
-        for r in (nreps):
+        for r in range(nreps):
             # magnetization prep
             states = Prep(states)
     

@@ -274,51 +274,67 @@ class BaseSimulator:
             )
 
         # build exchange matrix
+        # if self.model == "bm":
+        #     # build exchange matrix rows
+        #     k0 = 0 * self.kbm
+        #     kiew = torch.cat(
+        #         (k0, self.kbm * self.weight[..., [0]]), axis=-1
+        #     )  # intra-/extra-cellular water
+        #     kmw = torch.cat(
+        #         (self.kbm * self.weight[..., [1]], k0), axis=-1
+        #     )  # myelin water
+        #     self.k = torch.stack((kiew, kmw), axis=-2)
+        # elif self.model == "mt":
+        #     k0 = 0 * self.kmt
+        #     # build exchange matrix rows
+        #     kfree = torch.cat(
+        #         (k0, self.kmt * self.weight[..., [0]]), axis=-1
+        #     )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
+        #     kbound = torch.cat(
+        #         (self.kmt * self.weight[..., [1]], k0), axis=-1
+        #     )  # semisolid (exchange with myelin water only)
+        #     self.k = torch.stack((kfree, kbound), axis=-2)
+        # elif self.model == "bm-mt":
+        #     k0 = 0 * self.kbm
+        #     # build exchange matrix rows
+        #     kiew = torch.cat(
+        #         (k0, self.kbm * self.weight[..., [1]], k0), axis=-1
+        #     )  # intra-/extra-cellular water (exchange with myelin water only)
+        #     kmw = torch.cat(
+        #         (self.kbm * self.weight[..., [0]], k0, self.kmt * self.weight[..., 2]),
+        #         axis=-1,
+        #     )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
+        #     kbound = torch.cat(
+        #         (k0, self.kmt * self.weight[..., [1]], k0), axis=-1
+        #     )  # semisolid (exchange with myelin water only)
+        #     self.k = np.stack((kiew, kmw, kbound), axis=-2)
+        # else:
+        #     self.k = None
+
+        # # finalize exchange
+        # if self.k is not None:
+        #     self.k = _particle_conservation(self.k)
+
+        #     # single pool voxels do not exchange
+        #     idx = (self.weight == 1).sum(axis=-1) == 1
+        #     self.k[idx, :, :] = 0.0
+        
+        # build exchange matrix
         if self.model == "bm":
-            # build exchange matrix rows
-            k0 = 0 * self.kbm
-            kiew = torch.cat(
-                (k0, self.kbm * self.weight[..., [0]]), axis=-1
-            )  # intra-/extra-cellular water
-            kmw = torch.cat(
-                (self.kbm * self.weight[..., [1]], k0), axis=-1
-            )  # myelin water
-            self.k = torch.stack((kiew, kmw), axis=-2)
+            self.k = self.kbm
         elif self.model == "mt":
-            k0 = 0 * self.kmt
-            # build exchange matrix rows
-            kfree = torch.cat(
-                (k0, self.kmt * self.weight[..., [0]]), axis=-1
-            )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
-            kbound = torch.cat(
-                (self.kmt * self.weight[..., [1]], k0), axis=-1
-            )  # semisolid (exchange with myelin water only)
-            self.k = torch.stack((kfree, kbound), axis=-2)
+            self.k = self.kmt
         elif self.model == "bm-mt":
-            k0 = 0 * self.kbm
-            # build exchange matrix rows
-            kiew = torch.cat(
-                (k0, self.kbm * self.weight[..., [1]], k0), axis=-1
-            )  # intra-/extra-cellular water (exchange with myelin water only)
-            kmw = torch.cat(
-                (self.kbm * self.weight[..., [0]], k0, self.kmt * self.weight[..., 2]),
-                axis=-1,
-            )  # myelin water (exchange both with intra-/extra-cellular water and semisolid)
-            kbound = torch.cat(
-                (k0, self.kmt * self.weight[..., [1]], k0), axis=-1
-            )  # semisolid (exchange with myelin water only)
-            self.k = np.stack((kiew, kmw, kbound), axis=-2)
+            self.k = torch.cat((self.kbm, self.kmt), axis=-1)
         else:
             self.k = None
 
         # finalize exchange
         if self.k is not None:
-            self.k = _particle_conservation(self.k)
-
             # single pool voxels do not exchange
-            idx = (self.weight == 1).sum(axis=-1) == 1
-            self.k[idx, :, :] = 0.0
-            
+            idx = torch.isclose(self.weight, torch.tensor(1.0)).sum(axis=-1) == 1
+            self.k[idx, :] = 0.0
+                    
         # chemical shift
         if self.model is not None and "bm" in self.model:
             if self.chemshift is not None and self.chemshift_bm is None:
@@ -422,13 +438,16 @@ class BaseSimulator:
     def reformat(self, input): # noqa
         # handle tuples
         if isinstance(input, (list, tuple)):
-            output = [item[..., 0, 0] + 1j * item[..., -1, 0] for item in input]
-
+            output = [item[..., 0, :] + 1j * item[..., -1, :] for item in input]
+            # output = [torch.diagonal(item, dim1=-2, dim2=-1) if len(item.shape) == 4 else item for item in output]
+            output = [item.reshape(*item.shape[:2], -1) if len(item.shape) == 4 else item for item in output]
+                      
             # stack
             if len(output) == 1:
                 output = output[0]
             else:
-                output = torch.stack(output, dim=1)
+                output = torch.concatenate(output, dim=-1)
+                output = output.permute(2, 0, 1)
         else:
             output = input[..., 0] + 1j * input[..., -1]
 
@@ -543,16 +562,16 @@ class BaseSimulator:
 
 
 # %% local utils
-def _particle_conservation(k):
-    """Adjust diagonal of exchange matrix by imposing particle conservation."""
-    # get shape
-    npools = k.shape[-1]
+# def _particle_conservation(k):
+#     """Adjust diagonal of exchange matrix by imposing particle conservation."""
+#     # get shape
+#     npools = k.shape[-1]
 
-    for n in range(npools):
-        k[..., n, n] = 0.0  # ignore existing diagonal
-        k[..., n, n] = -k[..., n].sum(dim=-1)
+#     for n in range(npools):
+#         k[..., n, n] = 0.0  # ignore existing diagonal
+#         k[..., n, n] = -k[..., n].sum(dim=-1)
 
-    return k
+#     return k
 
 def inspect_signature(input):
     return list(inspect.signature(input).parameters)

@@ -48,6 +48,8 @@ class Relaxation(Operator):
             weight = torch.as_tensor(weight, dtype=torch.float32, device=device)
         if k is not None:
             k = torch.as_tensor(k, dtype=torch.float32, device=device)
+            k = _prepare_exchange(weight, k)
+            
         if df is not None:
             df = torch.as_tensor(df, dtype=torch.float32, device=device)
             df = torch.atleast_1d(df)
@@ -102,6 +104,37 @@ class Relaxation(Operator):
 
 
 # %% local utils
+def _prepare_exchange(weight, k):
+    
+    # prepare
+    if k.shape[-1] == 1: # BM or MT
+        k0 = 0 * k
+        k1 = torch.cat((k0, k * weight[..., [0]]), axis=-1)
+        k2 = torch.cat((k * weight[..., [1]], k0), axis=-1)
+        k = torch.stack((k1, k2), axis=-2)
+    else: # BM-MT
+        k0 = 0 * k[..., [0]]
+        k1 = torch.cat((k0, k[...,[0]] * weight[..., [1]], k0), axis=-1)
+        k2 = torch.cat((k[..., [0]] * weight[..., [0]], k0, k[..., [1]] * weight[..., [2]]), axis=-1)
+        k3 = torch.cat((k0, k[...,[1]] * weight[..., [1]], k0), axis=-1)
+        k = torch.stack((k1, k2, k3), axis=-2)
+    
+
+    # finalize exchange
+    return _particle_conservation(k)
+    
+
+def _particle_conservation(k):
+    """Adjust diagonal of exchange matrix by imposing particle conservation."""
+    # get shape
+    npools = k.shape[-1]
+
+    for n in range(npools):
+        k[..., n, n] = 0.0  # ignore existing diagonal
+        k[..., n, n] = -k[..., n].sum(dim=-1)
+
+    return k
+
 def _transverse_relax_apply(states, E2):
     """
     Apply transverse relaxation operator.
