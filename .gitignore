@@ -1,54 +1,25 @@
-# Temporary and binary files
-*~
-*.py[cod]
-*.so
-*.cfg
-!.isort.cfg
-!setup.cfg
-*.orig
-*.log
-*.pot
-**/__pycache__/
-.cache/*
-.*.swp
-.ipynb_checkpoints
-.DS_Store
-
-# Project files
-.ropeproject
-.project
-.pydevproject
-.settings
-.idea
+*.npy
+build/
+dist/
+*.egg-info/
+**/.ipynb_checkpoints/
+examples/*.ipynb
+*.xml
+.coverage*
 .vscode
-tags
 
-# Package files
+
+.idea
+*.log
+tmp/
+
+*_cache/
+*.py[cod]
 *.egg
-*.eggs/
-.installed.cfg
-*.egg-info
+*.nbi
+*.nbc
 
-# Unittest and coverage
-htmlcov/*
-.coverage
-.coverage.*
-.tox
-junit*.xml
-coverage.xml
-.pytest_cache/
+docs/generated/
+docs_build/
 
-# Build and docs folder/files
-build/*
-dist/*
-sdist/*
-docs/api/*
-docs/_rst/*
-docs/_build/*
-cover/*
-MANIFEST
-
-# Per-project virtualenvs
-.venv*/
-.conda*/
-.python-version
+src/mrtwin/_version.py
