@@ -22,4 +22,4 @@ tmp/
 docs/generated/
 docs_build/
 
-src/mrtwin/_version.py
+src/mrsim/_version.py
