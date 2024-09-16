@@ -70,7 +70,7 @@ def simulator(
             # Get diff
             diff = args[-1]
             args = args[:-1]
-            
+
             # Forward pass
             output = func(*args)
 
@@ -110,29 +110,23 @@ def simulator(
     return decorator
 
 
-# %%
+# %% subroutines
 def _force_scalar_tensors(fun):
     """Ensure all scalar arguments are tensors."""
 
     @wraps(fun)
-    def wrapper(*args, **kwargs):
-        kwargs = _get_defaults(fun, kwargs)
-
+    def wrapper(*args):
         # get device of first torch tensor
-        device = _get_device(args, kwargs)
+        device = _get_device(args)
 
         # convert all to torch
         args = [
             torch.as_tensor(arg, device=device) if _could_be_tensor(arg) else arg
             for arg in args
         ]
-        kwargs = {
-            k: (torch.as_tensor(v, device=device) if _could_be_tensor(v) else v)
-            for k, v in kwargs.items()
-        }
 
         # run function
-        return fun(*args, **kwargs)
+        return fun(*args)
 
     return wrapper
 
@@ -149,29 +143,11 @@ def _could_be_tensor(arg):
         return False
 
 
-def _get_device(args, kwargs):
+def _get_device(args):
     for arg in args:
         if is_cuda_array(arg):
             return arg.device
-    for arg in kwargs.values():
-        if is_cuda_array(arg):
-            return arg.device
     return torch.device("cpu")
-
-
-def _get_defaults(func, kwargs):
-    # Get the function signature
-    sig = inspect.signature(func)
-
-    # Create a dictionary of keyword arguments and their default values
-    default_kwargs = {
-        k: v.default
-        for k, v in sig.parameters.items()
-        if v.default is not inspect.Parameter.empty
-    }
-
-    # Merge the default keyword arguments with the provided kwargs
-    return {**default_kwargs, **kwargs}
 
 
 def _find_first_nonscalar_shape(batched_args):  # noqa
@@ -215,12 +191,13 @@ def _reshape_jacobian(jacobian, shape):
     """Reshape the Jacobian to match the original input shape."""
     if isinstance(jacobian, tuple):
         jacobian = [grad[..., 0] + 1j * grad[..., 1] for grad in jacobian]
-        jacobian = [grad.T for grad in jacobian]
-        jacobian = [grad.reshape(-1, *shape) for grad in jacobian]
+        jacobian = [grad.T if grad.ndim == 2 else grad for grad in jacobian]
+        jacobian = [grad.reshape(-1, *shape).squeeze() for grad in jacobian]
         jacobian = torch.stack(jacobian, dim=0)
     else:
         jacobian = jacobian[..., 0] + 1j * jacobian[..., 1]
-        jacobian = jacobian.T
-        jacobian = jacobian.reshape(-1, *shape)
+        if jacobian.ndim == 2:
+            jacobian = jacobian.T
+        jacobian = jacobian.reshape(-1, *shape).squeeze()
 
-    return jacobian.to(torch.complex64)
+    return torch.nan_to_num(jacobian.to(torch.complex64), posinf=0.0, neginf=0.0)
