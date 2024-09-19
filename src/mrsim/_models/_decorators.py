@@ -11,7 +11,7 @@ import numpy as np
 
 import torch
 
-from mrinufft.operators.base import with_torch
+from mrinufft._array_compat import with_torch, _get_args
 from mrinufft.operators.interfaces.utils import is_cuda_array
 
 
@@ -25,7 +25,16 @@ def torchify(func: Callable) -> Callable:
     Output is automatically converted to the same array interface as
     the leading array.
     """
-    return with_torch(_force_scalar_tensors(func))
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        args = _get_args(func, args, kwargs)
+        args = [np.asarray(arg) if _could_be_array(arg) else arg for arg in args]
+
+        # run function
+        return with_torch(func)(*args, **kwargs)
+
+    return wrapper
 
 
 def simulator(
@@ -111,36 +120,11 @@ def simulator(
 
 
 # %% subroutines
-def _force_scalar_tensors(fun):
-    """Ensure all scalar arguments are tensors."""
-
-    @wraps(fun)
-    def wrapper(*args):
-        # get device of first torch tensor
-        device = _get_device(args)
-
-        # convert all to torch
-        args = [
-            torch.as_tensor(arg, device=device) if _could_be_tensor(arg) else arg
-            for arg in args
-        ]
-
-        # run function
-        return fun(*args)
-
-    return wrapper
+_numeric_types = (int, float, complex)
 
 
-def _could_be_tensor(arg):
-    if np.isscalar(arg) or isinstance(arg, (list, tuple)):
-        if isinstance(arg, (list, tuple)) and isinstance(arg[0], str):
-            return False
-        elif isinstance(arg, str):
-            return False
-        else:
-            return True
-    else:
-        return False
+def _could_be_array(arg):
+    return isinstance(arg, _numeric_types)
 
 
 def _get_device(args):

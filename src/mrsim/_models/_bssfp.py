@@ -187,12 +187,6 @@ def _bssfp(
     alpha = torch.deg2rad(alpha)
     phase_cyc = torch.deg2rad(phase_cyc)
 
-    # # Broadcast tensors
-    # TR, alpha, phase_cyc = torch.atleast_1d(TR, alpha, phase_cyc)
-    # TR, alpha, phase_cyc = torch.meshgrid(TR, alpha, phase_cyc, indexing="ij")
-    # TR, alpha, phase_cyc = TR.ravel(), alpha.ravel(), phase_cyc.ravel()
-    # TR, alpha, phase_cyc = TR.squeeze(), alpha.squeeze(), phase_cyc.squeeze()
-
     # We are assuming Freeman-Hill convention for off-resonance map,
     # so we need to negate to make use with this Ernst-Anderson-based implementation from Hoff
     field_map = -1 * field_map
