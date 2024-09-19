@@ -11,7 +11,7 @@ import numpy as np
 
 import torch
 
-from mrinufft._array_compat import with_torch, _get_args
+from mrinufft._array_compat import with_torch
 from mrinufft.operators.interfaces.utils import is_cuda_array
 
 
@@ -32,7 +32,7 @@ def torchify(func: Callable) -> Callable:
         args = [np.asarray(arg) if _could_be_array(arg) else arg for arg in args]
 
         # run function
-        return with_torch(func)(*args, **kwargs)
+        return with_torch(func)(*args)
 
     return wrapper
 
@@ -120,6 +120,34 @@ def simulator(
 
 
 # %% subroutines
+def _get_args(func, args, kwargs):
+    """Convert input args/kwargs mix to a list of positional arguments.
+
+    This automatically fills missing kwargs with default values.
+    """
+    signature = inspect.signature(func)
+
+    # Get number of arguments
+    n_args = len(args)
+
+    # Create a dictionary of keyword arguments and their default values
+    _kwargs = {}
+    for k, v in signature.parameters.items():
+        if v.default is not inspect.Parameter.empty:
+            _kwargs[k] = v.default
+        else:
+            _kwargs[k] = None
+
+    # Merge the default keyword arguments with the provided kwargs
+    for k in kwargs.keys():
+        _kwargs[k] = kwargs[k]
+
+    # Replace args
+    _args = list(_kwargs.values())
+
+    return list(args) + _args[n_args:]
+
+
 _numeric_types = (int, float, complex)
 
 
