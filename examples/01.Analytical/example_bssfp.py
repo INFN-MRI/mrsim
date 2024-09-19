@@ -76,6 +76,7 @@ plt.show()
 # 3. ``phi_rf``: RF phase offset in radians.
 # 4. ``phi_edd``: Phase errors due to eddy current effects in radians.
 # 5. ``phi_drift``: Phase errors due to B0 drift in radians.
+# 6. ``M0``: Equilibrium magnetization.
 #
 # We also support vectorized computation of multple flip angles (``alpha``),
 # phase increments (``phase_cyc``) and repetition times (``TR``).

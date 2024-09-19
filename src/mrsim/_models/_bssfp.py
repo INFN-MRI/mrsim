@@ -72,7 +72,7 @@ def bssfp(
 
     Notes
     -----
-    `T1`, `T2`, `TR`, `alpha`, `field_map`, `phase_cyc`, `M0`, and `phi_rf` can all be
+    ``T1``, ``T2``, ``TR``, ``alpha``, ``field_map``, ``phase_cyc``, ``M0``, and ``phi_rf`` can all be
     either scalars or arrays.
 
     Output shape is determined by the shapes of input arrays.  All input

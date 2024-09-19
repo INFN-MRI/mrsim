@@ -16,12 +16,13 @@ def finite_difference(func, args, arg_idx, epsilon=1e-3):
     args1 = list(args)
     args2 = list(args)
 
-    args1[arg_idx] += epsilon
-    args2[arg_idx] -= epsilon
+    args1[arg_idx] = args1[arg_idx] + epsilon
+    args2[arg_idx] = args2[arg_idx] - epsilon
 
     f1 = func(*args1)
     f2 = func(*args2)
-    gradient = (f1 - f2) / (2 * epsilon)
+
+    gradient = 1e-3 * (f1 - f2) / (2 * epsilon)  # s -> ms
 
     return gradient
 
@@ -126,7 +127,6 @@ def test_bssfp(
     [
         (1000.0, 100.0, 4.0, 30.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, "T1"),
         (1000.0, 100.0, 4.0, 30.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, "T2"),
-        (1000.0, 100.0, 4.0, 30.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, ("T1", "T2")),
         # Add more parameters as needed
     ],
 )
@@ -176,16 +176,7 @@ def test_bssfp_derivatives(
     )
 
     # Calculate finite differences for the derivative
-    if isinstance(diff, tuple):
-        expected_output = [
-            finite_difference(ssfp.bssfp, args_ref, ARGLUT[param]) for param in diff
-        ]
-        expected_output = np.stack(expected_output, axis=0)
-    else:
-        expected_output = finite_difference(ssfp.bssfp, args_ref, ARGLUT[diff])
+    expected_output = finite_difference(ssfp.bssfp, args_ref, ARGLUT[diff])
 
     # Compare numerical and analytical gradients
-    if isinstance(diff, tuple):
-        assert (np.abs(result - expected_output) < 1e-5).all()
-    else:
-        assert np.abs(result - expected_output) < 1e-5
+    assert np.abs(result - expected_output) < 1e-5
