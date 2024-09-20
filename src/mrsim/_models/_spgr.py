@@ -126,6 +126,28 @@ def _spgr(
     TE,
     alpha,
 ):
+    return _spgr_engine(
+        T1,
+        T2star,
+        M0,
+        field_map,
+        delta_cs,
+        TR,
+        TE,
+        alpha,
+    )
+
+
+def _spgr_engine(
+    T1,
+    T2star,
+    M0,
+    field_map,
+    delta_cs,
+    TR,
+    TE,
+    alpha,
+):
     # Unit conversion
     T1 = T1 * 1e-3  # ms -> s
     T2star = T2star * 1e-3  # ms -> s

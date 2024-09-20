@@ -180,6 +180,34 @@ def _bssfp(
     alpha,
     phase_cyc,
 ):
+    return _bssfp_engine(
+        T1,
+        T2,
+        M0,
+        field_map,
+        delta_cs,
+        phi_rf,
+        phi_edd,
+        phi_drift,
+        TR,
+        alpha,
+        phase_cyc,
+    )
+
+
+def _bssfp_engine(
+    T1,
+    T2,
+    M0,
+    field_map,
+    delta_cs,
+    phi_rf,
+    phi_edd,
+    phi_drift,
+    TR,
+    alpha,
+    phase_cyc,
+):
     # Unit conversion
     T1 = T1 * 1e-3  # ms -> s
     T2 = T2 * 1e-3  # ms -> s
