@@ -152,7 +152,12 @@ _numeric_types = (int, float, complex)
 
 
 def _could_be_array(arg):
-    return isinstance(arg, _numeric_types)
+    if isinstance(arg, _numeric_types):
+        return True
+    elif isinstance(arg, (list, tuple)) and isinstance(arg[0], _numeric_types):
+        leading_type = type(arg[0])
+        return all(isinstance(el, leading_type) for el in arg)
+    return False
 
 
 def _get_device(args):
