@@ -424,7 +424,7 @@ wavelet prior is a change to that one argument.
 
  .. code-block:: none
 
-    model-based                  2.8s   T2 error  17.1 ms (12.6%)
+    model-based                  3.0s   T2 error  17.1 ms (12.6%)
     residual 5.529e+03 -> 5.577e-01, damping 1e-03 -> 8e-06
 
 
@@ -465,9 +465,9 @@ iteration.
  .. code-block:: none
 
     per conjugate-gradient step, 3 channels solved for:
-      model    J  v      3.7 ms
+      model    J  v      3.8 ms
       model    J^H v     1.3 ms
-      encoding A         5.3 ms
+      encoding A         5.4 ms
       encoding A^H       5.1 ms
     the Jacobian this avoids holding: 1.7 MiB, against 0.6 MiB for a signal
 
@@ -500,7 +500,7 @@ Writing a different model
 -------------------------
 
 The model is the only thing above that names a relaxation time, and it is an
-ordinary :class:`~torchsim.model.SignalModel` -- the same object the fitting
+ordinary :class:`~torchsim.model.Simulator` -- the same object the fitting
 and sequence-design notebooks use. Water-fat separation, T2* with a field
 map, a Look-Locker inversion recovery: each is a different ``evaluate``, and
 the operator, the loop and the encoding are unchanged.
@@ -509,7 +509,7 @@ the operator, the loop and the encoding are unchanged.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.941 seconds)
+   **Total running time of the script:** (0 minutes 4.129 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_04-model-based-imaging_02-nonlinear-inversion.py:

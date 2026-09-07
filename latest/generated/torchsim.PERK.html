@@ -257,8 +257,9 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/index.html">API References</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -586,11 +587,11 @@ Torch CPU/CUDA kernels without a separate native implementation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>acquisition</strong> (<a class="reference internal" href="torchsim.model.SignalModel.html#torchsim.model.SignalModel" title="torchsim.model.SignalModel"><em>SignalModel</em></a><em>, </em><em>optional</em>) – The sequence being inverted: a simulator that ships with TorchSim, one
+<li><p><strong>acquisition</strong> (<a class="reference internal" href="torchsim.model.Simulator.html#torchsim.model.Simulator" title="torchsim.model.Simulator"><em>Simulator</em></a><em>, </em><em>optional</em>) – The sequence being inverted: a simulator that ships with TorchSim, one
 written by subclassing <a class="reference internal" href="torchsim.model.Simulator.html#torchsim.model.Simulator" title="torchsim.model.Simulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code></a>, or any other
-<a class="reference internal" href="torchsim.model.SignalModel.html#torchsim.model.SignalModel" title="torchsim.model.SignalModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignalModel</span></code></a>. Every tissue property that is
+<a class="reference internal" href="torchsim.model.Simulator.html#torchsim.model.Simulator" title="torchsim.model.Simulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code></a>. Every tissue property that is
 neither unknown nor measured separately is fixed on it beforehand, with
-the constructor or <a class="reference internal" href="torchsim.model.SignalModel.html#torchsim.model.SignalModel.bind" title="torchsim.model.SignalModel.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a>. Leave it
+the constructor or <a class="reference internal" href="torchsim.model.Simulator.html#torchsim.model.Simulator.bind" title="torchsim.model.Simulator.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a>. Leave it
 out to fit from signals handed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code> directly.</p></li>
 <li><p><strong>n_features</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of random Fourier features. The default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
 <li><p><strong>length_scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>tensor</em><em>, </em><em>optional</em>) – Gaussian-kernel length scale for every signal/known-parameter feature.

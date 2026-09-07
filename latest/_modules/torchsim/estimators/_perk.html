@@ -252,8 +252,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API References</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -519,12 +520,12 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    acquisition : SignalModel, optional</span>
+<span class="sd">    acquisition : Simulator, optional</span>
 <span class="sd">        The sequence being inverted: a simulator that ships with TorchSim, one</span>
 <span class="sd">        written by subclassing :class:`~torchsim.model.Simulator`, or any other</span>
-<span class="sd">        :class:`~torchsim.model.SignalModel`. Every tissue property that is</span>
+<span class="sd">        :class:`~torchsim.model.Simulator`. Every tissue property that is</span>
 <span class="sd">        neither unknown nor measured separately is fixed on it beforehand, with</span>
-<span class="sd">        the constructor or :meth:`~torchsim.model.SignalModel.bind`. Leave it</span>
+<span class="sd">        the constructor or :meth:`~torchsim.model.Simulator.bind`. Leave it</span>
 <span class="sd">        out to fit from signals handed to :meth:`fit` directly.</span>
 <span class="sd">    n_features : int, optional</span>
 <span class="sd">        Number of random Fourier features. The default is ``1000``.</span>

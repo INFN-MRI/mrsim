@@ -213,7 +213,7 @@ derivative with respect to tissue is cheapest taken forwards: one directional
 derivative per property yields every voxel's derivative at once, and the cost
 is one pass per property rather than per voxel.
 
-That is what :meth:`~torchsim.model.SignalModel.jacobian` does. A single name
+That is what :meth:`~torchsim.model.Simulator.jacobian` does. A single name
 collapses the parameter axis; a sequence of names keeps it.
 
 
@@ -423,7 +423,7 @@ thing a physicist would name rather than as a pulse and a spoiler.
 
       largest disagreement with the closed form: 7.45e-09
 
-    [<matplotlib.legend.Legend object at 0x7f486a172e70>]
+    [<matplotlib.legend.Legend object at 0x7f81496fb980>]
 
 
 
@@ -460,7 +460,7 @@ signal it produces.
 
       49 events, 6350 ms long
 
-    [<matplotlib.legend.Legend object at 0x7f4866d34620>]
+    [<matplotlib.legend.Legend object at 0x7f815801c9e0>]
 
 
 
@@ -533,7 +533,7 @@ The shipped models come with one, and yours can too:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.435 seconds)
+   **Total running time of the script:** (0 minutes 2.386 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_01-framework_03-writing-a-simulator.py:

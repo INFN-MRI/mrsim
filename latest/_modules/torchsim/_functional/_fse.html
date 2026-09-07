@@ -252,8 +252,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API References</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -513,7 +514,7 @@
     <span class="n">diff</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">B1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">M0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">nstates</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">states</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""</span>
@@ -553,7 +554,7 @@
 <span class="sd">    TI : float | npt.ArrayLike, optional</span>
 <span class="sd">        Inversion time in milliseconds.</span>
 <span class="sd">        The default is ``0.0``.</span>
-<span class="sd">    nstates : int, optional</span>
+<span class="sd">    states : int, optional</span>
 <span class="sd">        Number of EPG states to be retained.</span>
 <span class="sd">        The default is ``10``.</span>
 <span class="sd">    device : str | torch.device, optional</span>
@@ -584,7 +585,7 @@
         <span class="n">TR</span><span class="o">=</span><span class="n">TR</span><span class="p">,</span>
         <span class="n">exc_flip</span><span class="o">=</span><span class="n">exc_flip</span><span class="p">,</span>
         <span class="n">exc_phase</span><span class="o">=</span><span class="n">exc_phase</span><span class="p">,</span>
-        <span class="n">nstates</span><span class="o">=</span><span class="n">nstates</span><span class="p">,</span>
+        <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

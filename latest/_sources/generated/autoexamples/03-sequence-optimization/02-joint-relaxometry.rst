@@ -253,7 +253,7 @@ differing only in flip angle. Before and after.
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7f485d3b3650>
+    <matplotlib.legend.Legend object at 0x7f815456d9d0>
 
 
 
@@ -322,7 +322,7 @@ against the truth rather than against each other.
 .. GENERATED FROM PYTHON SOURCE LINES 416-422
 
 The two blocks are one experiment and are fitted as one: a
-:class:`~torchsim.model.SignalModel` that plays each and concatenates what
+:class:`~torchsim.model.Simulator` that plays each and concatenates what
 they record. The fit is the one thing held fixed between the protocols --
 the same nonlinear least squares over the same four unknowns, from the same
 guess.
@@ -333,10 +333,10 @@ guess.
 .. code-block:: Python
 
     from torchsim.estimators import NonlinearLeastSquares
-    from torchsim.model import SignalModel
+    from torchsim.model import Simulator
 
 
-    class JointRelaxometry(SignalModel):
+    class JointRelaxometry(Simulator):
         """Both blocks at fixed flip angles, as one signal model."""
 
         properties = ("T1", "T2", "M0", "B0")
@@ -407,7 +407,7 @@ standard deviation the bound was computed with.
 
  .. code-block:: none
 
-    38980 joint fits in 3.9 s
+    38980 joint fits in 4.0 s
 
 
 
@@ -528,7 +528,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.585 seconds)
+   **Total running time of the script:** (0 minutes 12.676 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_03-sequence-optimization_02-joint-relaxometry.py:

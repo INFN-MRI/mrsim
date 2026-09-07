@@ -1,9 +1,9 @@
-﻿SignalModel
+﻿SpinPhysics
 ===========
 
 .. currentmodule:: torchsim.model
 
-.. autoclass:: SignalModel
+.. autoclass:: SpinPhysics
    :members:
    :show-inheritance:
    :special-members: __call__, __add__, __mul__, __matmul__
@@ -16,9 +16,6 @@
    .. autosummary::
       :nosignatures:
    
-      ~SignalModel.bind
-      ~SignalModel.evaluate
-      ~SignalModel.jacobian
-      ~SignalModel.simulate
+      ~SpinPhysics.tissue
    
    

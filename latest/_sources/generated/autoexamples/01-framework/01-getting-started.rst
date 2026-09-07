@@ -119,7 +119,7 @@ will affect the resulting signal evolution
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7f4864a07620>
+    <matplotlib.legend.Legend object at 0x7f81554b2960>
 
 
 
@@ -129,7 +129,7 @@ Derivative with respect to tissue parameters
 --------------------------------------------
 
 Torchsim allows to efficiently evaluate the derivative
-of the signal wrt input parameters, via :meth:`~torchsim.model.SignalModel.jacobian`.
+of the signal wrt input parameters, via :meth:`~torchsim.model.Simulator.jacobian`.
 The desired derivatives can be specified by string:
 
 
@@ -364,8 +364,8 @@ minutes or hours.
 
  .. code-block:: none
 
-      held             0.94 ms a call
-      rebuilt anew    14.19 ms a call
+      held             1.04 ms a call
+      rebuilt anew    14.27 ms a call
 
 
 
@@ -510,7 +510,7 @@ to check that a layout laid down what you meant.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f4864800d10>]
+    [<matplotlib.legend.Legend object at 0x7f8154738b90>]
 
 
 
@@ -641,7 +641,7 @@ equilibrium the shipped object adds does not come along.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f4864213170>]
+    [<matplotlib.legend.Legend object at 0x7f8154625f10>]
 
 
 
@@ -715,7 +715,7 @@ notebooks say what to write instead.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.979 seconds)
+   **Total running time of the script:** (0 minutes 8.963 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_01-framework_01-getting-started.py:

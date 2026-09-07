@@ -259,8 +259,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API References</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../generated/torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../generated/torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../generated/torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../generated/torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -751,7 +752,7 @@ direction depends on what you are differentiating.</p>
 <p><strong>With respect to tissue</strong>, forward mode wins. Voxels are independent, so one
 directional derivative covers every voxel at once, and the cost is one pass per
 <em>property</em> – not per voxel, not per echo. That is
-<a class="reference internal" href="../generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.jacobian" title="torchsim.model.SignalModel.jacobian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jacobian()</span></code></a>, and it is what a dictionary fit, a
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">jacobian()</span></code>, and it is what a dictionary fit, a
 Cramer-Rao bound and a model-based reconstruction all consume. Inside the
 kernels it is dual arithmetic: each quantity carries a tangent beside it, and
 every operator differentiates itself.</p>

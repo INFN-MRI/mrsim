@@ -257,8 +257,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API References</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -650,10 +651,10 @@ belongs to the sequence, so it is given rather than assumed.</p>
 inverse. The table keeps the longest monotonic run and reports what it spans,
 so the invertible range is a number rather than an assumption.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">sweep</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">6000.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
-<span class="n">curve</span> <span class="o">=</span> <span class="n">unified</span><span class="p">(</span><a href="../../torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate" class="sphx-glr-backref-module-torchsim-model sphx-glr-backref-type-py-method"><span class="n">simulator</span><span class="o">.</span><span class="n">simulate</span></a><span class="p">(</span><span class="n">T1</span><span class="o">=</span><span class="n">sweep</span><span class="p">,</span> <span class="n">M0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="n">curve</span> <span class="o">=</span> <span class="n">unified</span><span class="p">(</span><a href="../../torchsim.simulators.MP2RAGESimulator.html#torchsim.simulators.MP2RAGESimulator" title="torchsim.simulators.MP2RAGESimulator" class="sphx-glr-backref-module-torchsim-simulators sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulator</span></a><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">T1</span><span class="o">=</span><span class="n">sweep</span><span class="p">,</span> <span class="n">M0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_02-lookup-table_002.png" srcset="../../../_images/sphx_glr_02-lookup-table_002.png" alt="the two blocks, the curve a T1 is read off" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.legend.Legend object at 0x7f484a101640&gt;]
+<img src="../../../_images/sphx_glr_02-lookup-table_002.png" srcset="../../../_images/sphx_glr_02-lookup-table_002.png" alt="the two blocks, the curve a T1 is read off" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.legend.Legend object at 0x7f813a25c6e0&gt;]
 </pre></div>
 </div>
 </section>
@@ -661,7 +662,7 @@ so the invertible range is a number rather than an assumption.</p>
 <h2>Measurement<a class="headerlink" href="#measurement" title="Link to this heading">#</a></h2>
 <p>Both blocks, at the true T1 and proton density of every brain voxel, with
 noise at half a percent of the peak magnetization.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">clean</span> <span class="o">=</span> <a href="../../torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate" class="sphx-glr-backref-module-torchsim-model sphx-glr-backref-type-py-method"><span class="n">simulator</span><span class="o">.</span><span class="n">simulate</span></a><span class="p">(</span><span class="n">T1</span><span class="o">=</span><span class="n">truth</span><span class="p">,</span> <span class="n">M0</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">clean</span> <span class="o">=</span> <a href="../../torchsim.simulators.MP2RAGESimulator.html#torchsim.simulators.MP2RAGESimulator" title="torchsim.simulators.MP2RAGESimulator" class="sphx-glr-backref-module-torchsim-simulators sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulator</span></a><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">T1</span><span class="o">=</span><span class="n">truth</span><span class="p">,</span> <span class="n">M0</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
 <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">NOISE_STD</span></a> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.005</span> <span class="o">*</span> <span class="n">clean</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
 <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
@@ -690,12 +691,12 @@ of three passes over the slice.</p>
             error     error      time      time
 -----------------------------------------------
      30     7.93%     0.88%     2.5ms     0.6ms
-     60     3.29%     0.75%     3.7ms     0.6ms
-    120     0.78%     0.71%     3.9ms     0.6ms
-    250     0.80%     0.71%     6.4ms     0.7ms
-    500     0.62%     0.71%    12.3ms     0.7ms
-   1000     0.66%     0.71%    23.9ms     0.8ms
-   2000     0.71%     0.71%    53.1ms     0.9ms
+     60     3.29%     0.75%     3.6ms     0.6ms
+    120     0.78%     0.71%     3.8ms     0.6ms
+    250     0.80%     0.71%     6.4ms     0.6ms
+    500     0.62%     0.71%    12.1ms     0.7ms
+   1000     0.66%     0.71%    23.0ms     0.8ms
+   2000     0.71%     0.71%    53.0ms     0.8ms
 </pre></div>
 </div>
 <p>The table is at its floor from the coarsest grid and does not move again. The
@@ -704,7 +705,7 @@ for it in points: its search is one comparison per atom per voxel, where the
 table’s binary search grows with the logarithm.</p>
 <p>The floor both reach is the noise. A fine enough grid matches a table
 exactly; the table’s advantage is that it was never told how fine.</p>
-<img src="../../../_images/sphx_glr_02-lookup-table_003.png" srcset="../../../_images/sphx_glr_02-lookup-table_003.png" alt="what the grid costs, what it costs to pay it" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x7f4851e29160&gt;
+<img src="../../../_images/sphx_glr_02-lookup-table_003.png" srcset="../../../_images/sphx_glr_02-lookup-table_003.png" alt="what the grid costs, what it costs to pay it" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x7f8141fce4e0&gt;
 </pre></div>
 </div>
 </section>
@@ -720,7 +721,7 @@ are a shape the measurement is a multiple of, so the multiple is one inner
 product per voxel.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">proton_density</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">maps</span></a><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The scale the measurement is, of the blocks the answer predicts."""</span>
-    <span class="n">predicted</span> <span class="o">=</span> <a href="../../torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate" class="sphx-glr-backref-module-torchsim-model sphx-glr-backref-type-py-method"><span class="n">simulator</span><span class="o">.</span><span class="n">simulate</span></a><span class="p">(</span><span class="n">T1</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">maps</span></a><span class="p">[</span><span class="s2">"T1"</span><span class="p">],</span> <span class="n">M0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">predicted</span> <span class="o">=</span> <a href="../../torchsim.simulators.MP2RAGESimulator.html#torchsim.simulators.MP2RAGESimulator" title="torchsim.simulators.MP2RAGESimulator" class="sphx-glr-backref-module-torchsim-simulators sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulator</span></a><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">T1</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">maps</span></a><span class="p">[</span><span class="s2">"T1"</span><span class="p">],</span> <span class="n">M0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">predicted</span> <span class="o">*</span> <span class="n">measured</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">predicted</span><span class="o">.</span><span class="n">square</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span>
 
 
@@ -730,14 +731,14 @@ product per voxel.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>method                      train      map     model      peak      T1      M0
 ------------------------------------------------------------------------------
 lookup, 60 points           0.00s    0.6ms  0.00 MiB        --   0.75%   0.46%
-match, 2000 atoms           0.00s   52.7ms  0.05 MiB        --   0.71%   0.45%
+match, 2000 atoms           0.00s   51.2ms  0.05 MiB        --   0.71%   0.45%
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
 <li><img src="../../../_images/sphx_glr_02-lookup-table_004.png" srcset="../../../_images/sphx_glr_02-lookup-table_004.png" alt="truth, lookup, match" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../../_images/sphx_glr_02-lookup-table_005.png" srcset="../../../_images/sphx_glr_02-lookup-table_005.png" alt="Δ lookup, Δ match" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.403 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.355 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-02-parameter-inference-02-lookup-table-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/firmlab-pisa/torchsim/gh-pages?urlpath=lab/tree/latest/examples/generated/autoexamples/02-parameter-inference/02-lookup-table.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo1.svg" style="width: 150px;" />

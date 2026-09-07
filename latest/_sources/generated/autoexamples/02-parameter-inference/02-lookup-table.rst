@@ -189,7 +189,7 @@ so the invertible range is a number rather than an assumption.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f484a101640>]
+    [<matplotlib.legend.Legend object at 0x7f813a25c6e0>]
 
 
 
@@ -272,12 +272,12 @@ of three passes over the slice.
                 error     error      time      time
     -----------------------------------------------
          30     7.93%     0.88%     2.5ms     0.6ms
-         60     3.29%     0.75%     3.7ms     0.6ms
-        120     0.78%     0.71%     3.9ms     0.6ms
-        250     0.80%     0.71%     6.4ms     0.7ms
-        500     0.62%     0.71%    12.3ms     0.7ms
-       1000     0.66%     0.71%    23.9ms     0.8ms
-       2000     0.71%     0.71%    53.1ms     0.9ms
+         60     3.29%     0.75%     3.6ms     0.6ms
+        120     0.78%     0.71%     3.8ms     0.6ms
+        250     0.80%     0.71%     6.4ms     0.6ms
+        500     0.62%     0.71%    12.1ms     0.7ms
+       1000     0.66%     0.71%    23.0ms     0.8ms
+       2000     0.71%     0.71%    53.0ms     0.8ms
 
 
 
@@ -309,7 +309,7 @@ exactly; the table's advantage is that it was never told how fine.
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7f4851e29160>
+    <matplotlib.legend.Legend object at 0x7f8141fce4e0>
 
 
 
@@ -371,7 +371,7 @@ product per voxel.
     method                      train      map     model      peak      T1      M0
     ------------------------------------------------------------------------------
     lookup, 60 points           0.00s    0.6ms  0.00 MiB        --   0.75%   0.46%
-    match, 2000 atoms           0.00s   52.7ms  0.05 MiB        --   0.71%   0.45%
+    match, 2000 atoms           0.00s   51.2ms  0.05 MiB        --   0.71%   0.45%
 
 
 
@@ -405,7 +405,7 @@ product per voxel.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.403 seconds)
+   **Total running time of the script:** (0 minutes 2.355 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_02-parameter-inference_02-lookup-table.py:

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SignalModel &#8212; TorchSim Documentation</title>
+    <title>SpinPhysics &#8212; TorchSim Documentation</title>
   
   
   
@@ -53,7 +53,7 @@
     <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/torchsim.model.SignalModel';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/torchsim.model.SpinPhysics';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://firmlab-pisa.github.io/torchsim/versions.json';
@@ -62,11 +62,11 @@
             true;
         </script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <link rel="canonical" href="https://firmlab-pisa.github.io/torchsim/latest/generated/torchsim.model.SignalModel.html" />
+    <link rel="canonical" href="https://firmlab-pisa.github.io/torchsim/latest/generated/torchsim.model.SpinPhysics.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Simulator" href="torchsim.model.Simulator.html" />
-    <link rel="prev" title="Signal models" href="../api/model.html" />
+    <link rel="next" title="EventOperators" href="torchsim.model.EventOperators.html" />
+    <link rel="prev" title="Simulator" href="torchsim.model.Simulator.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -257,8 +257,9 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/index.html">API References</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="../api/model.html">Signal models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l3 current active"><a class="current reference internal" href="#">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -415,7 +416,7 @@
       
       
       
-      <li><a href="https://github.com/FiRMLAB-Pisa/torchsim/edit/main/generated/torchsim.model.SignalModel.rst" target="_blank"
+      <li><a href="https://github.com/FiRMLAB-Pisa/torchsim/edit/main/generated/torchsim.model.SpinPhysics.rst" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -432,7 +433,7 @@
       
       
       
-      <li><a href="https://github.com/FiRMLAB-Pisa/torchsim/issues/new?title=Issue%20on%20page%20%2Fgenerated/torchsim.model.SignalModel.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/FiRMLAB-Pisa/torchsim/issues/new?title=Issue%20on%20page%20%2Fgenerated/torchsim.model.SpinPhysics.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -462,7 +463,7 @@
       
       
       
-      <li><a href="../_sources/generated/torchsim.model.SignalModel.rst" target="_blank"
+      <li><a href="../_sources/generated/torchsim.model.SpinPhysics.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -545,7 +546,7 @@
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>SignalModel</h1>
+    <h1>SpinPhysics</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -555,16 +556,13 @@
             </div>
             <nav aria-label="Page">
                 <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel"><code class="docutils literal notranslate"><span class="pre">SignalModel</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.properties"><code class="docutils literal notranslate"><span class="pre">SignalModel.properties</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.bound"><code class="docutils literal notranslate"><span class="pre">SignalModel.bound</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.evaluate"><code class="docutils literal notranslate"><span class="pre">SignalModel.evaluate()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.exposes"><code class="docutils literal notranslate"><span class="pre">SignalModel.exposes</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.accepts"><code class="docutils literal notranslate"><span class="pre">SignalModel.accepts</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.bind"><code class="docutils literal notranslate"><span class="pre">SignalModel.bind()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.to"><code class="docutils literal notranslate"><span class="pre">SignalModel.to()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.simulate"><code class="docutils literal notranslate"><span class="pre">SignalModel.simulate()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.jacobian"><code class="docutils literal notranslate"><span class="pre">SignalModel.jacobian()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics"><code class="docutils literal notranslate"><span class="pre">SpinPhysics</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.properties"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.properties</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.operators"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.operators</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.fixed"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.fixed</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.definitions"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.definitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.tissue"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.tissue()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.fields"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.fields</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -578,36 +576,57 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="signalmodel">
-<h1>SignalModel<a class="headerlink" href="#signalmodel" title="Link to this heading">#</a></h1>
+  <section id="spinphysics">
+<h1>SpinPhysics<a class="headerlink" href="#spinphysics" title="Link to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">torchsim.model.</span></span><span class="sig-name descname"><span class="pre">SignalModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_signal.html#SignalModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SignalModel" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>One signal model: declared properties, and a signal.</p>
-<p>Subclasses set <a class="reference internal" href="#torchsim.model.SignalModel.properties" title="torchsim.model.SignalModel.properties"><code class="xref py py-attr docutils literal notranslate"><span class="pre">properties</span></code></a> and implement <a class="reference internal" href="#torchsim.model.SignalModel.evaluate" title="torchsim.model.SignalModel.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a>.</p>
-<p><strong>The constructor takes the keywords</strong> <a class="reference internal" href="#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code></a> <strong>takes, and fixes
-them; a call overrides.</strong> <a class="reference internal" href="#torchsim.model.SignalModel.bind" title="torchsim.model.SignalModel.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a> fixes more on a copy, so what a
-caller is left to give per call is whatever is actually varying.</p>
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">torchsim.model.</span></span><span class="sig-name descname"><span class="pre">SpinPhysics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">definitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#SpinPhysics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SpinPhysics" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Which properties a voxel has, and what each kind of event does to it.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.properties">
-<span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#torchsim.model.SignalModel.properties" title="Link to this definition">#</a></dt>
-<dd><p>What the model exposes, as names. A mapping is read for its keys, so a
-subclass that also needs to say where each property goes – as
-<code class="xref py py-class docutils literal notranslate"><span class="pre">SpinPhysics</span></code> does, naming the tissue
-field each fills – declares both at once.</p>
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#torchsim.model.SpinPhysics.properties" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">{public</span> <span class="pre">name:</span> <span class="pre">tissue</span> <span class="pre">field}</span></code>. A field left unnamed is never given to
+the tissue, and the kernels leave its term out – so this is how a
+model asks for off-resonance, diffusion, flow or a second pool. A name
+mapped to <code class="docutils literal notranslate"><span class="pre">None</span></code> is the model’s own and reaches the signal without
+reaching the tissue.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>mapping or sequence of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p>mapping</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.bound">
-<span class="sig-name descname"><span class="pre">bound</span></span><a class="headerlink" href="#torchsim.model.SignalModel.bound" title="Link to this definition">#</a></dt>
-<dd><p>The arguments fixed on this model, under the names <a class="reference internal" href="#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code></a>
-takes them by. A call may name any of them again, and the call wins.</p>
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics.operators">
+<span class="sig-name descname"><span class="pre">operators</span></span><a class="headerlink" href="#torchsim.model.SpinPhysics.operators" title="Link to this definition">#</a></dt>
+<dd><p>What each kind of event plays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="torchsim.model.EventOperators.html#torchsim.model.EventOperators" title="torchsim.model.EventOperators">EventOperators</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics.fixed">
+<span class="sig-name descname"><span class="pre">fixed</span></span><a class="headerlink" href="#torchsim.model.SpinPhysics.fixed" title="Link to this definition">#</a></dt>
+<dd><p>Tissue fields the model pins rather than exposes, as
+<code class="docutils literal notranslate"><span class="pre">{field:</span> <span class="pre">value}</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mapping</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics.definitions">
+<span class="sig-name descname"><span class="pre">definitions</span></span><a class="headerlink" href="#torchsim.model.SpinPhysics.definitions" title="Link to this definition">#</a></dt>
+<dd><p>The RF resources the events name. The default is one ideal hard pulse
+at id 0; a model whose excitation is slice-selective supplies a shaped
+definition here instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>mapping</p>
@@ -618,126 +637,36 @@ takes them by. A call may name any of them again, and the call wins.</p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#torchsim.model.SignalModel.bind" title="torchsim.model.SignalModel.bind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind</span></code></a></p></td>
-<td><p>This model with more arguments fixed on it, or some of them changed.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#torchsim.model.SignalModel.evaluate" title="torchsim.model.SignalModel.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a></p></td>
-<td><p>Return the signal these properties and this sequence record.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#torchsim.model.SignalModel.jacobian" title="torchsim.model.SignalModel.jacobian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jacobian</span></code></a></p></td>
-<td><p>Return the signal and its derivative with respect to <code class="docutils literal notranslate"><span class="pre">diff</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simulate</span></code></a></p></td>
-<td><p>Return the recorded signal.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#torchsim.model.SpinPhysics.tissue" title="torchsim.model.SpinPhysics.tissue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tissue</span></code></a></p></td>
+<td><p>Build the tissue, leaving everything undeclared at its identity.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py method">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.evaluate">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_signal.html#SignalModel.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SignalModel.evaluate" title="Link to this definition">#</a></dt>
-<dd><p>Return the signal these properties and this sequence record.</p>
-<p><code class="docutils literal notranslate"><span class="pre">properties</span></code> holds the declared values the caller passed, under the
-names <a class="reference internal" href="#torchsim.model.SignalModel.properties" title="torchsim.model.SignalModel.properties"><code class="xref py py-attr docutils literal notranslate"><span class="pre">properties</span></code></a> gives them, and holds nothing for those the
-caller left out. Public units are the caller’s – milliseconds and
-degrees – and converting them belongs here, with the sequence.</p>
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics.tissue">
+<span class="sig-name descname"><span class="pre">tissue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#SpinPhysics.tissue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SpinPhysics.tissue" title="Link to this definition">#</a></dt>
+<dd><p>Build the tissue, leaving everything undeclared at its identity.</p>
+<p>A property the model does not expose, and one it exposes that the
+caller left out, are both simply absent – so each reaches the gate as
+the scalar default <code class="xref py py-class docutils literal notranslate"><span class="pre">TissueProperties</span></code> holds and the kernels
+leave its term out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a name is mapped to a field the tissue does not have.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.exposes">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">exposes</span></span><a class="headerlink" href="#torchsim.model.SignalModel.exposes" title="Link to this definition">#</a></dt>
-<dd><p>The property names this model declares, in its own order.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.accepts">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">accepts</span></span><a class="headerlink" href="#torchsim.model.SignalModel.accepts" title="Link to this definition">#</a></dt>
-<dd><p>what is declared, and the rest.</p>
-<p>A model declares the vocabulary its protocol is written in, and a voxel
-has more fields than any one model names. Both are accepted, so asking
-for off-resonance or a second pool is giving one a value rather than
-rebuilding the model around it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Every property name a call may use</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.bind">
-<span class="sig-name descname"><span class="pre">bind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_signal.html#SignalModel.bind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SignalModel.bind" title="Link to this definition">#</a></dt>
-<dd><p>This model with more arguments fixed on it, or some of them changed.</p>
-<p>What a fit does with a property measured separately: the same sequence,
-with one more map held on it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – Properties or sequence arguments, under the names
-<a class="reference internal" href="#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code></a> takes them by.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A copy. This one is left as it was.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#torchsim.model.SignalModel" title="torchsim.model.SignalModel">SignalModel</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_signal.html#SignalModel.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SignalModel.to" title="Link to this definition">#</a></dt>
-<dd><p>This model, with everything fixed on it on <code class="docutils literal notranslate"><span class="pre">device</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>device</strong> (<em>torch.device</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Where to put it.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A copy. This one is left where it was.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#torchsim.model.SignalModel" title="torchsim.model.SignalModel">SignalModel</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.simulate">
-<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_signal.html#SignalModel.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SignalModel.simulate" title="Link to this definition">#</a></dt>
-<dd><p>Return the recorded signal.</p>
-<p>Property and sequence arguments are given together and told apart by
-<a class="reference internal" href="#torchsim.model.SignalModel.properties" title="torchsim.model.SignalModel.properties"><code class="xref py py-attr docutils literal notranslate"><span class="pre">properties</span></code></a>, and join whatever <a class="reference internal" href="#torchsim.model.SignalModel.bound" title="torchsim.model.SignalModel.bound"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bound</span></code></a> already holds. A
-cost built on this and differentiated with
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.Tensor.backward()</span></code> reaches the engine’s adjoint, which is
-the mode that suits a sequence parameter.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="torchsim.model.SignalModel.jacobian">
-<span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diff</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_signal.html#SignalModel.jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.SignalModel.jacobian" title="Link to this definition">#</a></dt>
-<dd><p>Return the signal and its derivative with respect to <code class="docutils literal notranslate"><span class="pre">diff</span></code>.</p>
-<p>Forward mode, one directional derivative per differentiated property.
-Voxels are independent, so each pass yields every voxel’s derivative at
-once and the cost is one pass per property rather than per voxel.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>diff</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>sequence</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – One property name, or several. A single name collapses the
-parameter axis; a sequence keeps it, stacked before the samples.</p></li>
-<li><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – The property and sequence arguments, as for <a class="reference internal" href="#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code></a>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The signal, and its Jacobian.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a></p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">diff</span></code> names something the model does not expose, or
-    something that carries no derivative.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="torchsim.model.SpinPhysics.fields">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#torchsim.model.SpinPhysics.fields" title="Link to this definition">#</a></dt>
+<dd><p>The public-name to tissue-field map, checked against the tissue.</p>
+<p>Every field a voxel has can be named, whether or not this model asked
+for it: the vocabulary is the same for all of them, and giving a value
+is what turns a term on. What <code class="docutils literal notranslate"><span class="pre">properties</span></code> adds is a model’s own
+spelling – a name of its own for a field, or a name it answers to and
+the tissue does not.</p>
 </dd></dl>
 
 </dd></dl>
@@ -756,20 +685,20 @@ parameter axis; a sequence keeps it, stacked before the samples.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../api/model.html"
+       href="torchsim.model.Simulator.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Signal models</p>
+        <p class="prev-next-title">Simulator</p>
       </div>
     </a>
     <a class="right-next"
-       href="torchsim.model.Simulator.html"
+       href="torchsim.model.EventOperators.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Simulator</p>
+        <p class="prev-next-title">EventOperators</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -791,16 +720,13 @@ parameter axis; a sequence keeps it, stacked before the samples.</p></li>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel"><code class="docutils literal notranslate"><span class="pre">SignalModel</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.properties"><code class="docutils literal notranslate"><span class="pre">SignalModel.properties</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.bound"><code class="docutils literal notranslate"><span class="pre">SignalModel.bound</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.evaluate"><code class="docutils literal notranslate"><span class="pre">SignalModel.evaluate()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.exposes"><code class="docutils literal notranslate"><span class="pre">SignalModel.exposes</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.accepts"><code class="docutils literal notranslate"><span class="pre">SignalModel.accepts</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.bind"><code class="docutils literal notranslate"><span class="pre">SignalModel.bind()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.to"><code class="docutils literal notranslate"><span class="pre">SignalModel.to()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.simulate"><code class="docutils literal notranslate"><span class="pre">SignalModel.simulate()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SignalModel.jacobian"><code class="docutils literal notranslate"><span class="pre">SignalModel.jacobian()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics"><code class="docutils literal notranslate"><span class="pre">SpinPhysics</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.properties"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.properties</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.operators"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.operators</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.fixed"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.fixed</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.definitions"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.definitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.tissue"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.tissue()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.SpinPhysics.fields"><code class="docutils literal notranslate"><span class="pre">SpinPhysics.fields</span></code></a></li>
 </ul>
 </li>
 </ul>

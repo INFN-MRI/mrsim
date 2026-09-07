@@ -102,145 +102,159 @@ continuum and not four values.
 
     Downloading phantom_1.0mm_normal_bck: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_bck: 1.00kB [00:00, 7.35kB/s]
+    Downloading phantom_1.0mm_normal_bck: 1.00kB [00:00, 7.46kB/s]
 
-    Downloading phantom_1.0mm_normal_bck: 152kB [00:00, 707kB/s]  
+    Downloading phantom_1.0mm_normal_bck: 40.1kB [00:00, 170kB/s] 
 
-    Downloading phantom_1.0mm_normal_bck: 585kB [00:00, 2.02MB/s]
+    Downloading phantom_1.0mm_normal_bck: 175kB [00:00, 535kB/s] 
 
-    Downloading phantom_1.0mm_normal_bck: 881kB [00:00, 2.31MB/s]
+    Downloading phantom_1.0mm_normal_bck: 433kB [00:00, 1.05MB/s]
 
-    Downloading phantom_1.0mm_normal_bck: 1.13MB [00:00, 2.39MB/s]
+    Downloading phantom_1.0mm_normal_bck: 937kB [00:00, 1.97MB/s]
 
-    Downloading phantom_1.0mm_normal_bck: 1.41MB [00:00, 2.05MB/s]
+    Downloading phantom_1.0mm_normal_bck: 1.41MB [00:00, 2.70MB/s]
 
-    Downloading phantom_1.0mm_normal_bck: 1.80MB [00:00, 2.50MB/s]
+    Downloading phantom_1.0mm_normal_bck: 1.68MB [00:00, 2.70MB/s]
 
-    Downloading phantom_1.0mm_normal_bck: 2.05MB [00:01, 1.87MB/s]
+    Downloading phantom_1.0mm_normal_bck: 1.94MB [00:01, 2.50MB/s]
+
+    Downloading phantom_1.0mm_normal_bck: 2.19MB [00:01, 2.46MB/s]
 
                                                                   
-    Downloading tissues:  10%|█         | 1/10 [00:01<00:16,  1.78s/it]
+    Downloading tissues:  10%|█         | 1/10 [00:02<00:18,  2.04s/it]
 
     Downloading phantom_1.0mm_normal_csf: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_csf: 1.00kB [00:00, 9.59kB/s]
+    Downloading phantom_1.0mm_normal_csf: 1.00kB [00:00, 9.89kB/s]
 
-    Downloading phantom_1.0mm_normal_csf: 177kB [00:00, 964kB/s]  
+    Downloading phantom_1.0mm_normal_csf: 40.8kB [00:00, 193kB/s] 
 
-                                                                
-    Downloading tissues:  20%|██        | 2/10 [00:02<00:08,  1.11s/it]
+    Downloading phantom_1.0mm_normal_csf: 208kB [00:00, 685kB/s] 
+
+    Downloading phantom_1.0mm_normal_csf: 568kB [00:00, 1.46MB/s]
+
+                                                                 
+    Downloading tissues:  20%|██        | 2/10 [00:03<00:12,  1.54s/it]
 
     Downloading phantom_1.0mm_normal_gry: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_gry: 8.81kB [00:00, 77.8kB/s]
+    Downloading phantom_1.0mm_normal_gry: 1.00kB [00:00, 9.12kB/s]
 
-    Downloading phantom_1.0mm_normal_gry: 273kB [00:00, 1.43MB/s] 
+    Downloading phantom_1.0mm_normal_gry: 40.8kB [00:00, 186kB/s] 
 
-    Downloading phantom_1.0mm_normal_gry: 969kB [00:00, 3.67MB/s]
+    Downloading phantom_1.0mm_normal_gry: 185kB [00:00, 589kB/s] 
+
+    Downloading phantom_1.0mm_normal_gry: 449kB [00:00, 1.11MB/s]
+
+    Downloading phantom_1.0mm_normal_gry: 927kB [00:00, 1.95MB/s]
 
                                                                  
-    Downloading tissues:  30%|███       | 3/10 [00:03<00:06,  1.09it/s]
+    Downloading tissues:  30%|███       | 3/10 [00:04<00:09,  1.38s/it]
 
     Downloading phantom_1.0mm_normal_wht: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_wht: 1.00kB [00:00, 9.68kB/s]
+    Downloading phantom_1.0mm_normal_wht: 1.00kB [00:00, 9.55kB/s]
 
-    Downloading phantom_1.0mm_normal_wht: 184kB [00:00, 1.00MB/s] 
+    Downloading phantom_1.0mm_normal_wht: 40.8kB [00:00, 189kB/s] 
+
+    Downloading phantom_1.0mm_normal_wht: 185kB [00:00, 593kB/s] 
+
+    Downloading phantom_1.0mm_normal_wht: 465kB [00:00, 1.17MB/s]
 
                                                                  
-    Downloading tissues:  40%|████      | 4/10 [00:03<00:04,  1.25it/s]
+    Downloading tissues:  40%|████      | 4/10 [00:05<00:07,  1.30s/it]
 
     Downloading phantom_1.0mm_normal_fat: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_fat: 40.8kB [00:00, 353kB/s]
+    Downloading phantom_1.0mm_normal_fat: 8.81kB [00:00, 59.5kB/s]
 
-    Downloading phantom_1.0mm_normal_fat: 457kB [00:00, 2.35MB/s]
+    Downloading phantom_1.0mm_normal_fat: 88.8kB [00:00, 417kB/s] 
+
+    Downloading phantom_1.0mm_normal_fat: 185kB [00:00, 610kB/s] 
+
+    Downloading phantom_1.0mm_normal_fat: 433kB [00:00, 1.28MB/s]
 
                                                                  
-    Downloading tissues:  50%|█████     | 5/10 [00:04<00:03,  1.37it/s]
+    Downloading tissues:  50%|█████     | 5/10 [00:06<00:06,  1.25s/it]
 
     Downloading phantom_1.0mm_normal_m-s: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_m-s: 1.00kB [00:00, 8.74kB/s]
+    Downloading phantom_1.0mm_normal_m-s: 1.00kB [00:00, 7.15kB/s]
 
-    Downloading phantom_1.0mm_normal_m-s: 184kB [00:00, 966kB/s]  
+    Downloading phantom_1.0mm_normal_m-s: 40.8kB [00:00, 171kB/s] 
 
-    Downloading phantom_1.0mm_normal_m-s: 673kB [00:00, 2.63MB/s]
+    Downloading phantom_1.0mm_normal_m-s: 183kB [00:00, 557kB/s] 
 
-    Downloading phantom_1.0mm_normal_m-s: 0.99MB [00:00, 2.90MB/s]
+    Downloading phantom_1.0mm_normal_m-s: 433kB [00:00, 1.05MB/s]
 
-    Downloading phantom_1.0mm_normal_m-s: 1.38MB [00:00, 3.29MB/s]
+    Downloading phantom_1.0mm_normal_m-s: 921kB [00:00, 1.93MB/s]
 
-    Downloading phantom_1.0mm_normal_m-s: 1.70MB [00:00, 3.25MB/s]
+    Downloading phantom_1.0mm_normal_m-s: 1.84MB [00:00, 3.61MB/s]
 
-    Downloading phantom_1.0mm_normal_m-s: 2.01MB [00:00, 3.23MB/s]
-
-    Downloading phantom_1.0mm_normal_m-s: 2.34MB [00:00, 3.30MB/s]
-
-    Downloading phantom_1.0mm_normal_m-s: 2.72MB [00:00, 3.44MB/s]
+    Downloading phantom_1.0mm_normal_m-s: 2.39MB [00:00, 4.06MB/s]
 
                                                                   
-    Downloading tissues:  60%|██████    | 6/10 [00:05<00:03,  1.08it/s]
+    Downloading tissues:  60%|██████    | 6/10 [00:08<00:05,  1.39s/it]
 
     Downloading phantom_1.0mm_normal_skn: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_skn: 1.00kB [00:00, 8.91kB/s]
+    Downloading phantom_1.0mm_normal_skn: 1.00kB [00:00, 9.92kB/s]
 
-    Downloading phantom_1.0mm_normal_skn: 176kB [00:00, 936kB/s]  
+    Downloading phantom_1.0mm_normal_skn: 40.1kB [00:00, 188kB/s] 
 
-    Downloading phantom_1.0mm_normal_skn: 681kB [00:00, 2.61MB/s]
+    Downloading phantom_1.0mm_normal_skn: 191kB [00:00, 618kB/s] 
 
-    Downloading phantom_1.0mm_normal_skn: 1.05MB [00:00, 3.11MB/s]
+    Downloading phantom_1.0mm_normal_skn: 473kB [00:00, 1.19MB/s]
 
-    Downloading phantom_1.0mm_normal_skn: 1.41MB [00:00, 3.31MB/s]
+    Downloading phantom_1.0mm_normal_skn: 1.00MB [00:00, 2.19MB/s]
 
-    Downloading phantom_1.0mm_normal_skn: 1.78MB [00:00, 3.50MB/s]
+    Downloading phantom_1.0mm_normal_skn: 1.95MB [00:00, 3.83MB/s]
 
-    Downloading phantom_1.0mm_normal_skn: 2.17MB [00:00, 3.53MB/s]
+    Downloading phantom_1.0mm_normal_skn: 2.55MB [00:00, 4.30MB/s]
 
-    Downloading phantom_1.0mm_normal_skn: 2.55MB [00:00, 3.51MB/s]
-
-    Downloading phantom_1.0mm_normal_skn: 2.88MB [00:00, 3.29MB/s]
+    Downloading phantom_1.0mm_normal_skn: 2.96MB [00:01, 3.84MB/s]
 
                                                                   
-    Downloading tissues:  70%|███████   | 7/10 [00:07<00:03,  1.10s/it]
+    Downloading tissues:  70%|███████   | 7/10 [00:10<00:04,  1.50s/it]
 
     Downloading phantom_1.0mm_normal_skl: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_skl: 8.81kB [00:00, 87.0kB/s]
+    Downloading phantom_1.0mm_normal_skl: 8.81kB [00:00, 63.0kB/s]
 
-    Downloading phantom_1.0mm_normal_skl: 273kB [00:00, 1.49MB/s] 
+    Downloading phantom_1.0mm_normal_skl: 96.0kB [00:00, 469kB/s] 
+
+    Downloading phantom_1.0mm_normal_skl: 185kB [00:00, 640kB/s] 
+
+    Downloading phantom_1.0mm_normal_skl: 417kB [00:00, 1.26MB/s]
 
                                                                  
-    Downloading tissues:  80%|████████  | 8/10 [00:07<00:01,  1.05it/s]
+    Downloading tissues:  80%|████████  | 8/10 [00:11<00:02,  1.37s/it]
 
     Downloading phantom_1.0mm_normal_gli: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_gli: 1.00kB [00:00, 7.61kB/s]
+    Downloading phantom_1.0mm_normal_gli: 1.00kB [00:00, 9.01kB/s]
 
                                                                   
-    Downloading tissues:  90%|█████████ | 9/10 [00:08<00:00,  1.23it/s]
+    Downloading tissues:  90%|█████████ | 9/10 [00:11<00:01,  1.18s/it]
 
     Downloading phantom_1.0mm_normal_mit: 0.00B [00:00, ?B/s]
 
-    Downloading phantom_1.0mm_normal_mit: 1.00kB [00:00, 8.66kB/s]
+    Downloading phantom_1.0mm_normal_mit: 1.00kB [00:00, 10.0kB/s]
 
-    Downloading phantom_1.0mm_normal_mit: 177kB [00:00, 927kB/s]  
+    Downloading phantom_1.0mm_normal_mit: 40.1kB [00:00, 189kB/s] 
 
-    Downloading phantom_1.0mm_normal_mit: 481kB [00:00, 1.84MB/s]
+    Downloading phantom_1.0mm_normal_mit: 191kB [00:00, 618kB/s] 
 
-    Downloading phantom_1.0mm_normal_mit: 785kB [00:00, 2.24MB/s]
+    Downloading phantom_1.0mm_normal_mit: 481kB [00:00, 1.21MB/s]
 
-    Downloading phantom_1.0mm_normal_mit: 1.11MB [00:00, 2.66MB/s]
+    Downloading phantom_1.0mm_normal_mit: 1.02MB [00:00, 2.25MB/s]
 
-    Downloading phantom_1.0mm_normal_mit: 1.42MB [00:00, 2.84MB/s]
+    Downloading phantom_1.0mm_normal_mit: 1.72MB [00:00, 3.59MB/s]
 
-    Downloading phantom_1.0mm_normal_mit: 1.75MB [00:00, 3.03MB/s]
-
-    Downloading phantom_1.0mm_normal_mit: 2.06MB [00:00, 3.10MB/s]
+    Downloading phantom_1.0mm_normal_mit: 2.09MB [00:00, 3.54MB/s]
 
                                                                   
-    Downloading tissues: 100%|██████████| 10/10 [00:09<00:00,  1.05it/s]
+    Downloading tissues: 100%|██████████| 10/10 [00:13<00:00,  1.28s/it]
                                                                         
     Text(0.5, 0.9878790357573323, 'BrainWeb subject 0, slice 90')
 
@@ -306,7 +320,7 @@ arithmetic that searches it.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f486486e2d0>]
+    [<matplotlib.legend.Legend object at 0x7f8154be4260>]
 
 
 
@@ -411,7 +425,7 @@ projecting through the basis and back.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f4851f69a90>]
+    [<matplotlib.legend.Legend object at 0x7f8141f0eb10>]
 
 
 
@@ -544,9 +558,9 @@ on a machine with no card.
 
     method                         train     map     model      peak      T1      T2      M0
     ----------------------------------------------------------------------------------------
-    match, 400 contrasts            8.9s   8.38s 122.3 MiB        --    0.6%    1.6%    0.4%
-    match, rank 4                   1.1s   1.79s   1.4 MiB        --    0.6%    1.6%    0.4%
-    match, rank 4 + groups          1.1s   0.09s   1.4 MiB        --    0.6%    1.6%    0.4%
+    match, 400 contrasts            9.0s   8.39s 122.3 MiB        --    0.6%    1.6%    0.4%
+    match, rank 4                   1.2s   1.79s   1.4 MiB        --    0.6%    1.6%    0.4%
+    match, rank 4 + groups          1.2s   0.09s   1.4 MiB        --    0.6%    1.6%    0.4%
 
 
 
@@ -586,7 +600,7 @@ Maps
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 59.390 seconds)
+   **Total running time of the script:** (1 minutes 3.527 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_02-parameter-inference_01-dictionary-matching.py:

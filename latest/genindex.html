@@ -252,8 +252,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API References</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -533,8 +534,6 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.accepts">accepts (torchsim.model.SignalModel property)</a>
-</li>
       <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.acquisition">acquisition (torchsim.Estimator attribute)</a>
 </li>
       <li><a href="generated/torchsim.SequenceDescription.html#torchsim.SequenceDescription.adc_events">adc_events (torchsim.SequenceDescription property)</a>
@@ -549,19 +548,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.utils.b1rms.html#torchsim.utils.b1rms">b1rms() (in module torchsim.utils)</a>
 </li>
+      <li><a href="api/model.html#torchsim.model.BALANCED">BALANCED (in module torchsim.model)</a>
+</li>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.basis">basis (torchsim.Subspace attribute)</a>
 </li>
       <li><a href="generated/torchsim.TrustRegion.html#torchsim.TrustRegion.begin">begin() (torchsim.TrustRegion method)</a>
 </li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.bind">bind() (torchsim.model.SignalModel method)</a>
-
-      <ul>
-        <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.bind">(torchsim.model.Simulator method)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.bound">bound (torchsim.model.SignalModel attribute)</a>
+      <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.bind">bind() (torchsim.model.Simulator method)</a>
 </li>
       <li><a href="generated/torchsim.Bounded.html#torchsim.Bounded">Bounded (class in torchsim)</a>
 </li>
@@ -593,14 +588,18 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics.definitions">definitions (torchsim.model.SpinPhysics attribute)</a>
+</li>
       <li><a href="generated/torchsim.Delay.html#torchsim.Delay">Delay() (in module torchsim)</a>
+</li>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators.delay">delay() (torchsim.model.EventOperators method)</a>
 </li>
       <li><a href="generated/torchsim.Dephase.html#torchsim.Dephase">Dephase() (in module torchsim)</a>
 </li>
-      <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.describe">describe() (torchsim.model.Simulator method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.describe">describe() (torchsim.model.Simulator method)</a>
+</li>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.dictionary">dictionary (torchsim.Subspace attribute)</a>
 </li>
       <li><a href="generated/torchsim.DictionaryMatcher.html#torchsim.DictionaryMatcher">DictionaryMatcher (class in torchsim)</a>
@@ -617,11 +616,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator">Estimator (class in torchsim)</a>
 </li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.evaluate">evaluate() (torchsim.model.SignalModel method)</a>
+      <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.evaluate">evaluate() (torchsim.model.Simulator method)</a>
 
       <ul>
-        <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.evaluate">(torchsim.model.Simulator method)</a>
-</li>
         <li><a href="generated/torchsim.simulators.bSSFPSimulator.html#torchsim.simulators.bSSFPSimulator.evaluate">(torchsim.simulators.bSSFPSimulator method)</a>
 </li>
         <li><a href="generated/torchsim.simulators.DoubleAngleSimulator.html#torchsim.simulators.DoubleAngleSimulator.evaluate">(torchsim.simulators.DoubleAngleSimulator method)</a>
@@ -645,15 +642,17 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators">EventOperators (class in torchsim.model)</a>
+</li>
       <li><a href="generated/torchsim.SequenceDescription.html#torchsim.SequenceDescription.events">events (torchsim.SequenceDescription attribute)</a>
 </li>
       <li><a href="generated/torchsim.Excitation.html#torchsim.Excitation">Excitation() (in module torchsim)</a>
 </li>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators.excitation">excitation() (torchsim.model.EventOperators method)</a>
+</li>
       <li><a href="generated/torchsim.execution.html#torchsim.execution">execution() (in module torchsim)</a>
 </li>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.expand">expand() (torchsim.Subspace method)</a>
-</li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.exposes">exposes (torchsim.model.SignalModel property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -661,6 +660,8 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics.fields">fields (torchsim.model.SpinPhysics property)</a>
+</li>
       <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.fit">fit() (torchsim.Estimator method)</a>
 
       <ul>
@@ -677,6 +678,8 @@
         <li><a href="generated/torchsim.PERK.html#torchsim.PERK.fitted">(torchsim.PERK property)</a>
 </li>
       </ul></li>
+      <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics.fixed">fixed (torchsim.model.SpinPhysics attribute)</a>
+</li>
       <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.forward">forward() (torchsim.Estimator method)</a>
 
       <ul>
@@ -729,9 +732,11 @@
 </li>
       <li><a href="generated/torchsim.ModelOperator.html#torchsim.ModelOperator.initial">initial() (torchsim.ModelOperator method)</a>
 </li>
+      <li><a href="generated/torchsim.Inversion.html#torchsim.Inversion">Inversion() (in module torchsim)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/torchsim.Inversion.html#torchsim.Inversion">Inversion() (in module torchsim)</a>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators.inversion">inversion() (torchsim.model.EventOperators method)</a>
 </li>
       <li><a href="generated/torchsim.simulators.InversionRecoverySimulator.html#torchsim.simulators.InversionRecoverySimulator">InversionRecoverySimulator (class in torchsim.simulators)</a>
 </li>
@@ -745,12 +750,8 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.jacobian">jacobian() (torchsim.model.SignalModel method)</a>
-
-      <ul>
-        <li><a href="generated/torchsim.ModelOperator.html#torchsim.ModelOperator.jacobian">(torchsim.ModelOperator method)</a>
+      <li><a href="generated/torchsim.ModelOperator.html#torchsim.ModelOperator.jacobian">jacobian() (torchsim.ModelOperator method)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.TrustRegion.html#torchsim.TrustRegion.judge">judge() (torchsim.TrustRegion method)</a>
@@ -853,10 +854,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.offload.html#torchsim.offload">offload() (in module torchsim)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.Operator.html#torchsim.Operator">Operator (class in torchsim)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.operators">operators (torchsim.model.Simulator property)</a>
+
+      <ul>
+        <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics.operators">(torchsim.model.SpinPhysics attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -881,7 +888,7 @@
 </li>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.project">project() (torchsim.Subspace method)</a>
 </li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.properties">properties (torchsim.model.SignalModel attribute)</a>
+      <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics.properties">properties (torchsim.model.SpinPhysics attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -897,16 +904,22 @@
       </ul></li>
       <li><a href="generated/torchsim.Readout.html#torchsim.Readout">Readout() (in module torchsim)</a>
 </li>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators.readout">readout() (torchsim.model.EventOperators method)</a>
+</li>
+      <li><a href="api/model.html#torchsim.model.REFOCUSED">REFOCUSED (in module torchsim.model)</a>
+</li>
       <li><a href="generated/torchsim.Refocusing.html#torchsim.Refocusing">Refocusing() (in module torchsim)</a>
 </li>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators.refocusing">refocusing() (torchsim.model.EventOperators method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.repetition_s">repetition_s() (torchsim.model.Simulator method)</a>
 
       <ul>
         <li><a href="generated/torchsim.simulators.FSESimulator.html#torchsim.simulators.FSESimulator.repetition_s">(torchsim.simulators.FSESimulator method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.retained">retained (torchsim.Subspace property)</a>
 </li>
       <li><a href="generated/torchsim.TrustRegion.html#torchsim.TrustRegion.retire">retire() (torchsim.TrustRegion method)</a>
@@ -929,6 +942,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.Saturation.html#torchsim.Saturation">Saturation() (in module torchsim)</a>
 </li>
+      <li><a href="generated/torchsim.model.EventOperators.html#torchsim.model.EventOperators.saturation">saturation() (torchsim.model.EventOperators method)</a>
+</li>
       <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.seed">seed (torchsim.Estimator attribute)</a>
 </li>
       <li><a href="generated/torchsim.ModelOperator.html#torchsim.ModelOperator.select">select() (torchsim.ModelOperator method)</a>
@@ -941,29 +956,29 @@
 </li>
       <li><a href="generated/torchsim.ShimDefinition.html#torchsim.ShimDefinition">ShimDefinition (class in torchsim)</a>
 </li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel">SignalModel (class in torchsim.model)</a>
-</li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate">simulate() (torchsim.model.SignalModel method)</a>
-</li>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.simulation">simulation (torchsim.Subspace attribute)</a>
 </li>
       <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator">Simulator (class in torchsim.model)</a>
 </li>
       <li><a href="generated/torchsim.Subspace.html#torchsim.Subspace.singular_values">singular_values (torchsim.Subspace attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.LookupTable.html#torchsim.LookupTable.span">span (torchsim.LookupTable property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.spgr_sim.html#torchsim.spgr_sim">spgr_sim() (in module torchsim)</a>
 </li>
       <li><a href="generated/torchsim.SPGRReadout.html#torchsim.SPGRReadout">SPGRReadout() (in module torchsim)</a>
 </li>
       <li><a href="generated/torchsim.simulators.SPGRSimulator.html#torchsim.simulators.SPGRSimulator">SPGRSimulator (class in torchsim.simulators)</a>
 </li>
+      <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics">SpinPhysics (class in torchsim.model)</a>
+</li>
       <li><a href="generated/torchsim.ModelOperator.html#torchsim.ModelOperator.split">split() (torchsim.ModelOperator method)</a>
 </li>
       <li><a href="generated/torchsim.Spoil.html#torchsim.Spoil">Spoil() (in module torchsim)</a>
+</li>
+      <li><a href="api/model.html#torchsim.model.SPOILED">SPOILED (in module torchsim.model)</a>
 </li>
       <li><a href="generated/torchsim.SSFPEchoReadout.html#torchsim.SSFPEchoReadout">SSFPEchoReadout() (in module torchsim)</a>
 </li>
@@ -985,12 +1000,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.TrustRegion.html#torchsim.TrustRegion.tau">tau (torchsim.TrustRegion attribute)</a>
 </li>
-      <li><a href="generated/torchsim.model.SignalModel.html#torchsim.model.SignalModel.to">to() (torchsim.model.SignalModel method)</a>
-
-      <ul>
-        <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.to">(torchsim.model.Simulator method)</a>
+      <li><a href="generated/torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics.tissue">tissue() (torchsim.model.SpinPhysics method)</a>
 </li>
-      </ul></li>
+      <li><a href="generated/torchsim.model.Simulator.html#torchsim.model.Simulator.to">to() (torchsim.model.Simulator method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/torchsim.SequenceDescription.html#torchsim.SequenceDescription.tr_duration_us">tr_duration_us (torchsim.SequenceDescription attribute)</a>
@@ -1007,10 +1020,12 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.uncertainty_of">uncertainty_of() (torchsim.Estimator method)</a>
+      <li><a href="api/model.html#torchsim.model.UNBALANCED">UNBALANCED (in module torchsim.model)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.uncertainty_of">uncertainty_of() (torchsim.Estimator method)</a>
+</li>
       <li><a href="generated/torchsim.Estimator.html#torchsim.Estimator.unknown">unknown (torchsim.Estimator property)</a>
 </li>
   </ul></td>

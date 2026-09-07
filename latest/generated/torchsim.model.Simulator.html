@@ -65,8 +65,8 @@
     <link rel="canonical" href="https://firmlab-pisa.github.io/torchsim/latest/generated/torchsim.model.Simulator.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Simulators" href="../api/simulators.html" />
-    <link rel="prev" title="SignalModel" href="torchsim.model.SignalModel.html" />
+    <link rel="next" title="SpinPhysics" href="torchsim.model.SpinPhysics.html" />
+    <link rel="prev" title="Signal models" href="../api/model.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -257,8 +257,9 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/index.html">API References</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="../api/model.html">Signal models</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -559,6 +560,7 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.model"><code class="docutils literal notranslate"><span class="pre">Simulator.model</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.states"><code class="docutils literal notranslate"><span class="pre">Simulator.states</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.bind"><code class="docutils literal notranslate"><span class="pre">Simulator.bind()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.operators"><code class="docutils literal notranslate"><span class="pre">Simulator.operators</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.variables"><code class="docutils literal notranslate"><span class="pre">Simulator.variables</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.to"><code class="docutils literal notranslate"><span class="pre">Simulator.to()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.layout"><code class="docutils literal notranslate"><span class="pre">Simulator.layout()</span></code></a></li>
@@ -586,30 +588,34 @@
 <h1>Simulator<a class="headerlink" href="#simulator" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="torchsim.model.Simulator">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">torchsim.model.</span></span><span class="sig-name descname"><span class="pre">Simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">across_slice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crusher_dephasing_rad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size_m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#Simulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.Simulator" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="torchsim.model.SignalModel.html#torchsim.model.SignalModel" title="torchsim.model._signal.SignalModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignalModel</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">torchsim.model.</span></span><span class="sig-name descname"><span class="pre">Simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#Simulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.Simulator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_SignalModel</span></code></p>
 <p>A protocol: what a sequence plays, and the physics behind it.</p>
+<p>The one thing anything downstream takes. Parameter inference, model-based
+reconstruction and sequence design are written against this and never ask
+how the signal is arrived at.</p>
 <p>Subclasses set <a class="reference internal" href="#torchsim.model.Simulator.model" title="torchsim.model.Simulator.model"><code class="xref py py-attr docutils literal notranslate"><span class="pre">model</span></code></a> and implement <a class="reference internal" href="#torchsim.model.Simulator.layout" title="torchsim.model.Simulator.layout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">layout()</span></code></a>, which returns
-the operators of one repetition in the order they are played.</p>
-<p><strong>The constructor takes the keywords</strong>
-<a class="reference internal" href="torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code></a> <strong>takes, and fixes them; a
-call overrides.</strong> So a sequence is written once with the tissue it
+the operators of one repetition in the order they are played. A protocol
+with a closed form – a steady state that needs no state machine –
+implements <a class="reference internal" href="#torchsim.model.Simulator.evaluate" title="torchsim.model.Simulator.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a> instead and never reaches <a class="reference internal" href="#torchsim.model.Simulator.layout" title="torchsim.model.Simulator.layout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">layout()</span></code></a>; its
+<a class="reference internal" href="#torchsim.model.Simulator.model" title="torchsim.model.Simulator.model"><code class="xref py py-attr docutils literal notranslate"><span class="pre">model</span></code></a> then carries only the property declaration, since there are
+no events for operators to realize.</p>
+<p><strong>The constructor takes the keywords</strong> <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code> <strong>takes, and fixes
+them; a call overrides.</strong> So a sequence is written once with the tissue it
 is being asked about already on it, and what is left to give per call is
 whatever is actually varying – the design under optimization, the map
 being fitted.</p>
-<p>A protocol with a closed form – a steady state that needs no state
-machine – overrides <a class="reference internal" href="#torchsim.model.Simulator.evaluate" title="torchsim.model.Simulator.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a> instead and never reaches
-<a class="reference internal" href="#torchsim.model.Simulator.layout" title="torchsim.model.Simulator.layout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">layout()</span></code></a>. Its <a class="reference internal" href="#torchsim.model.Simulator.model" title="torchsim.model.Simulator.model"><code class="xref py py-attr docutils literal notranslate"><span class="pre">model</span></code></a> then carries only the property
-declaration, since there are no events for operators to realize. Both kinds
-are constructed and called the same way, which is what lets parameter
-inference and sequence optimization take either.</p>
+<p>A model that composes others rather than declaring physics of its own
+names its properties in the class body and writes whatever constructor
+suits it: every setting has a value at the class level, so one that never
+reaches this constructor still answers <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate()</span></code>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="torchsim.model.Simulator.model">
 <span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#torchsim.model.Simulator.model" title="Link to this definition">#</a></dt>
 <dd><p>The physics behind the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>SpinPhysics, optional</p>
+<dd class="field-odd"><p><a class="reference internal" href="torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics" title="torchsim.model.SpinPhysics">SpinPhysics</a>, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -670,6 +676,15 @@ winding the description asks for.</p>
 – the pulse the events drive, where across the slice to work it out,
 how many orders to carry – is applied to the copy instead, because it
 changes what is simulated rather than what is simulated with.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="torchsim.model.Simulator.operators">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">operators</span></span><a class="headerlink" href="#torchsim.model.Simulator.operators" title="Link to this definition">#</a></dt>
+<dd><p>What plays each kind of event, from this simulator’s physics.</p>
+<p>A layout reads its operators here. Each is resolved while a
+description is being assembled and never again: what the layout
+produces carries its own action word, and the run consults no slot.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -800,7 +815,7 @@ own operators rather than taken as they arrive.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>description</strong> (<a class="reference internal" href="torchsim.SequenceDescription.html#torchsim.SequenceDescription" title="torchsim.SequenceDescription"><em>SequenceDescription</em></a>) – The stream, as the MRD client decodes it or a Pulseq design
 exports it.</p></li>
-<li><p><strong>model</strong> (<em>SpinPhysics</em><em>, </em><em>optional</em>) – The physics to read it with. Defaults to this simulator’s own,
+<li><p><strong>model</strong> (<a class="reference internal" href="torchsim.model.SpinPhysics.html#torchsim.model.SpinPhysics" title="torchsim.model.SpinPhysics"><em>SpinPhysics</em></a><em>, </em><em>optional</em>) – The physics to read it with. Defaults to this simulator’s own,
 which is what naming a concrete one is for.</p></li>
 <li><p><strong>settings</strong> (<em>Any</em><em>, </em><em>optional</em>) – Run settings and tissue, as the constructor takes them.</p></li>
 </ul>
@@ -816,7 +831,7 @@ which is what naming a concrete one is for.</p></li>
 <dt class="sig sig-object py" id="torchsim.model.Simulator.evaluate">
 <span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#Simulator.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.Simulator.evaluate" title="Link to this definition">#</a></dt>
 <dd><p>Run one simulation of the described protocol.</p>
-<p><code class="docutils literal notranslate"><span class="pre">nstates</span></code>, <code class="docutils literal notranslate"><span class="pre">repetitions</span></code>, <code class="docutils literal notranslate"><span class="pre">record</span></code>, <code class="docutils literal notranslate"><span class="pre">device</span></code> and <code class="docutils literal notranslate"><span class="pre">execution</span></code>
+<p><code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">repetitions</span></code>, <code class="docutils literal notranslate"><span class="pre">record</span></code>, <code class="docutils literal notranslate"><span class="pre">device</span></code> and <code class="docutils literal notranslate"><span class="pre">execution</span></code>
 describe the run and are taken here, each falling back to what the
 constructor was given; everything else overrides a protocol argument.</p>
 </dd></dl>
@@ -837,20 +852,20 @@ constructor was given; everything else overrides a protocol argument.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="torchsim.model.SignalModel.html"
+       href="../api/model.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">SignalModel</p>
+        <p class="prev-next-title">Signal models</p>
       </div>
     </a>
     <a class="right-next"
-       href="../api/simulators.html"
+       href="torchsim.model.SpinPhysics.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Simulators</p>
+        <p class="prev-next-title">SpinPhysics</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -876,6 +891,7 @@ constructor was given; everything else overrides a protocol argument.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.model"><code class="docutils literal notranslate"><span class="pre">Simulator.model</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.states"><code class="docutils literal notranslate"><span class="pre">Simulator.states</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.bind"><code class="docutils literal notranslate"><span class="pre">Simulator.bind()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.operators"><code class="docutils literal notranslate"><span class="pre">Simulator.operators</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.variables"><code class="docutils literal notranslate"><span class="pre">Simulator.variables</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.to"><code class="docutils literal notranslate"><span class="pre">Simulator.to()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#torchsim.model.Simulator.layout"><code class="docutils literal notranslate"><span class="pre">Simulator.layout()</span></code></a></li>

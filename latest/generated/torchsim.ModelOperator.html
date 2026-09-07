@@ -257,8 +257,9 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/index.html">API References</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -594,7 +595,7 @@ convention deepinv and mri-nufft use, and it is the only place it flips.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>acquisition</strong> (<a class="reference internal" href="torchsim.model.SignalModel.html#torchsim.model.SignalModel" title="torchsim.model.SignalModel"><em>SignalModel</em></a>) – The sequence being inverted, with every property that is not being
+<li><p><strong>acquisition</strong> (<a class="reference internal" href="torchsim.model.Simulator.html#torchsim.model.Simulator" title="torchsim.model.Simulator"><em>Simulator</em></a>) – The sequence being inverted, with every property that is not being
 solved for already fixed on it. A property bound as a map – a
 measured B1, a known T1 – is one value per voxel and rides along.</p></li>
 <li><p><strong>unknown</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The property names being solved for, in the order their channels

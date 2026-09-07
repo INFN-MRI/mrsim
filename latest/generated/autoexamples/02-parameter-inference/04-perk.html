@@ -257,8 +257,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API References</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/model.html">Signal models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.SignalModel.html">SignalModel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.Simulator.html">Simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.SpinPhysics.html">SpinPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../torchsim.model.EventOperators.html">EventOperators</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/simulators.html">Simulators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -640,12 +641,12 @@ would give trajectories differing by noise rather than by physics.</p>
 returns transverse magnetization to the imaginary axis: the trajectory comes
 back real to within 3e-8, which halves both the dictionary and the
 arithmetic that searches it.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fingerprints</span> <span class="o">=</span> <a href="../../torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate" class="sphx-glr-backref-module-torchsim-model sphx-glr-backref-type-py-method"><span class="n">simulator</span><span class="o">.</span><span class="n">simulate</span></a><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fingerprints</span> <span class="o">=</span> <a href="../../torchsim.simulators.MRFSimulator.html#torchsim.simulators.MRFSimulator" title="torchsim.simulators.MRFSimulator" class="sphx-glr-backref-module-torchsim-simulators sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulator</span></a><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
     <span class="n">T1</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">500.0</span><span class="p">,</span> <span class="mf">833.0</span><span class="p">,</span> <span class="mf">2569.0</span><span class="p">]),</span> <span class="n">T2</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">70.0</span><span class="p">,</span> <span class="mf">83.0</span><span class="p">,</span> <span class="mf">329.0</span><span class="p">])</span>
 <span class="p">)</span><span class="o">.</span><span class="n">real</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_04-perk_002.png" srcset="../../../_images/sphx_glr_04-perk_002.png" alt="the schedule, fingerprints" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.legend.Legend object at 0x7f484a100440&gt;]
+<img src="../../../_images/sphx_glr_04-perk_002.png" srcset="../../../_images/sphx_glr_04-perk_002.png" alt="the schedule, fingerprints" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.legend.Legend object at 0x7f8141f0d940&gt;]
 </pre></div>
 </div>
 <p>The measurement, with noise at 2% of the peak fingerprint. One number sets
@@ -659,7 +660,7 @@ data and answers with the prior instead.</p>
     <span class="s2">"T2"</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">T2_true</span></a><span class="p">[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()),</span>
 <span class="p">}</span>
 <span class="n">density</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">M0_true</span></a><span class="p">[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-<span class="n">clean</span> <span class="o">=</span> <a href="../../torchsim.model.SignalModel.html#torchsim.model.SignalModel.simulate" title="torchsim.model.SignalModel.simulate" class="sphx-glr-backref-module-torchsim-model sphx-glr-backref-type-py-method"><span class="n">simulator</span><span class="o">.</span><span class="n">simulate</span></a><span class="p">(</span><span class="o">**</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">truth</span></a><span class="p">)</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">density</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">clean</span> <span class="o">=</span> <a href="../../torchsim.simulators.MRFSimulator.html#torchsim.simulators.MRFSimulator" title="torchsim.simulators.MRFSimulator" class="sphx-glr-backref-module-torchsim-simulators sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulator</span></a><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="o">**</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">truth</span></a><span class="p">)</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">density</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 <span class="n">measured</span> <span class="o">=</span> <span class="n">clean</span> <span class="o">+</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">NOISE_STD</span></a> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">clean</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span>
 </pre></div>
@@ -698,7 +699,7 @@ keeps is the relative squared error of projecting through it and back.</p>
 <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">RANK</span></a> <span class="o">=</span> <span class="mi">4</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_04-perk_003.png" srcset="../../../_images/sphx_glr_04-perk_003.png" alt="what projecting through the basis loses" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.legend.Legend object at 0x7f4851fdce00&gt;]
+<img src="../../../_images/sphx_glr_04-perk_003.png" srcset="../../../_images/sphx_glr_04-perk_003.png" alt="what projecting through the basis loses" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.legend.Legend object at 0x7f81491464e0&gt;]
 </pre></div>
 </div>
 <p>Four directions leave less outside the basis than the noise puts in, so
@@ -734,10 +735,10 @@ card while the slice was mapped, and a dash on a machine with no card. The
 dictionary row is the reference point.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>method                       train     map     model      peak      T1      T2
 ------------------------------------------------------------------------------
-match, rank 4                 1.1s   1.76s   1.4 MiB        --    0.6%    1.6%
-PERK, 500 features            1.4s   0.03s   0.0 MiB        --    1.6%   12.3%
-PERK, 1000 features           1.8s   0.04s   0.1 MiB        --    0.8%    5.5%
-PERK, 4000 features           9.8s   0.12s   0.4 MiB        --    0.9%    4.6%
+match, rank 4                 1.1s   1.79s   1.4 MiB        --    0.6%    1.6%
+PERK, 500 features            1.4s   0.03s   0.0 MiB        --    0.9%   11.1%
+PERK, 1000 features           1.8s   0.04s   0.1 MiB        --    0.6%    3.8%
+PERK, 4000 features          10.0s   0.12s   0.4 MiB        --    1.1%    3.6%
 </pre></div>
 </div>
 </section>
@@ -760,15 +761,15 @@ rerun of the volume.</p>
 <p>Read against the Cramer-Rao bound, the lowest standard deviation an unbiased
 estimate could reach from this train at this noise. The bound belongs to the
 sequence, so the gap is what the method loses.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">_signal</span><span class="p">,</span> <span class="n">sensitivity</span> <span class="o">=</span> <a href="../../torchsim.model.SignalModel.html#torchsim.model.SignalModel.jacobian" title="torchsim.model.SignalModel.jacobian" class="sphx-glr-backref-module-torchsim-model sphx-glr-backref-type-py-method"><span class="n">simulator</span><span class="o">.</span><span class="n">jacobian</span></a><span class="p">(</span><span class="s2">"T1 T2"</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="o">**</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">truth</span></a><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">_signal</span><span class="p">,</span> <span class="n">sensitivity</span> <span class="o">=</span> <a href="../../torchsim.simulators.MRFSimulator.html#torchsim.simulators.MRFSimulator" title="torchsim.simulators.MRFSimulator" class="sphx-glr-backref-module-torchsim-simulators sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulator</span></a><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="s2">"T1 T2"</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="o">**</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">truth</span></a><span class="p">)</span>
 <span class="n">sensitivity</span> <span class="o">=</span> <span class="n">sensitivity</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">density</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="n">floor</span> <span class="o">=</span> <a href="../../torchsim.crlb.html#torchsim.crlb" title="torchsim.crlb" class="sphx-glr-backref-module-torchsim sphx-glr-backref-type-py-function"><span class="n">torchsim</span><span class="o">.</span><span class="n">crlb</span></a><span class="p">(</span><span class="n">sensitivity</span><span class="p">,</span> <span class="n">noise_variance</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">NOISE_STD</span></a><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">singular</span><span class="o">=</span><span class="s2">"infinite"</span><span class="p">)</span>
 <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bound</span></a> <span class="o">=</span> <span class="p">{</span><span class="s2">"T1"</span><span class="p">:</span> <span class="n">floor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(),</span> <span class="s2">"T2"</span><span class="p">:</span> <span class="n">floor</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()}</span>
 </pre></div>
 </div>
 <img src="../../../_images/sphx_glr_04-perk_006.png" srcset="../../../_images/sphx_glr_04-perk_006.png" alt="PERK, CRLB, PERK, relative" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            PERK      CRLB     PERK   (median over the brain)
-T1        7.8 ms    2.4 ms     1.2%
-T2       11.3 ms    0.5 ms    15.4%
+T1        5.5 ms    2.4 ms     0.8%
+T2       11.8 ms    0.5 ms    14.4%
 </pre></div>
 </div>
 <p>Each row uses its own parameter’s colormap. The two absolute panels share a
@@ -782,7 +783,7 @@ enlarge.</p>
 <p>The number is not the noise alone. A regression trained on a prior answers
 with the prior where the data is weak, and is wrong the same way in every
 realization, so repeating the scan would never show that part.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 31.745 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 32.356 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-02-parameter-inference-04-perk-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/firmlab-pisa/torchsim/gh-pages?urlpath=lab/tree/latest/examples/generated/autoexamples/02-parameter-inference/04-perk.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo1.svg" style="width: 150px;" />
