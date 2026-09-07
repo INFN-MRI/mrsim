@@ -13,16 +13,6 @@ developer_guide
 ```{toctree}
 :hidden:
 :maxdepth: 2
-:caption: Explanation
-
-explanations/epg
-explanations/description
-explanations/implementation
-```
-
-```{toctree}
-:hidden:
-:maxdepth: 2
 :caption: Examples
 
 generated/autoexamples/index

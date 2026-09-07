@@ -975,16 +975,13 @@ def test_the_subspace_verdict_refuses_a_per_voxel_pair():
 def test_a_pair_survives_a_train_the_real_kernel_would_have_taken(monkeypatch):
     """And the verdict is reached rather than skipped.
 
-    ``detection`` is what decides whether the subspace is even tested for, and
-    it is measured per machine -- so a test that hopes to clear it by carrying
-    enough voxels is testing the machine. Forcing it to zero asks the question
-    directly.
+    ``detection`` is what decides whether the subspace is even tested for, so a
+    test that hopes to clear it by carrying enough voxels is testing the
+    threshold. Forcing it to zero asks the question directly.
     """
     from torchsim.sequence import _accelerators
 
-    monkeypatch.setattr(
-        _accelerators, "detection", lambda kind, device, state_count: 0.0
-    )
+    monkeypatch.setattr(_accelerators, "detection", lambda kind, device: 0.0)
     prepared, events, pairs, output_count = _real_subspace_train()
     settled = _accelerators._run_packed(
         prepared, events, 16, output_count, 1, dynamic=pairs

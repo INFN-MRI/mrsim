@@ -4,6 +4,83 @@
 
 ### Changed
 
+- **Both adjoint kernels compile one sweep at a time.** A reverse pass records
+  a trajectory through the events and then walks it back, and the walk back is
+  where the kernel's mass is: in the forward-over-reverse kernel at three
+  pools, 7670 of its 10 493 MLIR operations against 2477 for the record loop.
+  Compile cost is quadratic in that count -- fitted across the four pool models
+  the exponent is 1.9 -- so the two sweeps compiled together cost half as much
+  again as compiling each apart. `recording` is a `tl.constexpr` now and each
+  launcher makes two launches of the one kernel, each compiling the sweep it
+  was asked for. Nothing else had to move: the trajectory already round-trips
+  through global memory between the sweeps.
+
+  Cold compile at three pools falls from 166 s to 124 s for the
+  forward-over-reverse kernel and from 22.2 s to 17.8 s for the first-order
+  one; with a chemically exchanging pool, from 83 s to 66 s and from 13.4 s to
+  10.9 s. Throughput is unchanged over 4096 atoms, twenty echoes and sixteen
+  orders, best of nine each side: 25.5 ms against 23.2-29.1 ms
+  forward-over-reverse at three pools, and 7.1 ms against 7.5-7.9 ms
+  first-order.
+
+- **The dispatcher's two thresholds are numbers, not measurements.** Whether a
+  problem is big enough to repay a device launch, and whether it is big enough
+  for testing the states for a real subspace to repay the kernel that test
+  selects, were both measured on first use: each probe ran the pass at a
+  spread of sizes, fitted `seconds = fixed + rate x work` through the points,
+  and read the threshold off where two such lines cross.
+
+  The first of those thresholds falls at between two and twenty-five voxels of
+  an echo train on this card, so every problem anyone simulates is three orders
+  of magnitude past it and the measurement decides nothing -- and near the line
+  the two choices cost the same by definition, which is where being wrong is
+  cheapest. The second falls higher and is worth having, but not worth
+  measuring: the probe for one pass could not see a saving at all and fell back.
+
+  Both are table lookups now, `sequence/_calibration.py` is a table, and
+  `_calibrate.py` -- the same idea for the estimators and the model-based
+  operator -- is gone, along with the four closures those built for it to time.
+  `torchsim._execution.choose` and `per_voxel` take the crossover as a number
+  rather than a callable to answer later. Placement is unchanged and stays the
+  caller's: with no `execution()` block a call runs wherever its tensors are, a
+  named device is an instruction, and whether a volume is resident or streamed
+  is still decided from the free memory on the card.
+
+  A first forward pass compiles two kernels rather than six, and a first
+  Jacobian three rather than eleven: the probes ran both the complex and the
+  real-subspace kernel of every pass they timed, so a run compiled the kernels
+  it would not use in order to choose between them. A first `backward()` over
+  four thousand atoms and two hundred repetitions falls from 33.5 s to 8.0 s on
+  a cold Triton cache and from 24.1 s to 2.9 s on a warm one. Throughput is
+  what it was -- ten thousand atoms over a five-hundred repetition train, best
+  of twenty-seven: 7.75 ms against 8.02 ms forward, 41.7 ms against 41.3 ms for
+  the Jacobian.
+
+  `calibrate` and `TORCHSIM_CALIBRATION` are gone with the probes.
+
+- **How many orders a run keeps is a number, not a compilation.** The Triton
+  kernels read `state_count` as a mask bound and as the stride between the
+  planes of a recorded trajectory, never as a shape: the tile they work in is
+  `block_states`, the power of two above it. Every width inside one
+  power-of-two band therefore compiled a kernel of its own that differed from
+  its neighbours in one comparison and one multiplier. It is now an ordinary
+  argument -- `do_not_specialize`, like the table counts beside it -- and so is
+  `locations`, the number of positions a profiled pulse is sampled at along the
+  slice, which the kernels use for a modulo and one address multiplier.
+
+  A dictionary swept at 20, 24 and 32 orders compiles once rather than three
+  times. Over those widths on an RTX 4060 the cold compile of the forward path
+  goes from 14.0 s to 8.6 s and of the Jacobian from 31.7 s to 14.3 s, and the
+  cache entries the sweep writes fall from 16 to 7 and from 31 to 12.
+  Throughput is what it was: ten thousand atoms over a five-hundred repetition
+  train, best of twenty-seven, 8.02 ms against 7.73 ms forward and 41.26 ms
+  against 40.84 ms for the Jacobian at 32 orders, and neither is worse at 20.
+
+  `atom_stride` stays a `tl.constexpr`. It is zero exactly when every optional
+  property is one number for the whole tissue, and the zero is what turns those
+  reads into one address every voxel shares; it takes two values, so it is one
+  further compilation and no more.
+
 - **`Simulator` is the only base class.** `SignalModel` is gone as a public
   name. Everything it declared -- `properties`, `evaluate`, and the forward
   and reverse derivative modes over them -- `Simulator` already carried, and

@@ -9,8 +9,7 @@ from typing import Any
 
 import torch
 
-from .._calibrate import crossover
-from .._execution import per_voxel
+from .._execution import PER_VOXEL_CROSSOVER, per_voxel
 from ._grouped import Grouping, correlate, match_in_groups
 from ._mapping import Estimator
 
@@ -251,32 +250,10 @@ class DictionaryMatcher(Estimator):
             [signals],
             bytes_per_voxel=contrasts * 8 + self.dictionary_chunk_size * 4,
             work=int(signals.shape[0]) * atoms * contrasts,
-            crossover=lambda device: crossover(
-                (atoms, contrasts, self.top_k),
-                device,
-                self._probe(contrasts),
-                atoms * contrasts,
-            ),
+            crossover=PER_VOXEL_CROSSOVER,
             body=lambda chunk, device: self._beside(device)._match_here(chunk[0]),
         )
         return outcome
-
-    def _probe(self, contrasts: int) -> Any:
-        """A closure the calibrator can time, running the real match."""
-
-        def build(device: torch.device, voxels: int) -> Any:
-            generator = torch.Generator(device=device).manual_seed(0)
-            signals = torch.randn(
-                voxels,
-                contrasts,
-                dtype=torch.float32,
-                generator=generator,
-                device=device,
-            ).to(self.dictionary.dtype)
-            replica = self._beside(device)
-            return lambda: replica._match_here(signals)
-
-        return build
 
     def _beside(self, device: torch.device) -> DictionaryMatcher:
         """This matcher with its dictionary on ``device``."""

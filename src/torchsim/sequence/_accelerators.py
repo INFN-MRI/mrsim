@@ -2013,7 +2013,6 @@ def _auto_real_axis(
     kind: str,
     events: tuple[torch.Tensor, ...],
     tissue: tuple[torch.Tensor, ...],
-    state_count: int,
     tangents: tuple[torch.Tensor, ...] = (),
     profile: Any = None,
     dynamic: Any = None,
@@ -2022,8 +2021,8 @@ def _auto_real_axis(
     """The subspace verdict, when deciding it costs less than it saves.
 
     Deciding scans the phase buffer, so it is cheap next to a kernel over many
-    atoms and states but not next to a small one, and where that line falls
-    depends on the machine -- ``detection`` measures it.
+    atoms and states but not next to a small one; ``detection`` is where that
+    line falls.
 
     ``tangents`` are the forward-mode directions, if any. A seed along
     off-resonance, transmit phase or RF phase leaves the subspace however real
@@ -2031,7 +2030,7 @@ def _auto_real_axis(
     their presence rules the fast path out.
     """
     work = int(tissue[0].numel()) * _train_count(events) * int(events[1].numel())
-    if work < detection(kind, tissue[0].device, state_count):
+    if work < detection(kind, tissue[0].device):
         return None
     if tangents:
         seeded = torch.stack([(direction != 0).any() for direction in tangents]).any()
@@ -2043,7 +2042,6 @@ def _auto_real_axis(
 def _auto_real_axis_adjoint(
     events: tuple[torch.Tensor, ...],
     tissue: tuple[torch.Tensor, ...],
-    state_count: int,
     tangents: tuple[torch.Tensor, ...],
     wanted: tuple[bool, ...] | None,
     profile: Any = None,
@@ -2066,7 +2064,6 @@ def _auto_real_axis_adjoint(
         "adjoint",
         events,
         tissue,
-        state_count,
         tuple(tangents[index] for index in _OUTSIDE_THE_SUBSPACE) if tangents else (),
         profile=profile,
         dynamic=dynamic,
@@ -2545,7 +2542,7 @@ def _choose(
             real_axis,
             _shim_count(tissue),
         ),
-        crossover=lambda device: crossover(kind, device, state_count),
+        crossover=crossover(kind),
     )
 
 
@@ -3134,7 +3131,6 @@ def _run_packed(
             "forward",
             events,
             tissue,
-            state_count,
             profile=profile,
             dynamic=dynamic,
             features=features,
@@ -3313,7 +3309,7 @@ def _run_packed_vjp(
     """
     profile = _tables(profile, events, dynamic)
     real_axis = _auto_real_axis_adjoint(
-        events, tissue, state_count, (), wanted, profile, dynamic, features
+        events, tissue, (), wanted, profile, dynamic, features
     )
     # Neither second pool is inside a real subspace the reduced kernels stand
     # for; see the forward path for why.
@@ -3556,7 +3552,7 @@ def _run_packed_vjp_jvp(
     profile = _tables(profile, events, dynamic)
     if real_axis is None:
         real_axis = _auto_real_axis_adjoint(
-            events, tissue, state_count, tangents, wanted, profile, dynamic, features
+            events, tissue, tangents, wanted, profile, dynamic, features
         )
     # Neither second pool is inside a real subspace the reduced kernels stand
     # for; see the forward path for why.
@@ -3765,7 +3761,6 @@ def _run_packed_jvp(
             "jvp",
             events,
             tissue,
-            state_count,
             (tissue_tangents[4], tissue_tangents[5], event_tangents[2]),
             profile=profile,
             dynamic=dynamic,

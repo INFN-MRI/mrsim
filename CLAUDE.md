@@ -80,6 +80,13 @@ which costs line attribution under `ncu`. Set `TRITON_CACHE_DIR` to somewhere
 you keep and the compile is paid once per edit of the kernel file rather than
 once per checkout.
 
+Neither knob stops the `.source` file, which carries a location per operation
+and is most of an entry on a kernel this size; nothing reads it at launch.
+Nothing evicts either, and the cache keys on the text of the kernel file, so
+every edit orphans every entry made before it.
+`scripts/prune_triton_cache.py` reports both and, with `--apply`, drops them:
+the IR is free to drop, the stale entries recompile if you ask for them again.
+
 **The `interpreted` marker is deselected by default.** Those tests run a Triton
 kernel through Triton's CPU interpreter — no GPU, no compile, about a minute
 each. `TRITON_INTERPRET=1` does the same thing by hand for a script. It is how

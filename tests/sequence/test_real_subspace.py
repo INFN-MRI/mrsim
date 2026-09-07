@@ -460,7 +460,7 @@ def _trains_worth(share, echoes=20, atoms=64):
 
     events, _tissue, _count = _tissue_events(1, echoes=echoes, atoms=atoms)
     per_train = atoms * int(events[1].numel())
-    floor = detection("forward", torch.device("cpu"), 10)
+    floor = detection("forward", torch.device("cpu"))
     return max(1, int(floor * share / per_train))
 
 
@@ -469,7 +469,7 @@ def test_the_fast_path_is_chosen_without_being_asked():
     from torchsim.sequence._accelerators import _auto_real_axis, _run_packed
 
     events, tissue, count = _tissue_events(_trains_worth(8))
-    assert _auto_real_axis("forward", events, tissue, 10) == 1
+    assert _auto_real_axis("forward", events, tissue) == 1
     automatic = _run_packed(tissue, events, 10, count, 1)
     complex_path = _run_packed(tissue, events, 10, count, 1, real_axis=-1)
     scale = complex_path.abs().max()
@@ -480,7 +480,7 @@ def test_off_resonance_is_not_chosen():
     from torchsim.sequence._accelerators import _auto_real_axis
 
     events, tissue, _ = _tissue_events(_trains_worth(8), b0_hz=15.0)
-    assert _auto_real_axis("forward", events, tissue, 10) is None
+    assert _auto_real_axis("forward", events, tissue) is None
 
 
 def test_a_tiny_problem_skips_the_test_that_would_cost_more_than_it_saves(monkeypatch):
@@ -498,9 +498,9 @@ def test_a_tiny_problem_skips_the_test_that_would_cost_more_than_it_saves(monkey
     events, tissue, _ = _tissue_events(1, atoms=2)
     work = 2 * int(events[1].numel())
     monkeypatch.setattr(_accelerators, "detection", lambda *_: 8.0 * work)
-    assert _auto_real_axis("forward", events, tissue, 10) is None
+    assert _auto_real_axis("forward", events, tissue) is None
     monkeypatch.setattr(_accelerators, "detection", lambda *_: work / 8.0)
-    assert _auto_real_axis("forward", events, tissue, 10) == 1
+    assert _auto_real_axis("forward", events, tissue) == 1
 
 
 @pytest.mark.parametrize("direction", [4, 5])
@@ -520,8 +520,7 @@ def test_a_seed_that_leaves_the_subspace_is_not_chosen(direction):
     )
     phase_seed = torch.zeros_like(events[3])
     assert (
-        _auto_real_axis("jvp", events, tissue, 10, (seed[4], seed[5], phase_seed))
-        is None
+        _auto_real_axis("jvp", events, tissue, (seed[4], seed[5], phase_seed)) is None
     )
 
 
@@ -532,7 +531,7 @@ def test_an_rf_phase_seed_is_not_chosen():
     zeros = tuple(torch.zeros_like(value) for value in tissue)
     assert (
         _auto_real_axis(
-            "jvp", events, tissue, 10, (zeros[4], zeros[5], torch.ones_like(events[3]))
+            "jvp", events, tissue, (zeros[4], zeros[5], torch.ones_like(events[3]))
         )
         is None
     )
@@ -589,7 +588,7 @@ def test_the_adjoint_verdict_follows_what_the_caller_will_read(wanted, expected)
 
     events, tissue, tangents, _cotangent, _count = _adjoint_case(_trains_worth(8))
 
-    assert _auto_real_axis_adjoint(events, tissue, 10, tangents, wanted) == expected
+    assert _auto_real_axis_adjoint(events, tissue, tangents, wanted) == expected
 
 
 @pytest.mark.parametrize(
@@ -606,7 +605,7 @@ def test_wanting_a_gradient_outside_the_subspace_keeps_the_complex_kernel(positi
     events, tissue, tangents, cotangent, count = _adjoint_case(_trains_worth(8))
     wanted = _only(_FLIP, position)
 
-    assert _auto_real_axis_adjoint(events, tissue, 10, tangents, wanted) is None
+    assert _auto_real_axis_adjoint(events, tissue, tangents, wanted) is None
 
     gradients, _ = _run_packed_vjp_jvp(
         tissue,
@@ -1009,7 +1008,7 @@ def test_partial_atom_blocks_of_the_adjoint_match_the_complex_kernel(atoms):
     trains = _trains_worth(8, atoms=atoms)
     events, tissue, count = _tissue_events(trains, atoms=atoms)
     wanted = tuple(index in INSIDE_THE_SUBSPACE for index in range(len(FLOAT_NAMES)))
-    assert _auto_real_axis_adjoint(events, tissue, 10, (), wanted) == 1
+    assert _auto_real_axis_adjoint(events, tissue, (), wanted) == 1
 
     torch.manual_seed(0)
     seed = torch.randn(

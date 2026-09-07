@@ -10,8 +10,7 @@ from typing import Any, Literal
 
 import torch
 
-from .._calibrate import crossover
-from .._execution import one_device, per_voxel
+from .._execution import PER_VOXEL_CROSSOVER, one_device, per_voxel
 from ._mapping import Estimator
 
 
@@ -369,27 +368,11 @@ class PERK(Estimator):
                 [inputs],
                 bytes_per_voxel=(contrasts + parameters) * 4,
                 work=int(inputs.shape[0]) * contrasts * self.n_features,
-                crossover=lambda device: crossover(
-                    (contrasts, self.n_features, parameters),
-                    device,
-                    self._probe(contrasts, parameters),
-                    contrasts * self.n_features,
-                ),
+                crossover=PER_VOXEL_CROSSOVER,
                 body=lambda chunk, device: (
                     self._regress(chunk[0], self._fitted_on(device)),
                 ),
             )
-
-    def _probe(self, contrasts: int, parameters: int) -> Any:
-        """A closure the calibrator can time, running the real regression."""
-
-        def build(device: torch.device, voxels: int) -> Any:
-            generator = torch.Generator(device=device).manual_seed(0)
-            signals = torch.randn(voxels, contrasts, generator=generator, device=device)
-            held = self._fitted_on(device)
-            return lambda: self._regress(signals, held)
-
-        return build
 
     def _fitted_on(self, device: torch.device) -> tuple[torch.Tensor, ...]:
         """The fitted tensors on ``device``.
@@ -655,32 +638,8 @@ class PERK(Estimator):
             work=sample_count * contrasts * self.n_features,
             voxels=sample_count,
             bytes_per_voxel=(contrasts + self.n_features) * 4,
-            crossover=lambda device: crossover(
-                (contrasts, self.n_features, "fit"),
-                device,
-                self._fit_probe(contrasts),
-                contrasts * self.n_features,
-            ),
+            crossover=PER_VOXEL_CROSSOVER,
         )
-
-    def _fit_probe(self, contrasts: int) -> Any:
-        """A closure the calibrator can time, accumulating one covariance."""
-
-        def build(device: torch.device, voxels: int) -> Any:
-            generator = torch.Generator(device=device).manual_seed(0)
-            inputs = torch.randn(voxels, contrasts, generator=generator, device=device)
-            frequency = torch.randn(
-                self.n_features, contrasts, generator=generator, device=device
-            )
-            phase = torch.zeros(self.n_features, device=device)
-
-            def once() -> torch.Tensor:
-                features = _rff(inputs, frequency, phase).to(torch.float64)
-                return features.mT @ features
-
-            return once
-
-        return build
 
     def _random_features(
         self, length_scale: torch.Tensor

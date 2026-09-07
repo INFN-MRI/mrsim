@@ -112,7 +112,7 @@ def _shift(
     fminus_imag,
     state,
     state_mask,
-    state_count: tl.constexpr,
+    state_count,
 ):
     keep_up = (state > 0) & state_mask
     keep_down = (state + 1 < state_count) & state_mask
@@ -131,7 +131,7 @@ def _shift_real(
     minus,
     state,
     state_mask,
-    state_count: tl.constexpr,
+    state_count,
 ):
     shifted_plus = tl.where((state > 0) & state_mask, _up(plus, state), 0.0)
     shifted_minus = tl.where(
@@ -4534,7 +4534,7 @@ def _shift_adjoint(
     minus_bar_imag,
     state,
     state_mask,
-    state_count: tl.constexpr,
+    state_count,
 ):
     """Transpose of ``_shift``.
 
@@ -4560,7 +4560,7 @@ def _shift_real_adjoint(
     minus_bar,
     state,
     state_mask,
-    state_count: tl.constexpr,
+    state_count,
 ):
     """Transpose of ``_shift_real``.
 
@@ -4577,7 +4577,7 @@ def _shift_real_adjoint(
 
 
 @triton.jit
-def _table_row(profile_index, event, location, locations: tl.constexpr):
+def _table_row(profile_index, event, location, locations):
     """Which row of the stacked tables this pulse reads.
 
     Its own shape's block of ``locations`` rows, then the voxel's place along
@@ -5656,7 +5656,9 @@ def _rotation_coefficients(a, b, c, d, p1r, p1i, p2r, p2i, pcr, pci):
     return t00, t01, t02, t12, t20, t21, t22
 
 
-@triton.jit(do_not_specialize=["profile_bins", "lineshape_bins"])
+@triton.jit(
+    do_not_specialize=["state_count", "locations", "profile_bins", "lineshape_bins"]
+)
 def _epg_vjp_kernel(
     t1,
     t2,
@@ -5714,11 +5716,11 @@ def _epg_vjp_kernel(
     shim_rows,
     profile_step,
     lineshape_step,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shimmed: tl.constexpr,
-    locations: tl.constexpr,
+    locations,
     profiled: tl.constexpr,
     profile_bins,
     dynamic: tl.constexpr,
@@ -5733,6 +5735,7 @@ def _epg_vjp_kernel(
     transmit: tl.constexpr,
     density: tl.constexpr,
     inverting: tl.constexpr,
+    recording: tl.constexpr,
     block_states: tl.constexpr,
     problems: tl.constexpr,
 ):
@@ -5864,443 +5867,458 @@ def _epg_vjp_kernel(
         zvr = empty + tl.where(state == 0, atom_free, 0.0)
         poolvr = empty + tl.where(state == 0, atom_bound + 0.0, 0.0)
     event_base = train * event_count
-    for event in range(0, event_count):
-        slot = trajectory + event * record_stride
-        tl.store(trajectory_r + slot, pvr, mask=state_mask)
-        tl.store(trajectory_i + slot, pvi, mask=state_mask)
-        tl.store(trajectory_r + slot + minus_plane, mvr, mask=state_mask)
-        tl.store(trajectory_i + slot + minus_plane, mvi, mask=state_mask)
-        tl.store(trajectory_r + slot + long_plane, zvr, mask=state_mask)
-        tl.store(trajectory_i + slot + long_plane, zvi, mask=state_mask)
-        if pools > 0:
-            tl.store(trajectory_r + slot + bound_plane, poolvr, mask=state_mask)
-            tl.store(trajectory_i + slot + bound_plane, poolvi, mask=state_mask)
-        if pools == 2 or pools == 3:
-            tl.store(trajectory_r + slot + bplus_plane, bpvr, mask=state_mask)
-            tl.store(trajectory_i + slot + bplus_plane, bpvi, mask=state_mask)
-            tl.store(trajectory_r + slot + bminus_plane, bmvr, mask=state_mask)
-            tl.store(trajectory_i + slot + bminus_plane, bmvi, mask=state_mask)
-        if pools == 3:
-            tl.store(trajectory_r + slot + semisolid_plane, semivr, mask=state_mask)
-            tl.store(trajectory_i + slot + semisolid_plane, semivi, mask=state_mask)
+    # The forward half records the trajectory the reverse half walks back,
+    # and the two are launched separately: each compiles the sweep it is
+    # asked for and no more.
+    if recording:
+        for event in range(0, event_count):
+            slot = trajectory + event * record_stride
+            tl.store(trajectory_r + slot, pvr, mask=state_mask)
+            tl.store(trajectory_i + slot, pvi, mask=state_mask)
+            tl.store(trajectory_r + slot + minus_plane, mvr, mask=state_mask)
+            tl.store(trajectory_i + slot + minus_plane, mvi, mask=state_mask)
+            tl.store(trajectory_r + slot + long_plane, zvr, mask=state_mask)
+            tl.store(trajectory_i + slot + long_plane, zvi, mask=state_mask)
+            if pools > 0:
+                tl.store(trajectory_r + slot + bound_plane, poolvr, mask=state_mask)
+                tl.store(trajectory_i + slot + bound_plane, poolvi, mask=state_mask)
+            if pools == 2 or pools == 3:
+                tl.store(trajectory_r + slot + bplus_plane, bpvr, mask=state_mask)
+                tl.store(trajectory_i + slot + bplus_plane, bpvi, mask=state_mask)
+                tl.store(trajectory_r + slot + bminus_plane, bmvr, mask=state_mask)
+                tl.store(trajectory_i + slot + bminus_plane, bmvi, mask=state_mask)
+            if pools == 3:
+                tl.store(trajectory_r + slot + semisolid_plane, semivr, mask=state_mask)
+                tl.store(trajectory_i + slot + semisolid_plane, semivi, mask=state_mask)
 
-        dt_value = _event_value(duration, event_base, event, active_atom, single_train)
-        wout_value = 1.0
-        if moving:
-            wout_value = _washout(atom_washout, dt_value)
-        e1_value = tl.exp(-r1_value * dt_value) * wout_value
-        e2_value = tl.exp(-r2_value * dt_value) * wout_value
-        damp_z = 1.0
-        damp_t = 1.0
-        if diffusing:
-            damp_z, damp_t = _damping(atom_damping, dt_value, order)
-        # Order zero is undamped, so recovery keeps the bare longitudinal factor.
-        recovery_value = 1.0 - e1_value
-        bare1_value = e1_value
-        bare2_value = e2_value
-        e1_value = bare1_value * damp_z
-        e2_value = bare2_value * damp_t
-        turn_t = 0.0
-        szr, szi = 1.0, 0.0
-        if moving:
-            turn_z, turn_t = _flow(atom_flow, dt_value, order)
-            szr, szi = tl.cos(turn_z), tl.sin(turn_z)
-        qr, qi = 1.0, 0.0
-        if off_axis or moving:
-            angle_value = -2.0 * 3.141592653589793 * (atom_b0 * dt_value) + turn_t
-            qr, qi = tl.cos(angle_value), tl.sin(angle_value)
-        ovr, ovi = e2_value * qr, e2_value * qi
-        lvr, lvi = e1_value * szr, e1_value * szi
-
-        if pools == 2 or pools == 3:
-            # With an exchanging pool the transverse relaxation sits inside the
-            # operator instead of in the scalar the free pool alone multiplies.
-            across = _two_pool_transverse_step_jvp(
-                r2_value,
-                0.0,
-                r2b_value,
-                0.0,
-                atom_exchange,
-                0.0,
-                atom_bound,
-                0.0,
-                atom_free,
-                0.0,
-                atom_shift,
-                0.0,
-                dt_value,
-                0.0,
-                wout_value,
-                0.0,
+            dt_value = _event_value(
+                duration, event_base, event, active_atom, single_train
             )
-            a11r, a11i = across[0], across[1]
-            a12r, a12i = across[2], across[3]
-            a21r, a21i = across[4], across[5]
-            a22r, a22i = across[6], across[7]
-            carr, cari = damp_t * qr, damp_t * qi
-            f11r, f11i = _complex_mul(a11r, a11i, pvr, pvi)
-            f12r, f12i = _complex_mul(a12r, a12i, bpvr, bpvi)
-            g21r, g21i = _complex_mul(a21r, a21i, pvr, pvi)
-            g22r, g22i = _complex_mul(a22r, a22i, bpvr, bpvi)
-            # ``F-`` takes the conjugate of the operator entry by entry, not its
-            # transpose: it is the conjugate state following the conjugate map.
-            h11r, h11i = _complex_mul(a11r, -a11i, mvr, mvi)
-            h12r, h12i = _complex_mul(a12r, -a12i, bmvr, bmvi)
-            k21r, k21i = _complex_mul(a21r, -a21i, mvr, mvi)
-            k22r, k22i = _complex_mul(a22r, -a22i, bmvr, bmvi)
-            pvr, pvi = _complex_mul(f11r + f12r, f11i + f12i, carr, cari)
-            bpvr, bpvi = _complex_mul(g21r + g22r, g21i + g22i, carr, cari)
-            mvr, mvi = _complex_mul(h11r + h12r, h11i + h12i, carr, -cari)
-            bmvr, bmvi = _complex_mul(k21r + k22r, k21i + k22i, carr, -cari)
-        else:
-            pvr, pvi = _complex_mul(ovr, ovi, pvr, pvi)
-            mvr, mvi = _complex_mul(ovr, -ovi, mvr, mvi)
-        if pools == 3:
-            # Three pools mix through a 3x3 formed once for the interval; each
-            # second pool exchanges with the free water and not with the other.
-            nil = 0.0 * dt_value
-            hold_value = wout_value + nil
-            if tabulated:
-                (
-                    w11,
-                    w12,
-                    w13,
-                    w21,
-                    w22,
-                    w23,
-                    w31,
-                    w32,
-                    w33,
-                    grow_free,
-                    grow_pool_b,
-                    grow_semisolid,
-                ) = _three_pool_from_table(
-                    pool_table,
-                    tl.load(
-                        duration_row + event_base + event,
-                        mask=active_atom,
-                        other=0,
-                    ),
-                    atom,
-                    atom_count,
-                    active_atom,
-                    hold_value,
-                    atom_free,
-                    atom_bound,
-                    atom_semisolid,
-                )
-            else:
-                (
-                    w11,
-                    w12,
-                    w13,
-                    w21,
-                    w22,
-                    w23,
-                    w31,
-                    w32,
-                    w33,
-                    grow_free,
-                    grow_pool_b,
-                    grow_semisolid,
-                    _dw11,
-                    _dw12,
-                    _dw13,
-                    _dw21,
-                    _dw22,
-                    _dw23,
-                    _dw31,
-                    _dw32,
-                    _dw33,
-                    _dgf,
-                    _dgb,
-                    _dgs,
-                ) = _three_pool_step_jvp(
-                    r1_value,
-                    nil,
-                    r1b_value,
-                    nil,
-                    r1c_value,
-                    nil,
+            wout_value = 1.0
+            if moving:
+                wout_value = _washout(atom_washout, dt_value)
+            e1_value = tl.exp(-r1_value * dt_value) * wout_value
+            e2_value = tl.exp(-r2_value * dt_value) * wout_value
+            damp_z = 1.0
+            damp_t = 1.0
+            if diffusing:
+                damp_z, damp_t = _damping(atom_damping, dt_value, order)
+            # Order zero is undamped, so recovery keeps the bare longitudinal factor.
+            recovery_value = 1.0 - e1_value
+            bare1_value = e1_value
+            bare2_value = e2_value
+            e1_value = bare1_value * damp_z
+            e2_value = bare2_value * damp_t
+            turn_t = 0.0
+            szr, szi = 1.0, 0.0
+            if moving:
+                turn_z, turn_t = _flow(atom_flow, dt_value, order)
+                szr, szi = tl.cos(turn_z), tl.sin(turn_z)
+            qr, qi = 1.0, 0.0
+            if off_axis or moving:
+                angle_value = -2.0 * 3.141592653589793 * (atom_b0 * dt_value) + turn_t
+                qr, qi = tl.cos(angle_value), tl.sin(angle_value)
+            ovr, ovi = e2_value * qr, e2_value * qi
+            lvr, lvi = e1_value * szr, e1_value * szi
+
+            if pools == 2 or pools == 3:
+                # With an exchanging pool the transverse relaxation sits inside the
+                # operator instead of in the scalar the free pool alone multiplies.
+                across = _two_pool_transverse_step_jvp(
+                    r2_value,
+                    0.0,
+                    r2b_value,
+                    0.0,
                     atom_exchange,
-                    nil,
-                    atom_semisolid_exchange,
-                    nil,
+                    0.0,
                     atom_bound,
-                    nil,
-                    atom_semisolid,
-                    nil,
+                    0.0,
+                    atom_free,
+                    0.0,
+                    atom_shift,
+                    0.0,
                     dt_value,
-                    nil,
-                    hold_value,
-                    nil,
-                    narrow,
+                    0.0,
+                    wout_value,
+                    0.0,
                 )
-            spin_r, spin_i = damp_z * szr, damp_z * szi
-            mix_fr = w11 * zvr + w12 * poolvr + w13 * semivr
-            mix_fi = w11 * zvi + w12 * poolvi + w13 * semivi
-            mix_br = w21 * zvr + w22 * poolvr + w23 * semivr
-            mix_bi = w21 * zvi + w22 * poolvi + w23 * semivi
-            mix_cr = w31 * zvr + w32 * poolvr + w33 * semivr
-            mix_ci = w31 * zvi + w32 * poolvi + w33 * semivi
-            zvr, zvi = _complex_mul(spin_r, spin_i, mix_fr, mix_fi)
-            poolvr, poolvi = _complex_mul(spin_r, spin_i, mix_br, mix_bi)
-            semivr, semivi = _complex_mul(spin_r, spin_i, mix_cr, mix_ci)
-            zvr += tl.where(state == 0, grow_free, 0.0)
-            poolvr += tl.where(state == 0, grow_pool_b, 0.0)
-            semivr += tl.where(state == 0, grow_semisolid, 0.0)
-        elif pools > 0:
-            # The pools exchange while they relax, so the longitudinal step is a
-            # 2x2 the interval forms once and the per-order damping and turn
-            # multiply. Read from the dual helper with no direction to follow:
-            # what only its tangents reach, the compiler drops.
-            (
-                pe11,
-                pe12,
-                pe21,
-                pe22,
-                prec_f,
-                prec_b,
-                _d11,
-                _d12,
-                _d21,
-                _d22,
-                _drf,
-                _drb,
-            ) = _two_pool_step_jvp(
-                r1_value,
-                0.0,
-                r1b_value,
-                0.0,
-                atom_exchange,
-                0.0,
-                atom_bound,
-                0.0,
-                dt_value,
-                0.0,
-                wout_value,
-                0.0,
-            )
-            spin_r, spin_i = damp_z * szr, damp_z * szi
-            mix_fr = pe11 * zvr + pe12 * poolvr
-            mix_fi = pe11 * zvi + pe12 * poolvi
-            mix_br = pe21 * zvr + pe22 * poolvr
-            mix_bi = pe21 * zvi + pe22 * poolvi
-            zvr, zvi = _complex_mul(spin_r, spin_i, mix_fr, mix_fi)
-            poolvr, poolvi = _complex_mul(spin_r, spin_i, mix_br, mix_bi)
-            zvr += tl.where(state == 0, prec_f, 0.0)
-            poolvr += tl.where(state == 0, prec_b, 0.0)
-        else:
-            zvr, zvi = _complex_mul(lvr, lvi, zvr, zvi)
-            zvr += tl.where(state == 0, recovery_value, 0.0)
-
-        event_action = tl.load(action + event).to(tl.int32)
-        pre_shift = (event_action & 1) != 0
-        svr, svi, wvr, wvi = _shift(pvr, pvi, mvr, mvi, state, state_mask, state_count)
-        pvr = tl.where(pre_shift, svr, pvr)
-        pvi = tl.where(pre_shift, svi, pvi)
-        mvr = tl.where(pre_shift, wvr, mvr)
-        mvi = tl.where(pre_shift, wvi, mvi)
-        if pools == 2 or pools == 3:
-            svr, svi, wvr, wvi = _shift(
-                bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
-            )
-            bpvr = tl.where(pre_shift, svr, bpvr)
-            bpvi = tl.where(pre_shift, svi, bpvi)
-            bmvr = tl.where(pre_shift, wvr, bmvr)
-            bmvi = tl.where(pre_shift, wvi, bmvi)
-
-        event_kind = tl.load(kind + event)
-        is_rf = event_kind == 1
-        is_inversion = (event_action & 4) != 0
-        invert = is_rf & is_inversion
-        zvr = tl.where(invert, -atom_inv * zvr, zvr)
-        zvi = tl.where(invert, -atom_inv * zvi, zvi)
-        if pools == 2 or pools == 3:
-            # A chemically exchanging pool is free water and inverts like any
-            # other; a semisolid one is saturated instead, by the pulse's own
-            # saturation term.
-            poolvr = tl.where(invert, -atom_inv * poolvr, poolvr)
-            poolvi = tl.where(invert, -atom_inv * poolvi, poolvi)
-
-        event_flip = _event_value(flip, event_base, event, active_atom, single_train)
-        event_phase = _event_value(phase, event_base, event, active_atom, single_train)
-        pulse_b1 = atom_b1
-        pulse_b1_phase = atom_b1_phase
-        # One shim is the whole sequence's transmit field, loaded once above;
-        # several give each pulse a row of its own.
-        if shimmed:
-            row = tl.load(shim_index + event).to(tl.int64) * atom_count
-            if transmit:
-                pulse_b1 = tl.load(b1 + row + atom, mask=active_atom, other=1.0)
-            if off_axis:
-                pulse_b1_phase = tl.load(
-                    b1_phase + row + atom, mask=active_atom, other=0.0
-                )
-        alpha_value = event_flip * pulse_b1
-        phi_value = event_phase + pulse_b1_phase
-        if pools == 1 or pools == 3:
-            # The pool absorbs the power the pulse deposits, read at the offset
-            # the pulse is played less the voxel's own.
-            offset_value = tl.load(rf_frequency + event) - atom_b0
-            shape_value, _shape_slope = _lineshape_at_slope(
-                lineshape, offset_value, lineshape_bins, lineshape_step
-            )
-            event_saturation = tl.load(saturation + event)
-            power_value = event_saturation * alpha_value * alpha_value
-            absorbed_value = tl.exp(power_value * shape_value)
-            saturating = is_rf & ~is_inversion
-            if pools == 1:
-                poolvr = tl.where(saturating, absorbed_value * poolvr, poolvr)
-                poolvi = tl.where(saturating, absorbed_value * poolvi, poolvi)
+                a11r, a11i = across[0], across[1]
+                a12r, a12i = across[2], across[3]
+                a21r, a21i = across[4], across[5]
+                a22r, a22i = across[6], across[7]
+                carr, cari = damp_t * qr, damp_t * qi
+                f11r, f11i = _complex_mul(a11r, a11i, pvr, pvi)
+                f12r, f12i = _complex_mul(a12r, a12i, bpvr, bpvi)
+                g21r, g21i = _complex_mul(a21r, a21i, pvr, pvi)
+                g22r, g22i = _complex_mul(a22r, a22i, bpvr, bpvi)
+                # ``F-`` takes the conjugate of the operator entry by entry, not its
+                # transpose: it is the conjugate state following the conjugate map.
+                h11r, h11i = _complex_mul(a11r, -a11i, mvr, mvi)
+                h12r, h12i = _complex_mul(a12r, -a12i, bmvr, bmvi)
+                k21r, k21i = _complex_mul(a21r, -a21i, mvr, mvi)
+                k22r, k22i = _complex_mul(a22r, -a22i, bmvr, bmvi)
+                pvr, pvi = _complex_mul(f11r + f12r, f11i + f12i, carr, cari)
+                bpvr, bpvi = _complex_mul(g21r + g22r, g21i + g22i, carr, cari)
+                mvr, mvi = _complex_mul(h11r + h12r, h11i + h12i, carr, -cari)
+                bmvr, bmvi = _complex_mul(k21r + k22r, k21i + k22i, carr, -cari)
             else:
-                semivr = tl.where(saturating, absorbed_value * semivr, semivr)
-                semivi = tl.where(saturating, absorbed_value * semivi, semivi)
-        cos_value = tl.cos(alpha_value)
-        sin_value = tl.sin(alpha_value)
-        p1r, p1i = tl.cos(phi_value), tl.sin(phi_value)
-        p2r, p2i = _complex_mul(p1r, p1i, p1r, p1i)
-        t00, t01, t02, t12, t20, t21, t22 = _rotation_coefficients(
-            0.5 * (1.0 + cos_value),
-            0.5 * (1.0 - cos_value),
-            sin_value,
-            cos_value,
-            p1r,
-            p1i,
-            p2r,
-            p2i,
-            p1r,
-            -p1i,
-        )
-        a0 = _complex_mul(t00[0], t00[1], pvr, pvi)
-        a1 = _complex_mul(t01[0], t01[1], mvr, mvi)
-        a2 = _complex_mul(t02[0], t02[1], zvr, zvi)
-        b0_ = _complex_mul(t01[0], -t01[1], pvr, pvi)
-        b1_ = _complex_mul(t00[0], t00[1], mvr, mvi)
-        b2 = _complex_mul(t12[0], t12[1], zvr, zvi)
-        c0 = _complex_mul(t20[0], t20[1], pvr, pvi)
-        c1 = _complex_mul(t21[0], t21[1], mvr, mvi)
-        c2 = _complex_mul(t22[0], t22[1], zvr, zvi)
-
-        turned_pr = a0[0] + a1[0] + a2[0]
-        turned_pi = a0[1] + a1[1] + a2[1]
-        turned_mr = b0_[0] + b1_[0] + b2[0]
-        turned_mi = b0_[1] + b1_[1] + b2[1]
-        turned_zr = c0[0] + c1[0] + c2[0]
-        turned_zi = c0[1] + c1[1] + c2[1]
-        if profiled or dynamic:
-            if dynamic:
-                pair = _dynamic_pair_at(
-                    pairs,
-                    pair_index,
-                    event_base,
-                    event,
-                    atom,
-                    atom_count,
-                    active_atom,
-                )
-                shaped_ar, shaped_ai = pair[0], pair[1]
-                # The pair is integrated at zero RF phase, so the event's own
-                # phase turns the axis afterwards.
-                shaped_br, shaped_bi = _complex_mul(pair[2], pair[3], p1r, -p1i)
-            else:
-                shaped_ar, shaped_ai, shaped_br, shaped_bi = _profile_pair(
-                    profile,
-                    _table_row(profile_index, event, location, locations),
-                    alpha_value,
-                    profile_bins,
-                    profile_step,
-                )
-                shaped_br, shaped_bi = _complex_mul(shaped_br, shaped_bi, p1r, -p1i)
-            (
-                turned_pr,
-                turned_pi,
-                turned_mr,
-                turned_mi,
-                turned_zr,
-                turned_zi,
-            ) = _rotate_spinor(
-                shaped_ar,
-                shaped_ai,
-                shaped_br,
-                shaped_bi,
-                pvr,
-                pvi,
-                mvr,
-                mvi,
-                zvr,
-                zvi,
-            )
-
-        rotate = is_rf & ~is_inversion
-        if pools == 2 or pools == 3:
-            # The same pulse, the same rotation. A chemical shift moves where a
-            # pool precesses, not what a pulse does to it.
-            e0 = _complex_mul(t00[0], t00[1], bpvr, bpvi)
-            e1_ = _complex_mul(t01[0], t01[1], bmvr, bmvi)
-            e2_ = _complex_mul(t02[0], t02[1], poolvr, poolvi)
-            f0 = _complex_mul(t01[0], -t01[1], bpvr, bpvi)
-            f1 = _complex_mul(t00[0], t00[1], bmvr, bmvi)
-            f2 = _complex_mul(t12[0], t12[1], poolvr, poolvi)
-            h0 = _complex_mul(t20[0], t20[1], bpvr, bpvi)
-            h1 = _complex_mul(t21[0], t21[1], bmvr, bmvi)
-            h2 = _complex_mul(t22[0], t22[1], poolvr, poolvi)
-            spun_pr, spun_pi = e0[0] + e1_[0] + e2_[0], e0[1] + e1_[1] + e2_[1]
-            spun_mr, spun_mi = f0[0] + f1[0] + f2[0], f0[1] + f1[1] + f2[1]
-            spun_zr, spun_zi = h0[0] + h1[0] + h2[0], h0[1] + h1[1] + h2[1]
-            if profiled or dynamic:
+                pvr, pvi = _complex_mul(ovr, ovi, pvr, pvi)
+                mvr, mvi = _complex_mul(ovr, -ovi, mvr, mvi)
+            if pools == 3:
+                # Three pools mix through a 3x3 formed once for the interval; each
+                # second pool exchanges with the free water and not with the other.
+                nil = 0.0 * dt_value
+                hold_value = wout_value + nil
+                if tabulated:
+                    (
+                        w11,
+                        w12,
+                        w13,
+                        w21,
+                        w22,
+                        w23,
+                        w31,
+                        w32,
+                        w33,
+                        grow_free,
+                        grow_pool_b,
+                        grow_semisolid,
+                    ) = _three_pool_from_table(
+                        pool_table,
+                        tl.load(
+                            duration_row + event_base + event,
+                            mask=active_atom,
+                            other=0,
+                        ),
+                        atom,
+                        atom_count,
+                        active_atom,
+                        hold_value,
+                        atom_free,
+                        atom_bound,
+                        atom_semisolid,
+                    )
+                else:
+                    (
+                        w11,
+                        w12,
+                        w13,
+                        w21,
+                        w22,
+                        w23,
+                        w31,
+                        w32,
+                        w33,
+                        grow_free,
+                        grow_pool_b,
+                        grow_semisolid,
+                        _dw11,
+                        _dw12,
+                        _dw13,
+                        _dw21,
+                        _dw22,
+                        _dw23,
+                        _dw31,
+                        _dw32,
+                        _dw33,
+                        _dgf,
+                        _dgb,
+                        _dgs,
+                    ) = _three_pool_step_jvp(
+                        r1_value,
+                        nil,
+                        r1b_value,
+                        nil,
+                        r1c_value,
+                        nil,
+                        atom_exchange,
+                        nil,
+                        atom_semisolid_exchange,
+                        nil,
+                        atom_bound,
+                        nil,
+                        atom_semisolid,
+                        nil,
+                        dt_value,
+                        nil,
+                        hold_value,
+                        nil,
+                        narrow,
+                    )
+                spin_r, spin_i = damp_z * szr, damp_z * szi
+                mix_fr = w11 * zvr + w12 * poolvr + w13 * semivr
+                mix_fi = w11 * zvi + w12 * poolvi + w13 * semivi
+                mix_br = w21 * zvr + w22 * poolvr + w23 * semivr
+                mix_bi = w21 * zvi + w22 * poolvi + w23 * semivi
+                mix_cr = w31 * zvr + w32 * poolvr + w33 * semivr
+                mix_ci = w31 * zvi + w32 * poolvi + w33 * semivi
+                zvr, zvi = _complex_mul(spin_r, spin_i, mix_fr, mix_fi)
+                poolvr, poolvi = _complex_mul(spin_r, spin_i, mix_br, mix_bi)
+                semivr, semivi = _complex_mul(spin_r, spin_i, mix_cr, mix_ci)
+                zvr += tl.where(state == 0, grow_free, 0.0)
+                poolvr += tl.where(state == 0, grow_pool_b, 0.0)
+                semivr += tl.where(state == 0, grow_semisolid, 0.0)
+            elif pools > 0:
+                # The pools exchange while they relax, so the longitudinal step is a
+                # 2x2 the interval forms once and the per-order damping and turn
+                # multiply. Read from the dual helper with no direction to follow:
+                # what only its tangents reach, the compiler drops.
                 (
-                    spun_pr,
-                    spun_pi,
-                    spun_mr,
-                    spun_mi,
-                    spun_zr,
-                    spun_zi,
+                    pe11,
+                    pe12,
+                    pe21,
+                    pe22,
+                    prec_f,
+                    prec_b,
+                    _d11,
+                    _d12,
+                    _d21,
+                    _d22,
+                    _drf,
+                    _drb,
+                ) = _two_pool_step_jvp(
+                    r1_value,
+                    0.0,
+                    r1b_value,
+                    0.0,
+                    atom_exchange,
+                    0.0,
+                    atom_bound,
+                    0.0,
+                    dt_value,
+                    0.0,
+                    wout_value,
+                    0.0,
+                )
+                spin_r, spin_i = damp_z * szr, damp_z * szi
+                mix_fr = pe11 * zvr + pe12 * poolvr
+                mix_fi = pe11 * zvi + pe12 * poolvi
+                mix_br = pe21 * zvr + pe22 * poolvr
+                mix_bi = pe21 * zvi + pe22 * poolvi
+                zvr, zvi = _complex_mul(spin_r, spin_i, mix_fr, mix_fi)
+                poolvr, poolvi = _complex_mul(spin_r, spin_i, mix_br, mix_bi)
+                zvr += tl.where(state == 0, prec_f, 0.0)
+                poolvr += tl.where(state == 0, prec_b, 0.0)
+            else:
+                zvr, zvi = _complex_mul(lvr, lvi, zvr, zvi)
+                zvr += tl.where(state == 0, recovery_value, 0.0)
+
+            event_action = tl.load(action + event).to(tl.int32)
+            pre_shift = (event_action & 1) != 0
+            svr, svi, wvr, wvi = _shift(
+                pvr, pvi, mvr, mvi, state, state_mask, state_count
+            )
+            pvr = tl.where(pre_shift, svr, pvr)
+            pvi = tl.where(pre_shift, svi, pvi)
+            mvr = tl.where(pre_shift, wvr, mvr)
+            mvi = tl.where(pre_shift, wvi, mvi)
+            if pools == 2 or pools == 3:
+                svr, svi, wvr, wvi = _shift(
+                    bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
+                )
+                bpvr = tl.where(pre_shift, svr, bpvr)
+                bpvi = tl.where(pre_shift, svi, bpvi)
+                bmvr = tl.where(pre_shift, wvr, bmvr)
+                bmvi = tl.where(pre_shift, wvi, bmvi)
+
+            event_kind = tl.load(kind + event)
+            is_rf = event_kind == 1
+            is_inversion = (event_action & 4) != 0
+            invert = is_rf & is_inversion
+            zvr = tl.where(invert, -atom_inv * zvr, zvr)
+            zvi = tl.where(invert, -atom_inv * zvi, zvi)
+            if pools == 2 or pools == 3:
+                # A chemically exchanging pool is free water and inverts like any
+                # other; a semisolid one is saturated instead, by the pulse's own
+                # saturation term.
+                poolvr = tl.where(invert, -atom_inv * poolvr, poolvr)
+                poolvi = tl.where(invert, -atom_inv * poolvi, poolvi)
+
+            event_flip = _event_value(
+                flip, event_base, event, active_atom, single_train
+            )
+            event_phase = _event_value(
+                phase, event_base, event, active_atom, single_train
+            )
+            pulse_b1 = atom_b1
+            pulse_b1_phase = atom_b1_phase
+            # One shim is the whole sequence's transmit field, loaded once above;
+            # several give each pulse a row of its own.
+            if shimmed:
+                row = tl.load(shim_index + event).to(tl.int64) * atom_count
+                if transmit:
+                    pulse_b1 = tl.load(b1 + row + atom, mask=active_atom, other=1.0)
+                if off_axis:
+                    pulse_b1_phase = tl.load(
+                        b1_phase + row + atom, mask=active_atom, other=0.0
+                    )
+            alpha_value = event_flip * pulse_b1
+            phi_value = event_phase + pulse_b1_phase
+            if pools == 1 or pools == 3:
+                # The pool absorbs the power the pulse deposits, read at the offset
+                # the pulse is played less the voxel's own.
+                offset_value = tl.load(rf_frequency + event) - atom_b0
+                shape_value, _shape_slope = _lineshape_at_slope(
+                    lineshape, offset_value, lineshape_bins, lineshape_step
+                )
+                event_saturation = tl.load(saturation + event)
+                power_value = event_saturation * alpha_value * alpha_value
+                absorbed_value = tl.exp(power_value * shape_value)
+                saturating = is_rf & ~is_inversion
+                if pools == 1:
+                    poolvr = tl.where(saturating, absorbed_value * poolvr, poolvr)
+                    poolvi = tl.where(saturating, absorbed_value * poolvi, poolvi)
+                else:
+                    semivr = tl.where(saturating, absorbed_value * semivr, semivr)
+                    semivi = tl.where(saturating, absorbed_value * semivi, semivi)
+            cos_value = tl.cos(alpha_value)
+            sin_value = tl.sin(alpha_value)
+            p1r, p1i = tl.cos(phi_value), tl.sin(phi_value)
+            p2r, p2i = _complex_mul(p1r, p1i, p1r, p1i)
+            t00, t01, t02, t12, t20, t21, t22 = _rotation_coefficients(
+                0.5 * (1.0 + cos_value),
+                0.5 * (1.0 - cos_value),
+                sin_value,
+                cos_value,
+                p1r,
+                p1i,
+                p2r,
+                p2i,
+                p1r,
+                -p1i,
+            )
+            a0 = _complex_mul(t00[0], t00[1], pvr, pvi)
+            a1 = _complex_mul(t01[0], t01[1], mvr, mvi)
+            a2 = _complex_mul(t02[0], t02[1], zvr, zvi)
+            b0_ = _complex_mul(t01[0], -t01[1], pvr, pvi)
+            b1_ = _complex_mul(t00[0], t00[1], mvr, mvi)
+            b2 = _complex_mul(t12[0], t12[1], zvr, zvi)
+            c0 = _complex_mul(t20[0], t20[1], pvr, pvi)
+            c1 = _complex_mul(t21[0], t21[1], mvr, mvi)
+            c2 = _complex_mul(t22[0], t22[1], zvr, zvi)
+
+            turned_pr = a0[0] + a1[0] + a2[0]
+            turned_pi = a0[1] + a1[1] + a2[1]
+            turned_mr = b0_[0] + b1_[0] + b2[0]
+            turned_mi = b0_[1] + b1_[1] + b2[1]
+            turned_zr = c0[0] + c1[0] + c2[0]
+            turned_zi = c0[1] + c1[1] + c2[1]
+            if profiled or dynamic:
+                if dynamic:
+                    pair = _dynamic_pair_at(
+                        pairs,
+                        pair_index,
+                        event_base,
+                        event,
+                        atom,
+                        atom_count,
+                        active_atom,
+                    )
+                    shaped_ar, shaped_ai = pair[0], pair[1]
+                    # The pair is integrated at zero RF phase, so the event's own
+                    # phase turns the axis afterwards.
+                    shaped_br, shaped_bi = _complex_mul(pair[2], pair[3], p1r, -p1i)
+                else:
+                    shaped_ar, shaped_ai, shaped_br, shaped_bi = _profile_pair(
+                        profile,
+                        _table_row(profile_index, event, location, locations),
+                        alpha_value,
+                        profile_bins,
+                        profile_step,
+                    )
+                    shaped_br, shaped_bi = _complex_mul(shaped_br, shaped_bi, p1r, -p1i)
+                (
+                    turned_pr,
+                    turned_pi,
+                    turned_mr,
+                    turned_mi,
+                    turned_zr,
+                    turned_zi,
                 ) = _rotate_spinor(
                     shaped_ar,
                     shaped_ai,
                     shaped_br,
                     shaped_bi,
-                    bpvr,
-                    bpvi,
-                    bmvr,
-                    bmvi,
-                    poolvr,
-                    poolvi,
+                    pvr,
+                    pvi,
+                    mvr,
+                    mvi,
+                    zvr,
+                    zvi,
                 )
-            bpvr = tl.where(rotate, spun_pr, bpvr)
-            bpvi = tl.where(rotate, spun_pi, bpvi)
-            bmvr = tl.where(rotate, spun_mr, bmvr)
-            bmvi = tl.where(rotate, spun_mi, bmvi)
-            poolvr = tl.where(rotate, spun_zr, poolvr)
-            poolvi = tl.where(rotate, spun_zi, poolvi)
-        pvr = tl.where(rotate, turned_pr, pvr)
-        pvi = tl.where(rotate, turned_pi, pvi)
-        mvr = tl.where(rotate, turned_mr, mvr)
-        mvi = tl.where(rotate, turned_mi, mvi)
-        zvr = tl.where(rotate, turned_zr, zvr)
-        zvi = tl.where(rotate, turned_zi, zvi)
 
-        do_shift = ((event_action & 2) != 0) | ((event_action & 16) != 0)
-        if pools == 2 or pools == 3:
+            rotate = is_rf & ~is_inversion
+            if pools == 2 or pools == 3:
+                # The same pulse, the same rotation. A chemical shift moves where a
+                # pool precesses, not what a pulse does to it.
+                e0 = _complex_mul(t00[0], t00[1], bpvr, bpvi)
+                e1_ = _complex_mul(t01[0], t01[1], bmvr, bmvi)
+                e2_ = _complex_mul(t02[0], t02[1], poolvr, poolvi)
+                f0 = _complex_mul(t01[0], -t01[1], bpvr, bpvi)
+                f1 = _complex_mul(t00[0], t00[1], bmvr, bmvi)
+                f2 = _complex_mul(t12[0], t12[1], poolvr, poolvi)
+                h0 = _complex_mul(t20[0], t20[1], bpvr, bpvi)
+                h1 = _complex_mul(t21[0], t21[1], bmvr, bmvi)
+                h2 = _complex_mul(t22[0], t22[1], poolvr, poolvi)
+                spun_pr, spun_pi = e0[0] + e1_[0] + e2_[0], e0[1] + e1_[1] + e2_[1]
+                spun_mr, spun_mi = f0[0] + f1[0] + f2[0], f0[1] + f1[1] + f2[1]
+                spun_zr, spun_zi = h0[0] + h1[0] + h2[0], h0[1] + h1[1] + h2[1]
+                if profiled or dynamic:
+                    (
+                        spun_pr,
+                        spun_pi,
+                        spun_mr,
+                        spun_mi,
+                        spun_zr,
+                        spun_zi,
+                    ) = _rotate_spinor(
+                        shaped_ar,
+                        shaped_ai,
+                        shaped_br,
+                        shaped_bi,
+                        bpvr,
+                        bpvi,
+                        bmvr,
+                        bmvi,
+                        poolvr,
+                        poolvi,
+                    )
+                bpvr = tl.where(rotate, spun_pr, bpvr)
+                bpvi = tl.where(rotate, spun_pi, bpvi)
+                bmvr = tl.where(rotate, spun_mr, bmvr)
+                bmvi = tl.where(rotate, spun_mi, bmvi)
+                poolvr = tl.where(rotate, spun_zr, poolvr)
+                poolvi = tl.where(rotate, spun_zi, poolvi)
+            pvr = tl.where(rotate, turned_pr, pvr)
+            pvi = tl.where(rotate, turned_pi, pvi)
+            mvr = tl.where(rotate, turned_mr, mvr)
+            mvi = tl.where(rotate, turned_mi, mvi)
+            zvr = tl.where(rotate, turned_zr, zvr)
+            zvi = tl.where(rotate, turned_zi, zvi)
+
+            do_shift = ((event_action & 2) != 0) | ((event_action & 16) != 0)
+            if pools == 2 or pools == 3:
+                svr, svi, wvr, wvi = _shift(
+                    bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
+                )
+                spoil_b = (event_action & 8) != 0
+                bpvr = tl.where(spoil_b, 0.0, tl.where(do_shift, svr, bpvr))
+                bpvi = tl.where(spoil_b, 0.0, tl.where(do_shift, svi, bpvi))
+                bmvr = tl.where(spoil_b, 0.0, tl.where(do_shift, wvr, bmvr))
+                bmvi = tl.where(spoil_b, 0.0, tl.where(do_shift, wvi, bmvi))
             svr, svi, wvr, wvi = _shift(
-                bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
+                pvr, pvi, mvr, mvi, state, state_mask, state_count
             )
-            spoil_b = (event_action & 8) != 0
-            bpvr = tl.where(spoil_b, 0.0, tl.where(do_shift, svr, bpvr))
-            bpvi = tl.where(spoil_b, 0.0, tl.where(do_shift, svi, bpvi))
-            bmvr = tl.where(spoil_b, 0.0, tl.where(do_shift, wvr, bmvr))
-            bmvi = tl.where(spoil_b, 0.0, tl.where(do_shift, wvi, bmvi))
-        svr, svi, wvr, wvi = _shift(pvr, pvi, mvr, mvi, state, state_mask, state_count)
-        pvr = tl.where(do_shift, svr, pvr)
-        pvi = tl.where(do_shift, svi, pvi)
-        mvr = tl.where(do_shift, wvr, mvr)
-        mvi = tl.where(do_shift, wvi, mvi)
-        spoil = (event_action & 8) != 0
-        pvr = tl.where(spoil, 0.0, pvr)
-        pvi = tl.where(spoil, 0.0, pvi)
-        mvr = tl.where(spoil, 0.0, mvr)
-        mvi = tl.where(spoil, 0.0, mvi)
+            pvr = tl.where(do_shift, svr, pvr)
+            pvi = tl.where(do_shift, svi, pvi)
+            mvr = tl.where(do_shift, wvr, mvr)
+            mvi = tl.where(do_shift, wvi, mvi)
+            spoil = (event_action & 8) != 0
+            pvr = tl.where(spoil, 0.0, pvr)
+            pvi = tl.where(spoil, 0.0, pvi)
+            mvr = tl.where(spoil, 0.0, mvr)
+            mvi = tl.where(spoil, 0.0, mvi)
+        return
 
     # ---- reverse ----
     pbvr = empty
@@ -8444,7 +8462,9 @@ def _epg_vjp_kernel(
             )
 
 
-@triton.jit(do_not_specialize=["profile_bins", "lineshape_bins"])
+@triton.jit(
+    do_not_specialize=["state_count", "locations", "profile_bins", "lineshape_bins"]
+)
 def _epg_vjp_jvp_kernel(
     t1,
     t2,
@@ -8529,12 +8549,12 @@ def _epg_vjp_jvp_kernel(
     washout_scale,
     profile_step,
     lineshape_step,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shim_rows,
     shimmed: tl.constexpr,
-    locations: tl.constexpr,
+    locations,
     profiled: tl.constexpr,
     profile_bins,
     dynamic: tl.constexpr,
@@ -8550,6 +8570,7 @@ def _epg_vjp_jvp_kernel(
     pools: tl.constexpr,
     narrow: tl.constexpr,
     tabulated: tl.constexpr,
+    recording: tl.constexpr,
     block_states: tl.constexpr,
     problems: tl.constexpr,
 ):
@@ -8767,687 +8788,658 @@ def _epg_vjp_jvp_kernel(
     r2_tangent = -1000.0 * d_t2 / (atom_t2 * atom_t2)
 
     event_base = train * event_count
-    for event in range(0, event_count):
-        slot = trajectory + event * record_stride
-        tl.store(trajectory_vr + slot, pvr, mask=state_mask)
-        tl.store(trajectory_vi + slot, pvi, mask=state_mask)
-        tl.store(trajectory_tr + slot, ptr, mask=state_mask)
-        tl.store(trajectory_ti + slot, pti, mask=state_mask)
-        tl.store(trajectory_vr + slot + minus_plane, mvr, mask=state_mask)
-        tl.store(trajectory_vi + slot + minus_plane, mvi, mask=state_mask)
-        tl.store(trajectory_tr + slot + minus_plane, mtr, mask=state_mask)
-        tl.store(trajectory_ti + slot + minus_plane, mti, mask=state_mask)
-        tl.store(trajectory_vr + slot + long_plane, zvr, mask=state_mask)
-        tl.store(trajectory_vi + slot + long_plane, zvi, mask=state_mask)
-        tl.store(trajectory_tr + slot + long_plane, ztr, mask=state_mask)
-        tl.store(trajectory_ti + slot + long_plane, zti, mask=state_mask)
-        if pools > 0:
-            tl.store(trajectory_vr + slot + bound_plane, bvr, mask=state_mask)
-            tl.store(trajectory_vi + slot + bound_plane, bvi, mask=state_mask)
-            tl.store(trajectory_tr + slot + bound_plane, btr, mask=state_mask)
-            tl.store(trajectory_ti + slot + bound_plane, bti, mask=state_mask)
-        if pools == 2 or pools == 3:
-            tl.store(trajectory_vr + slot + bplus_plane, bpvr, mask=state_mask)
-            tl.store(trajectory_vi + slot + bplus_plane, bpvi, mask=state_mask)
-            tl.store(trajectory_tr + slot + bplus_plane, bptr, mask=state_mask)
-            tl.store(trajectory_ti + slot + bplus_plane, bpti, mask=state_mask)
-            tl.store(trajectory_vr + slot + bminus_plane, bmvr, mask=state_mask)
-            tl.store(trajectory_vi + slot + bminus_plane, bmvi, mask=state_mask)
-            tl.store(trajectory_tr + slot + bminus_plane, bmtr, mask=state_mask)
-            tl.store(trajectory_ti + slot + bminus_plane, bmti, mask=state_mask)
-        if pools == 3:
-            tl.store(trajectory_vr + slot + semisolid_plane, cvr, mask=state_mask)
-            tl.store(trajectory_vi + slot + semisolid_plane, cvi, mask=state_mask)
-            tl.store(trajectory_tr + slot + semisolid_plane, ctr, mask=state_mask)
-            tl.store(trajectory_ti + slot + semisolid_plane, cti, mask=state_mask)
+    # The forward half records the trajectory the reverse half walks back,
+    # and the two are launched separately: each compiles the sweep it is
+    # asked for and no more.
+    if recording:
+        for event in range(0, event_count):
+            slot = trajectory + event * record_stride
+            tl.store(trajectory_vr + slot, pvr, mask=state_mask)
+            tl.store(trajectory_vi + slot, pvi, mask=state_mask)
+            tl.store(trajectory_tr + slot, ptr, mask=state_mask)
+            tl.store(trajectory_ti + slot, pti, mask=state_mask)
+            tl.store(trajectory_vr + slot + minus_plane, mvr, mask=state_mask)
+            tl.store(trajectory_vi + slot + minus_plane, mvi, mask=state_mask)
+            tl.store(trajectory_tr + slot + minus_plane, mtr, mask=state_mask)
+            tl.store(trajectory_ti + slot + minus_plane, mti, mask=state_mask)
+            tl.store(trajectory_vr + slot + long_plane, zvr, mask=state_mask)
+            tl.store(trajectory_vi + slot + long_plane, zvi, mask=state_mask)
+            tl.store(trajectory_tr + slot + long_plane, ztr, mask=state_mask)
+            tl.store(trajectory_ti + slot + long_plane, zti, mask=state_mask)
+            if pools > 0:
+                tl.store(trajectory_vr + slot + bound_plane, bvr, mask=state_mask)
+                tl.store(trajectory_vi + slot + bound_plane, bvi, mask=state_mask)
+                tl.store(trajectory_tr + slot + bound_plane, btr, mask=state_mask)
+                tl.store(trajectory_ti + slot + bound_plane, bti, mask=state_mask)
+            if pools == 2 or pools == 3:
+                tl.store(trajectory_vr + slot + bplus_plane, bpvr, mask=state_mask)
+                tl.store(trajectory_vi + slot + bplus_plane, bpvi, mask=state_mask)
+                tl.store(trajectory_tr + slot + bplus_plane, bptr, mask=state_mask)
+                tl.store(trajectory_ti + slot + bplus_plane, bpti, mask=state_mask)
+                tl.store(trajectory_vr + slot + bminus_plane, bmvr, mask=state_mask)
+                tl.store(trajectory_vi + slot + bminus_plane, bmvi, mask=state_mask)
+                tl.store(trajectory_tr + slot + bminus_plane, bmtr, mask=state_mask)
+                tl.store(trajectory_ti + slot + bminus_plane, bmti, mask=state_mask)
+            if pools == 3:
+                tl.store(trajectory_vr + slot + semisolid_plane, cvr, mask=state_mask)
+                tl.store(trajectory_vi + slot + semisolid_plane, cvi, mask=state_mask)
+                tl.store(trajectory_tr + slot + semisolid_plane, ctr, mask=state_mask)
+                tl.store(trajectory_ti + slot + semisolid_plane, cti, mask=state_mask)
 
-        dt_value = _event_value(duration, event_base, event, active_atom, single_train)
-        dt_tangent = _event_value(
-            dot_duration, event_base, event, active_atom, single_train
-        )
-        wout_value = 1.0
-        wout_tangent = 0.0
-        if moving:
-            wout_value, wout_tangent = _washout_jvp(
-                atom_washout, d_washout, dt_value, dt_tangent
+            dt_value = _event_value(
+                duration, event_base, event, active_atom, single_train
             )
-        dry1_value = tl.exp(-r1_value * dt_value)
-        dry1_tangent = -dry1_value * (r1_value * dt_tangent + r1_tangent * dt_value)
-        dry2_value = tl.exp(-r2_value * dt_value)
-        dry2_tangent = -dry2_value * (r2_value * dt_tangent + r2_tangent * dt_value)
-        e1_value = dry1_value * wout_value
-        e1_tangent = dry1_tangent * wout_value + dry1_value * wout_tangent
-        e2_value = dry2_value * wout_value
-        e2_tangent = dry2_tangent * wout_value + dry2_value * wout_tangent
-        damp_z = 1.0
-        damp_z_tangent = 0.0
-        damp_t = 1.0
-        damp_t_tangent = 0.0
-        if diffusing:
-            damp_z, damp_z_tangent, damp_t, damp_t_tangent = _damping_jvp(
-                atom_damping, d_damping, dt_value, dt_tangent, order
+            dt_tangent = _event_value(
+                dot_duration, event_base, event, active_atom, single_train
             )
-        # Order zero is undamped, so recovery keeps the bare longitudinal factor.
-        recovery_value, recovery_tangent = 1.0 - e1_value, -e1_tangent
-        bare1_value, bare1_tangent = e1_value, e1_tangent
-        bare2_value, bare2_tangent = e2_value, e2_tangent
-        e1_tangent = e1_tangent * damp_z + bare1_value * damp_z_tangent
-        e1_value = bare1_value * damp_z
-        e2_tangent = e2_tangent * damp_t + bare2_value * damp_t_tangent
-        e2_value = bare2_value * damp_t
-        turn_t = 0.0
-        dturn_t = 0.0
-        szr, szi, sztr, szti = 1.0, 0.0, 0.0, 0.0
-        if moving:
-            turn_z, turn_t = _flow(atom_flow, dt_value, order)
-            d_turn = d_flow * dt_value + atom_flow * dt_tangent
-            dturn_z = -order * d_turn
-            dturn_t = -(order + 0.5) * d_turn
-            szr, szi, sztr, szti = _dual_polar(turn_z, dturn_z)
-        qr, qi, qtr, qti = 1.0, 0.0, 0.0, 0.0
-        if off_axis or moving:
-            angle_value = -2.0 * 3.141592653589793 * (atom_b0 * dt_value) + turn_t
-            angle_tangent = (
-                -2.0 * 3.141592653589793 * (d_b0 * dt_value + atom_b0 * dt_tangent)
-                + dturn_t
-            )
-            qr, qi, qtr, qti = _dual_polar(angle_value, angle_tangent)
-        ovr, ovi, otr, oti = _dual_scale(e2_value, e2_tangent, qr, qi, qtr, qti)
-        lvr, lvi, ltr, lti = _dual_scale(e1_value, e1_tangent, szr, szi, sztr, szti)
-
-        # The damping and the off-resonance turn both pools take; with an
-        # exchanging one the relaxation itself sits inside the operator instead
-        # of in the scalar the free pool alone multiplies by.
-        carried = _dual_scale(damp_t, damp_t_tangent, qr, qi, qtr, qti)
-        if pools == 2 or pools == 3:
-            across = _two_pool_transverse_step_jvp(
-                r2_value,
-                r2_tangent,
-                r2b_value,
-                r2b_tangent,
-                atom_exchange,
-                d_exchange,
-                atom_bound,
-                d_boundf,
-                atom_free,
-                d_free,
-                atom_shift,
-                d_shift,
-                dt_value,
-                dt_tangent,
-                wout_value,
-                wout_tangent,
-            )
-            a11 = (across[0], across[1], across[8], across[9])
-            a12 = (across[2], across[3], across[10], across[11])
-            a21 = (across[4], across[5], across[12], across[13])
-            a22 = (across[6], across[7], across[14], across[15])
-            free_plus = (pvr, pvi, ptr, pti)
-            pool_plus = (bpvr, bpvi, bptr, bpti)
-            free_minus = (mvr, mvi, mtr, mti)
-            pool_minus = (bmvr, bmvi, bmtr, bmti)
-            conjugated = _dual_conj(carried)
-            # ``F-`` takes the conjugate of the operator entry by entry, not
-            # its transpose: it is the conjugate state following the conjugate
-            # map.
-            pvr, pvi, ptr, pti = _dual_product(
-                _dual_add(_dual_product(a11, free_plus), _dual_product(a12, pool_plus)),
-                carried,
-            )
-            bpvr, bpvi, bptr, bpti = _dual_product(
-                _dual_add(_dual_product(a21, free_plus), _dual_product(a22, pool_plus)),
-                carried,
-            )
-            mvr, mvi, mtr, mti = _dual_product(
-                _dual_add(
-                    _dual_product(_dual_conj(a11), free_minus),
-                    _dual_product(_dual_conj(a12), pool_minus),
-                ),
-                conjugated,
-            )
-            bmvr, bmvi, bmtr, bmti = _dual_product(
-                _dual_add(
-                    _dual_product(_dual_conj(a21), free_minus),
-                    _dual_product(_dual_conj(a22), pool_minus),
-                ),
-                conjugated,
-            )
-        else:
-            pvr, pvi, ptr, pti = _dual_mul(ovr, ovi, otr, oti, pvr, pvi, ptr, pti)
-            mvr, mvi, mtr, mti = _dual_mul(ovr, -ovi, otr, -oti, mvr, mvi, mtr, mti)
-        if pools == 3:
-            # Three pools mix through a 3x3 formed in double, tangent and all:
-            # a direction through an operator this ill-conditioned needs the
-            # width as much as the value does.
-            if tabulated:
-                (
-                    t11,
-                    t12,
-                    t13,
-                    t21,
-                    t22,
-                    t23,
-                    t31,
-                    t32,
-                    t33,
-                    grow_free,
-                    grow_pool_b,
-                    grow_semisolid,
-                    d_t11,
-                    d_t12,
-                    d_t13,
-                    d_t21,
-                    d_t22,
-                    d_t23,
-                    d_t31,
-                    d_t32,
-                    d_t33,
-                    d_grow_free,
-                    d_grow_pool_b,
-                    d_grow_semisolid,
-                ) = _three_pool_from_table_jvp(
-                    pool_table,
-                    tl.load(
-                        duration_row + event_base + event,
-                        mask=active_atom,
-                        other=0,
-                    ),
-                    atom,
-                    atom_count,
-                    active_atom,
-                    r1_value,
-                    r1b_value,
-                    r1c_value,
-                    atom_exchange,
-                    atom_semisolid_exchange,
-                    atom_bound,
-                    d_boundf,
-                    atom_semisolid,
-                    d_semisolidf,
-                    dt_tangent,
-                    wout_value,
-                    wout_tangent,
+            wout_value = 1.0
+            wout_tangent = 0.0
+            if moving:
+                wout_value, wout_tangent = _washout_jvp(
+                    atom_washout, d_washout, dt_value, dt_tangent
                 )
-            else:
-                (
-                    t11,
-                    t12,
-                    t13,
-                    t21,
-                    t22,
-                    t23,
-                    t31,
-                    t32,
-                    t33,
-                    grow_free,
-                    grow_pool_b,
-                    grow_semisolid,
-                    d_t11,
-                    d_t12,
-                    d_t13,
-                    d_t21,
-                    d_t22,
-                    d_t23,
-                    d_t31,
-                    d_t32,
-                    d_t33,
-                    d_grow_free,
-                    d_grow_pool_b,
-                    d_grow_semisolid,
-                ) = _three_pool_step_jvp(
-                    r1_value,
-                    r1_tangent,
-                    r1b_value,
-                    r1b_tangent,
-                    r1c_value,
-                    r1c_tangent,
+            dry1_value = tl.exp(-r1_value * dt_value)
+            dry1_tangent = -dry1_value * (r1_value * dt_tangent + r1_tangent * dt_value)
+            dry2_value = tl.exp(-r2_value * dt_value)
+            dry2_tangent = -dry2_value * (r2_value * dt_tangent + r2_tangent * dt_value)
+            e1_value = dry1_value * wout_value
+            e1_tangent = dry1_tangent * wout_value + dry1_value * wout_tangent
+            e2_value = dry2_value * wout_value
+            e2_tangent = dry2_tangent * wout_value + dry2_value * wout_tangent
+            damp_z = 1.0
+            damp_z_tangent = 0.0
+            damp_t = 1.0
+            damp_t_tangent = 0.0
+            if diffusing:
+                damp_z, damp_z_tangent, damp_t, damp_t_tangent = _damping_jvp(
+                    atom_damping, d_damping, dt_value, dt_tangent, order
+                )
+            # Order zero is undamped, so recovery keeps the bare longitudinal factor.
+            recovery_value, recovery_tangent = 1.0 - e1_value, -e1_tangent
+            bare1_value, bare1_tangent = e1_value, e1_tangent
+            bare2_value, bare2_tangent = e2_value, e2_tangent
+            e1_tangent = e1_tangent * damp_z + bare1_value * damp_z_tangent
+            e1_value = bare1_value * damp_z
+            e2_tangent = e2_tangent * damp_t + bare2_value * damp_t_tangent
+            e2_value = bare2_value * damp_t
+            turn_t = 0.0
+            dturn_t = 0.0
+            szr, szi, sztr, szti = 1.0, 0.0, 0.0, 0.0
+            if moving:
+                turn_z, turn_t = _flow(atom_flow, dt_value, order)
+                d_turn = d_flow * dt_value + atom_flow * dt_tangent
+                dturn_z = -order * d_turn
+                dturn_t = -(order + 0.5) * d_turn
+                szr, szi, sztr, szti = _dual_polar(turn_z, dturn_z)
+            qr, qi, qtr, qti = 1.0, 0.0, 0.0, 0.0
+            if off_axis or moving:
+                angle_value = -2.0 * 3.141592653589793 * (atom_b0 * dt_value) + turn_t
+                angle_tangent = (
+                    -2.0 * 3.141592653589793 * (d_b0 * dt_value + atom_b0 * dt_tangent)
+                    + dturn_t
+                )
+                qr, qi, qtr, qti = _dual_polar(angle_value, angle_tangent)
+            ovr, ovi, otr, oti = _dual_scale(e2_value, e2_tangent, qr, qi, qtr, qti)
+            lvr, lvi, ltr, lti = _dual_scale(e1_value, e1_tangent, szr, szi, sztr, szti)
+
+            # The damping and the off-resonance turn both pools take; with an
+            # exchanging one the relaxation itself sits inside the operator instead
+            # of in the scalar the free pool alone multiplies by.
+            carried = _dual_scale(damp_t, damp_t_tangent, qr, qi, qtr, qti)
+            if pools == 2 or pools == 3:
+                across = _two_pool_transverse_step_jvp(
+                    r2_value,
+                    r2_tangent,
+                    r2b_value,
+                    r2b_tangent,
                     atom_exchange,
                     d_exchange,
-                    atom_semisolid_exchange,
-                    d_semisolid_exchange,
                     atom_bound,
                     d_boundf,
-                    atom_semisolid,
-                    d_semisolidf,
+                    atom_free,
+                    d_free,
+                    atom_shift,
+                    d_shift,
                     dt_value,
                     dt_tangent,
                     wout_value,
                     wout_tangent,
-                    narrow,
                 )
-            spin = _dual_scale(damp_z, damp_z_tangent, szr, szi, sztr, szti)
-            was_free = (zvr, zvi, ztr, zti)
-            was_pool_b = (bvr, bvi, btr, bti)
-            was_semisolid = (cvr, cvi, ctr, cti)
-            mixed_free = _dual_add(
-                _dual_add(
-                    _dual_scale(
-                        t11, d_t11, was_free[0], was_free[1], was_free[2], was_free[3]
+                a11 = (across[0], across[1], across[8], across[9])
+                a12 = (across[2], across[3], across[10], across[11])
+                a21 = (across[4], across[5], across[12], across[13])
+                a22 = (across[6], across[7], across[14], across[15])
+                free_plus = (pvr, pvi, ptr, pti)
+                pool_plus = (bpvr, bpvi, bptr, bpti)
+                free_minus = (mvr, mvi, mtr, mti)
+                pool_minus = (bmvr, bmvi, bmtr, bmti)
+                conjugated = _dual_conj(carried)
+                # ``F-`` takes the conjugate of the operator entry by entry, not
+                # its transpose: it is the conjugate state following the conjugate
+                # map.
+                pvr, pvi, ptr, pti = _dual_product(
+                    _dual_add(
+                        _dual_product(a11, free_plus), _dual_product(a12, pool_plus)
                     ),
-                    _dual_scale(
+                    carried,
+                )
+                bpvr, bpvi, bptr, bpti = _dual_product(
+                    _dual_add(
+                        _dual_product(a21, free_plus), _dual_product(a22, pool_plus)
+                    ),
+                    carried,
+                )
+                mvr, mvi, mtr, mti = _dual_product(
+                    _dual_add(
+                        _dual_product(_dual_conj(a11), free_minus),
+                        _dual_product(_dual_conj(a12), pool_minus),
+                    ),
+                    conjugated,
+                )
+                bmvr, bmvi, bmtr, bmti = _dual_product(
+                    _dual_add(
+                        _dual_product(_dual_conj(a21), free_minus),
+                        _dual_product(_dual_conj(a22), pool_minus),
+                    ),
+                    conjugated,
+                )
+            else:
+                pvr, pvi, ptr, pti = _dual_mul(ovr, ovi, otr, oti, pvr, pvi, ptr, pti)
+                mvr, mvi, mtr, mti = _dual_mul(ovr, -ovi, otr, -oti, mvr, mvi, mtr, mti)
+            if pools == 3:
+                # Three pools mix through a 3x3 formed in double, tangent and all:
+                # a direction through an operator this ill-conditioned needs the
+                # width as much as the value does.
+                if tabulated:
+                    (
+                        t11,
                         t12,
-                        d_t12,
-                        was_pool_b[0],
-                        was_pool_b[1],
-                        was_pool_b[2],
-                        was_pool_b[3],
-                    ),
-                ),
-                _dual_scale(
-                    t13,
-                    d_t13,
-                    was_semisolid[0],
-                    was_semisolid[1],
-                    was_semisolid[2],
-                    was_semisolid[3],
-                ),
-            )
-            mixed_pool_b = _dual_add(
-                _dual_add(
-                    _dual_scale(
-                        t21, d_t21, was_free[0], was_free[1], was_free[2], was_free[3]
-                    ),
-                    _dual_scale(
+                        t13,
+                        t21,
                         t22,
-                        d_t22,
-                        was_pool_b[0],
-                        was_pool_b[1],
-                        was_pool_b[2],
-                        was_pool_b[3],
-                    ),
-                ),
-                _dual_scale(
-                    t23,
-                    d_t23,
-                    was_semisolid[0],
-                    was_semisolid[1],
-                    was_semisolid[2],
-                    was_semisolid[3],
-                ),
-            )
-            mixed_semisolid = _dual_add(
-                _dual_add(
-                    _dual_scale(
-                        t31, d_t31, was_free[0], was_free[1], was_free[2], was_free[3]
-                    ),
-                    _dual_scale(
+                        t23,
+                        t31,
                         t32,
+                        t33,
+                        grow_free,
+                        grow_pool_b,
+                        grow_semisolid,
+                        d_t11,
+                        d_t12,
+                        d_t13,
+                        d_t21,
+                        d_t22,
+                        d_t23,
+                        d_t31,
                         d_t32,
-                        was_pool_b[0],
-                        was_pool_b[1],
-                        was_pool_b[2],
-                        was_pool_b[3],
+                        d_t33,
+                        d_grow_free,
+                        d_grow_pool_b,
+                        d_grow_semisolid,
+                    ) = _three_pool_from_table_jvp(
+                        pool_table,
+                        tl.load(
+                            duration_row + event_base + event,
+                            mask=active_atom,
+                            other=0,
+                        ),
+                        atom,
+                        atom_count,
+                        active_atom,
+                        r1_value,
+                        r1b_value,
+                        r1c_value,
+                        atom_exchange,
+                        atom_semisolid_exchange,
+                        atom_bound,
+                        d_boundf,
+                        atom_semisolid,
+                        d_semisolidf,
+                        dt_tangent,
+                        wout_value,
+                        wout_tangent,
+                    )
+                else:
+                    (
+                        t11,
+                        t12,
+                        t13,
+                        t21,
+                        t22,
+                        t23,
+                        t31,
+                        t32,
+                        t33,
+                        grow_free,
+                        grow_pool_b,
+                        grow_semisolid,
+                        d_t11,
+                        d_t12,
+                        d_t13,
+                        d_t21,
+                        d_t22,
+                        d_t23,
+                        d_t31,
+                        d_t32,
+                        d_t33,
+                        d_grow_free,
+                        d_grow_pool_b,
+                        d_grow_semisolid,
+                    ) = _three_pool_step_jvp(
+                        r1_value,
+                        r1_tangent,
+                        r1b_value,
+                        r1b_tangent,
+                        r1c_value,
+                        r1c_tangent,
+                        atom_exchange,
+                        d_exchange,
+                        atom_semisolid_exchange,
+                        d_semisolid_exchange,
+                        atom_bound,
+                        d_boundf,
+                        atom_semisolid,
+                        d_semisolidf,
+                        dt_value,
+                        dt_tangent,
+                        wout_value,
+                        wout_tangent,
+                        narrow,
+                    )
+                spin = _dual_scale(damp_z, damp_z_tangent, szr, szi, sztr, szti)
+                was_free = (zvr, zvi, ztr, zti)
+                was_pool_b = (bvr, bvi, btr, bti)
+                was_semisolid = (cvr, cvi, ctr, cti)
+                mixed_free = _dual_add(
+                    _dual_add(
+                        _dual_scale(
+                            t11,
+                            d_t11,
+                            was_free[0],
+                            was_free[1],
+                            was_free[2],
+                            was_free[3],
+                        ),
+                        _dual_scale(
+                            t12,
+                            d_t12,
+                            was_pool_b[0],
+                            was_pool_b[1],
+                            was_pool_b[2],
+                            was_pool_b[3],
+                        ),
                     ),
-                ),
-                _dual_scale(
-                    t33,
-                    d_t33,
-                    was_semisolid[0],
-                    was_semisolid[1],
-                    was_semisolid[2],
-                    was_semisolid[3],
-                ),
-            )
-            zvr, zvi, ztr, zti = _dual_mul(
-                spin[0],
-                spin[1],
-                spin[2],
-                spin[3],
-                mixed_free[0],
-                mixed_free[1],
-                mixed_free[2],
-                mixed_free[3],
-            )
-            bvr, bvi, btr, bti = _dual_mul(
-                spin[0],
-                spin[1],
-                spin[2],
-                spin[3],
-                mixed_pool_b[0],
-                mixed_pool_b[1],
-                mixed_pool_b[2],
-                mixed_pool_b[3],
-            )
-            cvr, cvi, ctr, cti = _dual_mul(
-                spin[0],
-                spin[1],
-                spin[2],
-                spin[3],
-                mixed_semisolid[0],
-                mixed_semisolid[1],
-                mixed_semisolid[2],
-                mixed_semisolid[3],
-            )
-            zvr += tl.where(state == 0, grow_free, 0.0)
-            ztr += tl.where(state == 0, d_grow_free, 0.0)
-            bvr += tl.where(state == 0, grow_pool_b, 0.0)
-            btr += tl.where(state == 0, d_grow_pool_b, 0.0)
-            cvr += tl.where(state == 0, grow_semisolid, 0.0)
-            ctr += tl.where(state == 0, d_grow_semisolid, 0.0)
-        elif pools > 0:
-            # The exchange operator is a property of the interval, not of a
-            # dephasing order, so it is formed once and the per-order damping
-            # and turn multiply it.
-            (
-                pe11,
-                pe12,
-                pe21,
-                pe22,
-                prec_f,
-                prec_b,
-                de11,
-                de12,
-                de21,
-                de22,
-                drec_f,
-                drec_b,
-            ) = _two_pool_step_jvp(
-                r1_value,
-                r1_tangent,
-                r1b_value,
-                r1b_tangent,
-                atom_exchange,
-                d_exchange,
-                atom_bound,
-                d_boundf,
-                dt_value,
-                dt_tangent,
-                wout_value,
-                wout_tangent,
-            )
-            spin = _dual_scale(damp_z, damp_z_tangent, szr, szi, sztr, szti)
-            free_part = _dual_scale(pe11, de11, zvr, zvi, ztr, zti)
-            cross_in = _dual_scale(pe12, de12, bvr, bvi, btr, bti)
-            cross_out = _dual_scale(pe21, de21, zvr, zvi, ztr, zti)
-            bound_part = _dual_scale(pe22, de22, bvr, bvi, btr, bti)
-            zvr, zvi, ztr, zti = _dual_mul(
-                spin[0],
-                spin[1],
-                spin[2],
-                spin[3],
-                free_part[0] + cross_in[0],
-                free_part[1] + cross_in[1],
-                free_part[2] + cross_in[2],
-                free_part[3] + cross_in[3],
-            )
-            bvr, bvi, btr, bti = _dual_mul(
-                spin[0],
-                spin[1],
-                spin[2],
-                spin[3],
-                cross_out[0] + bound_part[0],
-                cross_out[1] + bound_part[1],
-                cross_out[2] + bound_part[2],
-                cross_out[3] + bound_part[3],
-            )
-            zvr += tl.where(state == 0, prec_f, 0.0)
-            ztr += tl.where(state == 0, drec_f, 0.0)
-            bvr += tl.where(state == 0, prec_b, 0.0)
-            btr += tl.where(state == 0, drec_b, 0.0)
-        else:
-            zvr, zvi, ztr, zti = _dual_mul(lvr, lvi, ltr, lti, zvr, zvi, ztr, zti)
-            zvr += tl.where(state == 0, recovery_value, 0.0)
-            ztr += tl.where(state == 0, recovery_tangent, 0.0)
+                    _dual_scale(
+                        t13,
+                        d_t13,
+                        was_semisolid[0],
+                        was_semisolid[1],
+                        was_semisolid[2],
+                        was_semisolid[3],
+                    ),
+                )
+                mixed_pool_b = _dual_add(
+                    _dual_add(
+                        _dual_scale(
+                            t21,
+                            d_t21,
+                            was_free[0],
+                            was_free[1],
+                            was_free[2],
+                            was_free[3],
+                        ),
+                        _dual_scale(
+                            t22,
+                            d_t22,
+                            was_pool_b[0],
+                            was_pool_b[1],
+                            was_pool_b[2],
+                            was_pool_b[3],
+                        ),
+                    ),
+                    _dual_scale(
+                        t23,
+                        d_t23,
+                        was_semisolid[0],
+                        was_semisolid[1],
+                        was_semisolid[2],
+                        was_semisolid[3],
+                    ),
+                )
+                mixed_semisolid = _dual_add(
+                    _dual_add(
+                        _dual_scale(
+                            t31,
+                            d_t31,
+                            was_free[0],
+                            was_free[1],
+                            was_free[2],
+                            was_free[3],
+                        ),
+                        _dual_scale(
+                            t32,
+                            d_t32,
+                            was_pool_b[0],
+                            was_pool_b[1],
+                            was_pool_b[2],
+                            was_pool_b[3],
+                        ),
+                    ),
+                    _dual_scale(
+                        t33,
+                        d_t33,
+                        was_semisolid[0],
+                        was_semisolid[1],
+                        was_semisolid[2],
+                        was_semisolid[3],
+                    ),
+                )
+                zvr, zvi, ztr, zti = _dual_mul(
+                    spin[0],
+                    spin[1],
+                    spin[2],
+                    spin[3],
+                    mixed_free[0],
+                    mixed_free[1],
+                    mixed_free[2],
+                    mixed_free[3],
+                )
+                bvr, bvi, btr, bti = _dual_mul(
+                    spin[0],
+                    spin[1],
+                    spin[2],
+                    spin[3],
+                    mixed_pool_b[0],
+                    mixed_pool_b[1],
+                    mixed_pool_b[2],
+                    mixed_pool_b[3],
+                )
+                cvr, cvi, ctr, cti = _dual_mul(
+                    spin[0],
+                    spin[1],
+                    spin[2],
+                    spin[3],
+                    mixed_semisolid[0],
+                    mixed_semisolid[1],
+                    mixed_semisolid[2],
+                    mixed_semisolid[3],
+                )
+                zvr += tl.where(state == 0, grow_free, 0.0)
+                ztr += tl.where(state == 0, d_grow_free, 0.0)
+                bvr += tl.where(state == 0, grow_pool_b, 0.0)
+                btr += tl.where(state == 0, d_grow_pool_b, 0.0)
+                cvr += tl.where(state == 0, grow_semisolid, 0.0)
+                ctr += tl.where(state == 0, d_grow_semisolid, 0.0)
+            elif pools > 0:
+                # The exchange operator is a property of the interval, not of a
+                # dephasing order, so it is formed once and the per-order damping
+                # and turn multiply it.
+                (
+                    pe11,
+                    pe12,
+                    pe21,
+                    pe22,
+                    prec_f,
+                    prec_b,
+                    de11,
+                    de12,
+                    de21,
+                    de22,
+                    drec_f,
+                    drec_b,
+                ) = _two_pool_step_jvp(
+                    r1_value,
+                    r1_tangent,
+                    r1b_value,
+                    r1b_tangent,
+                    atom_exchange,
+                    d_exchange,
+                    atom_bound,
+                    d_boundf,
+                    dt_value,
+                    dt_tangent,
+                    wout_value,
+                    wout_tangent,
+                )
+                spin = _dual_scale(damp_z, damp_z_tangent, szr, szi, sztr, szti)
+                free_part = _dual_scale(pe11, de11, zvr, zvi, ztr, zti)
+                cross_in = _dual_scale(pe12, de12, bvr, bvi, btr, bti)
+                cross_out = _dual_scale(pe21, de21, zvr, zvi, ztr, zti)
+                bound_part = _dual_scale(pe22, de22, bvr, bvi, btr, bti)
+                zvr, zvi, ztr, zti = _dual_mul(
+                    spin[0],
+                    spin[1],
+                    spin[2],
+                    spin[3],
+                    free_part[0] + cross_in[0],
+                    free_part[1] + cross_in[1],
+                    free_part[2] + cross_in[2],
+                    free_part[3] + cross_in[3],
+                )
+                bvr, bvi, btr, bti = _dual_mul(
+                    spin[0],
+                    spin[1],
+                    spin[2],
+                    spin[3],
+                    cross_out[0] + bound_part[0],
+                    cross_out[1] + bound_part[1],
+                    cross_out[2] + bound_part[2],
+                    cross_out[3] + bound_part[3],
+                )
+                zvr += tl.where(state == 0, prec_f, 0.0)
+                ztr += tl.where(state == 0, drec_f, 0.0)
+                bvr += tl.where(state == 0, prec_b, 0.0)
+                btr += tl.where(state == 0, drec_b, 0.0)
+            else:
+                zvr, zvi, ztr, zti = _dual_mul(lvr, lvi, ltr, lti, zvr, zvi, ztr, zti)
+                zvr += tl.where(state == 0, recovery_value, 0.0)
+                ztr += tl.where(state == 0, recovery_tangent, 0.0)
 
-        event_action = tl.load(action + event).to(tl.int32)
-        pre_shift = (event_action & 1) != 0
-        svr, svi, wvr, wvi = _shift(pvr, pvi, mvr, mvi, state, state_mask, state_count)
-        str_, sti, wtr, wti = _shift(ptr, pti, mtr, mti, state, state_mask, state_count)
-        pvr = tl.where(pre_shift, svr, pvr)
-        pvi = tl.where(pre_shift, svi, pvi)
-        ptr = tl.where(pre_shift, str_, ptr)
-        pti = tl.where(pre_shift, sti, pti)
-        mvr = tl.where(pre_shift, wvr, mvr)
-        mvi = tl.where(pre_shift, wvi, mvi)
-        mtr = tl.where(pre_shift, wtr, mtr)
-        mti = tl.where(pre_shift, wti, mti)
-        if pools == 2 or pools == 3:
+            event_action = tl.load(action + event).to(tl.int32)
+            pre_shift = (event_action & 1) != 0
             svr, svi, wvr, wvi = _shift(
-                bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
+                pvr, pvi, mvr, mvi, state, state_mask, state_count
             )
             str_, sti, wtr, wti = _shift(
-                bptr, bpti, bmtr, bmti, state, state_mask, state_count
+                ptr, pti, mtr, mti, state, state_mask, state_count
             )
-            bpvr = tl.where(pre_shift, svr, bpvr)
-            bpvi = tl.where(pre_shift, svi, bpvi)
-            bptr = tl.where(pre_shift, str_, bptr)
-            bpti = tl.where(pre_shift, sti, bpti)
-            bmvr = tl.where(pre_shift, wvr, bmvr)
-            bmvi = tl.where(pre_shift, wvi, bmvi)
-            bmtr = tl.where(pre_shift, wtr, bmtr)
-            bmti = tl.where(pre_shift, wti, bmti)
-
-        event_kind = tl.load(kind + event)
-        is_rf = event_kind == 1
-        is_inversion = (event_action & 4) != 0
-        invert = is_rf & is_inversion
-        ivr, ivi, itr, iti = _dual_scale(-atom_inv, -d_inv, zvr, zvi, ztr, zti)
-        zvr = tl.where(invert, ivr, zvr)
-        zvi = tl.where(invert, ivi, zvi)
-        ztr = tl.where(invert, itr, ztr)
-        zti = tl.where(invert, iti, zti)
-        if pools == 2 or pools == 3:
-            # A semisolid pool is saturated by an adiabatic sweep rather than
-            # turned over; a chemically exchanging one is free water and
-            # inverts like any other.
-            ivr, ivi, itr, iti = _dual_scale(-atom_inv, -d_inv, bvr, bvi, btr, bti)
-            bvr = tl.where(invert, ivr, bvr)
-            bvi = tl.where(invert, ivi, bvi)
-            btr = tl.where(invert, itr, btr)
-            bti = tl.where(invert, iti, bti)
-
-        event_flip = _event_value(flip, event_base, event, active_atom, single_train)
-        event_dot_flip = _event_value(
-            dot_flip, event_base, event, active_atom, single_train
-        )
-        event_phase = _event_value(phase, event_base, event, active_atom, single_train)
-        event_dot_phase = _event_value(
-            dot_phase, event_base, event, active_atom, single_train
-        )
-        # One shim is the whole sequence's transmit field, loaded once above;
-        # several give each pulse a row of its own.
-        if shimmed:
-            row = tl.load(shim_index + event).to(tl.int64) * atom_count
-            atom_b1 = 1.0
-            if transmit:
-                atom_b1 = tl.load(b1 + row + atom, mask=active_atom, other=1.0)
-            if off_axis:
-                atom_b1_phase = tl.load(
-                    b1_phase + row + atom, mask=active_atom, other=0.0
+            pvr = tl.where(pre_shift, svr, pvr)
+            pvi = tl.where(pre_shift, svi, pvi)
+            ptr = tl.where(pre_shift, str_, ptr)
+            pti = tl.where(pre_shift, sti, pti)
+            mvr = tl.where(pre_shift, wvr, mvr)
+            mvi = tl.where(pre_shift, wvi, mvi)
+            mtr = tl.where(pre_shift, wtr, mtr)
+            mti = tl.where(pre_shift, wti, mti)
+            if pools == 2 or pools == 3:
+                svr, svi, wvr, wvi = _shift(
+                    bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
                 )
-            d_b1 = tl.load(dot_b1 + row + atom, mask=active_atom, other=0.0)
-            if off_axis:
-                d_b1_phase = tl.load(
-                    dot_b1_phase + row + atom, mask=active_atom, other=0.0
+                str_, sti, wtr, wti = _shift(
+                    bptr, bpti, bmtr, bmti, state, state_mask, state_count
                 )
-        alpha_value = event_flip * atom_b1
-        alpha_tangent = event_dot_flip * atom_b1 + event_flip * d_b1
-        phi_value = event_phase + atom_b1_phase
-        phi_tangent = event_dot_phase + d_b1_phase
-        if pools == 1 or pools == 3:
-            # The semisolid pool absorbs the power the pulse deposits, so it
-            # reads the bare flip the transmit field gives the voxel -- not the
-            # slice-shaped rotation the free pool takes from the table.
-            offset_value = tl.load(rf_frequency + event) - atom_b0
-            shape_value, shape_slope = _lineshape_at_slope(
-                lineshape, offset_value, lineshape_bins, lineshape_step
+                bpvr = tl.where(pre_shift, svr, bpvr)
+                bpvi = tl.where(pre_shift, svi, bpvi)
+                bptr = tl.where(pre_shift, str_, bptr)
+                bpti = tl.where(pre_shift, sti, bpti)
+                bmvr = tl.where(pre_shift, wvr, bmvr)
+                bmvi = tl.where(pre_shift, wvi, bmvi)
+                bmtr = tl.where(pre_shift, wtr, bmtr)
+                bmti = tl.where(pre_shift, wti, bmti)
+
+            event_kind = tl.load(kind + event)
+            is_rf = event_kind == 1
+            is_inversion = (event_action & 4) != 0
+            invert = is_rf & is_inversion
+            ivr, ivi, itr, iti = _dual_scale(-atom_inv, -d_inv, zvr, zvi, ztr, zti)
+            zvr = tl.where(invert, ivr, zvr)
+            zvi = tl.where(invert, ivi, zvi)
+            ztr = tl.where(invert, itr, ztr)
+            zti = tl.where(invert, iti, zti)
+            if pools == 2 or pools == 3:
+                # A semisolid pool is saturated by an adiabatic sweep rather than
+                # turned over; a chemically exchanging one is free water and
+                # inverts like any other.
+                ivr, ivi, itr, iti = _dual_scale(-atom_inv, -d_inv, bvr, bvi, btr, bti)
+                bvr = tl.where(invert, ivr, bvr)
+                bvi = tl.where(invert, ivi, bvi)
+                btr = tl.where(invert, itr, btr)
+                bti = tl.where(invert, iti, bti)
+
+            event_flip = _event_value(
+                flip, event_base, event, active_atom, single_train
             )
-            shape_tangent = shape_slope * -d_b0
-            event_saturation = tl.load(saturation + event)
-            power_value = event_saturation * alpha_value * alpha_value
-            power_tangent = event_saturation * 2.0 * alpha_value * alpha_tangent
-            absorbed_value = tl.exp(power_value * shape_value)
-            absorbed_tangent = absorbed_value * (
-                power_tangent * shape_value + power_value * shape_tangent
+            event_dot_flip = _event_value(
+                dot_flip, event_base, event, active_atom, single_train
             )
-            saturating = is_rf & ~is_inversion
-            if pools == 1:
-                sat_b = _dual_scale(
-                    absorbed_value, absorbed_tangent, bvr, bvi, btr, bti
-                )
-                bvr = tl.where(saturating, sat_b[0], bvr)
-                bvi = tl.where(saturating, sat_b[1], bvi)
-                btr = tl.where(saturating, sat_b[2], btr)
-                bti = tl.where(saturating, sat_b[3], bti)
-            else:
-                sat_c = _dual_scale(
-                    absorbed_value, absorbed_tangent, cvr, cvi, ctr, cti
-                )
-                cvr = tl.where(saturating, sat_c[0], cvr)
-                cvi = tl.where(saturating, sat_c[1], cvi)
-                ctr = tl.where(saturating, sat_c[2], ctr)
-                cti = tl.where(saturating, sat_c[3], cti)
-        cos_value = tl.cos(alpha_value)
-        sin_value = tl.sin(alpha_value)
-        cos_tangent = -sin_value * alpha_tangent
-        sin_tangent = cos_value * alpha_tangent
-        p1r, p1i, p1tr, p1ti = _dual_polar(phi_value, phi_tangent)
-        p2r, p2i, p2tr, p2ti = _dual_mul(p1r, p1i, p1tr, p1ti, p1r, p1i, p1tr, p1ti)
-        t00, t01, t02, t12, t20, t21, t22 = _rotation_block(
-            0.5 * (1.0 + cos_value),
-            0.5 * cos_tangent,
-            0.5 * (1.0 - cos_value),
-            -0.5 * cos_tangent,
-            sin_value,
-            sin_tangent,
-            cos_value,
-            cos_tangent,
-            p1r,
-            p1i,
-            p1tr,
-            p1ti,
-            p2r,
-            p2i,
-            p2tr,
-            p2ti,
-            p1r,
-            -p1i,
-            p1tr,
-            -p1ti,
-        )
-        a0 = _dual_mul(t00[0], t00[1], t00[2], t00[3], pvr, pvi, ptr, pti)
-        a1 = _dual_mul(t01[0], t01[1], t01[2], t01[3], mvr, mvi, mtr, mti)
-        a2 = _dual_mul(t02[0], t02[1], t02[2], t02[3], zvr, zvi, ztr, zti)
-        b0_ = _dual_mul(t01[0], -t01[1], t01[2], -t01[3], pvr, pvi, ptr, pti)
-        b1_ = _dual_mul(t00[0], t00[1], t00[2], t00[3], mvr, mvi, mtr, mti)
-        b2 = _dual_mul(t12[0], t12[1], t12[2], t12[3], zvr, zvi, ztr, zti)
-        c0 = _dual_mul(t20[0], t20[1], t20[2], t20[3], pvr, pvi, ptr, pti)
-        c1 = _dual_mul(t21[0], t21[1], t21[2], t21[3], mvr, mvi, mtr, mti)
-        c2 = _dual_mul(t22[0], t22[1], t22[2], t22[3], zvr, zvi, ztr, zti)
-
-        turned_pvr = a0[0] + a1[0] + a2[0]
-        turned_pvi = a0[1] + a1[1] + a2[1]
-        turned_ptr = a0[2] + a1[2] + a2[2]
-        turned_pti = a0[3] + a1[3] + a2[3]
-        turned_mvr = b0_[0] + b1_[0] + b2[0]
-        turned_mvi = b0_[1] + b1_[1] + b2[1]
-        turned_mtr = b0_[2] + b1_[2] + b2[2]
-        turned_mti = b0_[3] + b1_[3] + b2[3]
-        turned_zvr = c0[0] + c1[0] + c2[0]
-        turned_zvi = c0[1] + c1[1] + c2[1]
-        turned_ztr = c0[2] + c1[2] + c2[2]
-        turned_zti = c0[3] + c1[3] + c2[3]
-        if profiled or dynamic:
-            if dynamic:
-                shaped_a, shaped_b = _dynamic_pair_dual_at(
-                    pairs,
-                    pair_direction,
-                    pair_index,
-                    event_base,
-                    event,
-                    atom,
-                    atom_count,
-                    active_atom,
-                    phi_value,
-                    phi_tangent,
-                    directed,
-                )
-            else:
-                shaped_a, shaped_b, _, _ = _profiled_pair_dual(
-                    profile,
-                    _table_row(profile_index, event, location, locations),
-                    alpha_value,
-                    alpha_tangent,
-                    phi_value,
-                    phi_tangent,
-                    profile_bins,
-                    profile_step,
-                )
-            (
-                turned_pvr,
-                turned_pvi,
-                turned_mvr,
-                turned_mvi,
-                turned_zvr,
-                turned_zvi,
-                turned_ptr,
-                turned_pti,
-                turned_mtr,
-                turned_mti,
-                turned_ztr,
-                turned_zti,
-            ) = _rotate_spinor_dual(
-                shaped_a[0],
-                shaped_a[1],
-                shaped_b[0],
-                shaped_b[1],
-                shaped_a[2],
-                shaped_a[3],
-                shaped_b[2],
-                shaped_b[3],
-                pvr,
-                pvi,
-                mvr,
-                mvi,
-                zvr,
-                zvi,
-                ptr,
-                pti,
-                mtr,
-                mti,
-                ztr,
-                zti,
+            event_phase = _event_value(
+                phase, event_base, event, active_atom, single_train
             )
+            event_dot_phase = _event_value(
+                dot_phase, event_base, event, active_atom, single_train
+            )
+            # One shim is the whole sequence's transmit field, loaded once above;
+            # several give each pulse a row of its own.
+            if shimmed:
+                row = tl.load(shim_index + event).to(tl.int64) * atom_count
+                atom_b1 = 1.0
+                if transmit:
+                    atom_b1 = tl.load(b1 + row + atom, mask=active_atom, other=1.0)
+                if off_axis:
+                    atom_b1_phase = tl.load(
+                        b1_phase + row + atom, mask=active_atom, other=0.0
+                    )
+                d_b1 = tl.load(dot_b1 + row + atom, mask=active_atom, other=0.0)
+                if off_axis:
+                    d_b1_phase = tl.load(
+                        dot_b1_phase + row + atom, mask=active_atom, other=0.0
+                    )
+            alpha_value = event_flip * atom_b1
+            alpha_tangent = event_dot_flip * atom_b1 + event_flip * d_b1
+            phi_value = event_phase + atom_b1_phase
+            phi_tangent = event_dot_phase + d_b1_phase
+            if pools == 1 or pools == 3:
+                # The semisolid pool absorbs the power the pulse deposits, so it
+                # reads the bare flip the transmit field gives the voxel -- not the
+                # slice-shaped rotation the free pool takes from the table.
+                offset_value = tl.load(rf_frequency + event) - atom_b0
+                shape_value, shape_slope = _lineshape_at_slope(
+                    lineshape, offset_value, lineshape_bins, lineshape_step
+                )
+                shape_tangent = shape_slope * -d_b0
+                event_saturation = tl.load(saturation + event)
+                power_value = event_saturation * alpha_value * alpha_value
+                power_tangent = event_saturation * 2.0 * alpha_value * alpha_tangent
+                absorbed_value = tl.exp(power_value * shape_value)
+                absorbed_tangent = absorbed_value * (
+                    power_tangent * shape_value + power_value * shape_tangent
+                )
+                saturating = is_rf & ~is_inversion
+                if pools == 1:
+                    sat_b = _dual_scale(
+                        absorbed_value, absorbed_tangent, bvr, bvi, btr, bti
+                    )
+                    bvr = tl.where(saturating, sat_b[0], bvr)
+                    bvi = tl.where(saturating, sat_b[1], bvi)
+                    btr = tl.where(saturating, sat_b[2], btr)
+                    bti = tl.where(saturating, sat_b[3], bti)
+                else:
+                    sat_c = _dual_scale(
+                        absorbed_value, absorbed_tangent, cvr, cvi, ctr, cti
+                    )
+                    cvr = tl.where(saturating, sat_c[0], cvr)
+                    cvi = tl.where(saturating, sat_c[1], cvi)
+                    ctr = tl.where(saturating, sat_c[2], ctr)
+                    cti = tl.where(saturating, sat_c[3], cti)
+            cos_value = tl.cos(alpha_value)
+            sin_value = tl.sin(alpha_value)
+            cos_tangent = -sin_value * alpha_tangent
+            sin_tangent = cos_value * alpha_tangent
+            p1r, p1i, p1tr, p1ti = _dual_polar(phi_value, phi_tangent)
+            p2r, p2i, p2tr, p2ti = _dual_mul(p1r, p1i, p1tr, p1ti, p1r, p1i, p1tr, p1ti)
+            t00, t01, t02, t12, t20, t21, t22 = _rotation_block(
+                0.5 * (1.0 + cos_value),
+                0.5 * cos_tangent,
+                0.5 * (1.0 - cos_value),
+                -0.5 * cos_tangent,
+                sin_value,
+                sin_tangent,
+                cos_value,
+                cos_tangent,
+                p1r,
+                p1i,
+                p1tr,
+                p1ti,
+                p2r,
+                p2i,
+                p2tr,
+                p2ti,
+                p1r,
+                -p1i,
+                p1tr,
+                -p1ti,
+            )
+            a0 = _dual_mul(t00[0], t00[1], t00[2], t00[3], pvr, pvi, ptr, pti)
+            a1 = _dual_mul(t01[0], t01[1], t01[2], t01[3], mvr, mvi, mtr, mti)
+            a2 = _dual_mul(t02[0], t02[1], t02[2], t02[3], zvr, zvi, ztr, zti)
+            b0_ = _dual_mul(t01[0], -t01[1], t01[2], -t01[3], pvr, pvi, ptr, pti)
+            b1_ = _dual_mul(t00[0], t00[1], t00[2], t00[3], mvr, mvi, mtr, mti)
+            b2 = _dual_mul(t12[0], t12[1], t12[2], t12[3], zvr, zvi, ztr, zti)
+            c0 = _dual_mul(t20[0], t20[1], t20[2], t20[3], pvr, pvi, ptr, pti)
+            c1 = _dual_mul(t21[0], t21[1], t21[2], t21[3], mvr, mvi, mtr, mti)
+            c2 = _dual_mul(t22[0], t22[1], t22[2], t22[3], zvr, zvi, ztr, zti)
 
-        rotate = is_rf & ~is_inversion
-        if pools == 2 or pools == 3:
-            # The same pulse, the same rotation. A chemical shift moves where a
-            # pool precesses, not what a pulse does to it.
-            e0 = _dual_mul(t00[0], t00[1], t00[2], t00[3], bpvr, bpvi, bptr, bpti)
-            e1_ = _dual_mul(t01[0], t01[1], t01[2], t01[3], bmvr, bmvi, bmtr, bmti)
-            e2_ = _dual_mul(t02[0], t02[1], t02[2], t02[3], bvr, bvi, btr, bti)
-            f0 = _dual_mul(t01[0], -t01[1], t01[2], -t01[3], bpvr, bpvi, bptr, bpti)
-            f1 = _dual_mul(t00[0], t00[1], t00[2], t00[3], bmvr, bmvi, bmtr, bmti)
-            f2 = _dual_mul(t12[0], t12[1], t12[2], t12[3], bvr, bvi, btr, bti)
-            h0 = _dual_mul(t20[0], t20[1], t20[2], t20[3], bpvr, bpvi, bptr, bpti)
-            h1 = _dual_mul(t21[0], t21[1], t21[2], t21[3], bmvr, bmvi, bmtr, bmti)
-            h2 = _dual_mul(t22[0], t22[1], t22[2], t22[3], bvr, bvi, btr, bti)
-            spun_pvr = e0[0] + e1_[0] + e2_[0]
-            spun_pvi = e0[1] + e1_[1] + e2_[1]
-            spun_ptr = e0[2] + e1_[2] + e2_[2]
-            spun_pti = e0[3] + e1_[3] + e2_[3]
-            spun_mvr = f0[0] + f1[0] + f2[0]
-            spun_mvi = f0[1] + f1[1] + f2[1]
-            spun_mtr = f0[2] + f1[2] + f2[2]
-            spun_mti = f0[3] + f1[3] + f2[3]
-            spun_zvr = h0[0] + h1[0] + h2[0]
-            spun_zvi = h0[1] + h1[1] + h2[1]
-            spun_ztr = h0[2] + h1[2] + h2[2]
-            spun_zti = h0[3] + h1[3] + h2[3]
+            turned_pvr = a0[0] + a1[0] + a2[0]
+            turned_pvi = a0[1] + a1[1] + a2[1]
+            turned_ptr = a0[2] + a1[2] + a2[2]
+            turned_pti = a0[3] + a1[3] + a2[3]
+            turned_mvr = b0_[0] + b1_[0] + b2[0]
+            turned_mvi = b0_[1] + b1_[1] + b2[1]
+            turned_mtr = b0_[2] + b1_[2] + b2[2]
+            turned_mti = b0_[3] + b1_[3] + b2[3]
+            turned_zvr = c0[0] + c1[0] + c2[0]
+            turned_zvi = c0[1] + c1[1] + c2[1]
+            turned_ztr = c0[2] + c1[2] + c2[2]
+            turned_zti = c0[3] + c1[3] + c2[3]
             if profiled or dynamic:
+                if dynamic:
+                    shaped_a, shaped_b = _dynamic_pair_dual_at(
+                        pairs,
+                        pair_direction,
+                        pair_index,
+                        event_base,
+                        event,
+                        atom,
+                        atom_count,
+                        active_atom,
+                        phi_value,
+                        phi_tangent,
+                        directed,
+                    )
+                else:
+                    shaped_a, shaped_b, _, _ = _profiled_pair_dual(
+                        profile,
+                        _table_row(profile_index, event, location, locations),
+                        alpha_value,
+                        alpha_tangent,
+                        phi_value,
+                        phi_tangent,
+                        profile_bins,
+                        profile_step,
+                    )
                 (
-                    spun_pvr,
-                    spun_pvi,
-                    spun_mvr,
-                    spun_mvi,
-                    spun_zvr,
-                    spun_zvi,
-                    spun_ptr,
-                    spun_pti,
-                    spun_mtr,
-                    spun_mti,
-                    spun_ztr,
-                    spun_zti,
+                    turned_pvr,
+                    turned_pvi,
+                    turned_mvr,
+                    turned_mvi,
+                    turned_zvr,
+                    turned_zvi,
+                    turned_ptr,
+                    turned_pti,
+                    turned_mtr,
+                    turned_mti,
+                    turned_ztr,
+                    turned_zti,
                 ) = _rotate_spinor_dual(
                     shaped_a[0],
                     shaped_a[1],
@@ -9457,79 +9449,146 @@ def _epg_vjp_jvp_kernel(
                     shaped_a[3],
                     shaped_b[2],
                     shaped_b[3],
-                    bpvr,
-                    bpvi,
-                    bmvr,
-                    bmvi,
-                    bvr,
-                    bvi,
-                    bptr,
-                    bpti,
-                    bmtr,
-                    bmti,
-                    btr,
-                    bti,
+                    pvr,
+                    pvi,
+                    mvr,
+                    mvi,
+                    zvr,
+                    zvi,
+                    ptr,
+                    pti,
+                    mtr,
+                    mti,
+                    ztr,
+                    zti,
                 )
-            bpvr = tl.where(rotate, spun_pvr, bpvr)
-            bpvi = tl.where(rotate, spun_pvi, bpvi)
-            bptr = tl.where(rotate, spun_ptr, bptr)
-            bpti = tl.where(rotate, spun_pti, bpti)
-            bmvr = tl.where(rotate, spun_mvr, bmvr)
-            bmvi = tl.where(rotate, spun_mvi, bmvi)
-            bmtr = tl.where(rotate, spun_mtr, bmtr)
-            bmti = tl.where(rotate, spun_mti, bmti)
-            bvr = tl.where(rotate, spun_zvr, bvr)
-            bvi = tl.where(rotate, spun_zvi, bvi)
-            btr = tl.where(rotate, spun_ztr, btr)
-            bti = tl.where(rotate, spun_zti, bti)
-        pvr = tl.where(rotate, turned_pvr, pvr)
-        pvi = tl.where(rotate, turned_pvi, pvi)
-        ptr = tl.where(rotate, turned_ptr, ptr)
-        pti = tl.where(rotate, turned_pti, pti)
-        mvr = tl.where(rotate, turned_mvr, mvr)
-        mvi = tl.where(rotate, turned_mvi, mvi)
-        mtr = tl.where(rotate, turned_mtr, mtr)
-        mti = tl.where(rotate, turned_mti, mti)
-        zvr = tl.where(rotate, turned_zvr, zvr)
-        zvi = tl.where(rotate, turned_zvi, zvi)
-        ztr = tl.where(rotate, turned_ztr, ztr)
-        zti = tl.where(rotate, turned_zti, zti)
 
-        do_shift = ((event_action & 2) != 0) | ((event_action & 16) != 0)
-        svr, svi, wvr, wvi = _shift(pvr, pvi, mvr, mvi, state, state_mask, state_count)
-        str_, sti, wtr, wti = _shift(ptr, pti, mtr, mti, state, state_mask, state_count)
-        pvr = tl.where(do_shift, svr, pvr)
-        pvi = tl.where(do_shift, svi, pvi)
-        ptr = tl.where(do_shift, str_, ptr)
-        pti = tl.where(do_shift, sti, pti)
-        mvr = tl.where(do_shift, wvr, mvr)
-        mvi = tl.where(do_shift, wvi, mvi)
-        mtr = tl.where(do_shift, wtr, mtr)
-        mti = tl.where(do_shift, wti, mti)
-        spoil = (event_action & 8) != 0
-        pvr = tl.where(spoil, 0.0, pvr)
-        pvi = tl.where(spoil, 0.0, pvi)
-        ptr = tl.where(spoil, 0.0, ptr)
-        pti = tl.where(spoil, 0.0, pti)
-        mvr = tl.where(spoil, 0.0, mvr)
-        mvi = tl.where(spoil, 0.0, mvi)
-        mtr = tl.where(spoil, 0.0, mtr)
-        mti = tl.where(spoil, 0.0, mti)
-        if pools == 2 or pools == 3:
+            rotate = is_rf & ~is_inversion
+            if pools == 2 or pools == 3:
+                # The same pulse, the same rotation. A chemical shift moves where a
+                # pool precesses, not what a pulse does to it.
+                e0 = _dual_mul(t00[0], t00[1], t00[2], t00[3], bpvr, bpvi, bptr, bpti)
+                e1_ = _dual_mul(t01[0], t01[1], t01[2], t01[3], bmvr, bmvi, bmtr, bmti)
+                e2_ = _dual_mul(t02[0], t02[1], t02[2], t02[3], bvr, bvi, btr, bti)
+                f0 = _dual_mul(t01[0], -t01[1], t01[2], -t01[3], bpvr, bpvi, bptr, bpti)
+                f1 = _dual_mul(t00[0], t00[1], t00[2], t00[3], bmvr, bmvi, bmtr, bmti)
+                f2 = _dual_mul(t12[0], t12[1], t12[2], t12[3], bvr, bvi, btr, bti)
+                h0 = _dual_mul(t20[0], t20[1], t20[2], t20[3], bpvr, bpvi, bptr, bpti)
+                h1 = _dual_mul(t21[0], t21[1], t21[2], t21[3], bmvr, bmvi, bmtr, bmti)
+                h2 = _dual_mul(t22[0], t22[1], t22[2], t22[3], bvr, bvi, btr, bti)
+                spun_pvr = e0[0] + e1_[0] + e2_[0]
+                spun_pvi = e0[1] + e1_[1] + e2_[1]
+                spun_ptr = e0[2] + e1_[2] + e2_[2]
+                spun_pti = e0[3] + e1_[3] + e2_[3]
+                spun_mvr = f0[0] + f1[0] + f2[0]
+                spun_mvi = f0[1] + f1[1] + f2[1]
+                spun_mtr = f0[2] + f1[2] + f2[2]
+                spun_mti = f0[3] + f1[3] + f2[3]
+                spun_zvr = h0[0] + h1[0] + h2[0]
+                spun_zvi = h0[1] + h1[1] + h2[1]
+                spun_ztr = h0[2] + h1[2] + h2[2]
+                spun_zti = h0[3] + h1[3] + h2[3]
+                if profiled or dynamic:
+                    (
+                        spun_pvr,
+                        spun_pvi,
+                        spun_mvr,
+                        spun_mvi,
+                        spun_zvr,
+                        spun_zvi,
+                        spun_ptr,
+                        spun_pti,
+                        spun_mtr,
+                        spun_mti,
+                        spun_ztr,
+                        spun_zti,
+                    ) = _rotate_spinor_dual(
+                        shaped_a[0],
+                        shaped_a[1],
+                        shaped_b[0],
+                        shaped_b[1],
+                        shaped_a[2],
+                        shaped_a[3],
+                        shaped_b[2],
+                        shaped_b[3],
+                        bpvr,
+                        bpvi,
+                        bmvr,
+                        bmvi,
+                        bvr,
+                        bvi,
+                        bptr,
+                        bpti,
+                        bmtr,
+                        bmti,
+                        btr,
+                        bti,
+                    )
+                bpvr = tl.where(rotate, spun_pvr, bpvr)
+                bpvi = tl.where(rotate, spun_pvi, bpvi)
+                bptr = tl.where(rotate, spun_ptr, bptr)
+                bpti = tl.where(rotate, spun_pti, bpti)
+                bmvr = tl.where(rotate, spun_mvr, bmvr)
+                bmvi = tl.where(rotate, spun_mvi, bmvi)
+                bmtr = tl.where(rotate, spun_mtr, bmtr)
+                bmti = tl.where(rotate, spun_mti, bmti)
+                bvr = tl.where(rotate, spun_zvr, bvr)
+                bvi = tl.where(rotate, spun_zvi, bvi)
+                btr = tl.where(rotate, spun_ztr, btr)
+                bti = tl.where(rotate, spun_zti, bti)
+            pvr = tl.where(rotate, turned_pvr, pvr)
+            pvi = tl.where(rotate, turned_pvi, pvi)
+            ptr = tl.where(rotate, turned_ptr, ptr)
+            pti = tl.where(rotate, turned_pti, pti)
+            mvr = tl.where(rotate, turned_mvr, mvr)
+            mvi = tl.where(rotate, turned_mvi, mvi)
+            mtr = tl.where(rotate, turned_mtr, mtr)
+            mti = tl.where(rotate, turned_mti, mti)
+            zvr = tl.where(rotate, turned_zvr, zvr)
+            zvi = tl.where(rotate, turned_zvi, zvi)
+            ztr = tl.where(rotate, turned_ztr, ztr)
+            zti = tl.where(rotate, turned_zti, zti)
+
+            do_shift = ((event_action & 2) != 0) | ((event_action & 16) != 0)
             svr, svi, wvr, wvi = _shift(
-                bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
+                pvr, pvi, mvr, mvi, state, state_mask, state_count
             )
             str_, sti, wtr, wti = _shift(
-                bptr, bpti, bmtr, bmti, state, state_mask, state_count
+                ptr, pti, mtr, mti, state, state_mask, state_count
             )
-            bpvr = tl.where(spoil, 0.0, tl.where(do_shift, svr, bpvr))
-            bpvi = tl.where(spoil, 0.0, tl.where(do_shift, svi, bpvi))
-            bptr = tl.where(spoil, 0.0, tl.where(do_shift, str_, bptr))
-            bpti = tl.where(spoil, 0.0, tl.where(do_shift, sti, bpti))
-            bmvr = tl.where(spoil, 0.0, tl.where(do_shift, wvr, bmvr))
-            bmvi = tl.where(spoil, 0.0, tl.where(do_shift, wvi, bmvi))
-            bmtr = tl.where(spoil, 0.0, tl.where(do_shift, wtr, bmtr))
-            bmti = tl.where(spoil, 0.0, tl.where(do_shift, wti, bmti))
+            pvr = tl.where(do_shift, svr, pvr)
+            pvi = tl.where(do_shift, svi, pvi)
+            ptr = tl.where(do_shift, str_, ptr)
+            pti = tl.where(do_shift, sti, pti)
+            mvr = tl.where(do_shift, wvr, mvr)
+            mvi = tl.where(do_shift, wvi, mvi)
+            mtr = tl.where(do_shift, wtr, mtr)
+            mti = tl.where(do_shift, wti, mti)
+            spoil = (event_action & 8) != 0
+            pvr = tl.where(spoil, 0.0, pvr)
+            pvi = tl.where(spoil, 0.0, pvi)
+            ptr = tl.where(spoil, 0.0, ptr)
+            pti = tl.where(spoil, 0.0, pti)
+            mvr = tl.where(spoil, 0.0, mvr)
+            mvi = tl.where(spoil, 0.0, mvi)
+            mtr = tl.where(spoil, 0.0, mtr)
+            mti = tl.where(spoil, 0.0, mti)
+            if pools == 2 or pools == 3:
+                svr, svi, wvr, wvi = _shift(
+                    bpvr, bpvi, bmvr, bmvi, state, state_mask, state_count
+                )
+                str_, sti, wtr, wti = _shift(
+                    bptr, bpti, bmtr, bmti, state, state_mask, state_count
+                )
+                bpvr = tl.where(spoil, 0.0, tl.where(do_shift, svr, bpvr))
+                bpvi = tl.where(spoil, 0.0, tl.where(do_shift, svi, bpvi))
+                bptr = tl.where(spoil, 0.0, tl.where(do_shift, str_, bptr))
+                bpti = tl.where(spoil, 0.0, tl.where(do_shift, sti, bpti))
+                bmvr = tl.where(spoil, 0.0, tl.where(do_shift, wvr, bmvr))
+                bmvi = tl.where(spoil, 0.0, tl.where(do_shift, wvi, bmvi))
+                bmtr = tl.where(spoil, 0.0, tl.where(do_shift, wtr, bmtr))
+                bmti = tl.where(spoil, 0.0, tl.where(do_shift, wti, bmti))
+        return
 
     # ---- reverse ----
     pbvr = empty
@@ -13093,7 +13152,7 @@ def _epg_vjp_jvp_kernel(
             )
 
 
-@triton.jit
+@triton.jit(do_not_specialize=["state_count"])
 def _epg_real_vjp_jvp_kernel(
     t1,
     t2,
@@ -13130,7 +13189,7 @@ def _epg_real_vjp_jvp_kernel(
     train_count,
     event_count,
     output_count,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shim_rows,
@@ -13783,7 +13842,7 @@ def _epg_real_vjp_jvp_kernel(
     )
 
 
-@triton.jit
+@triton.jit(do_not_specialize=["state_count"])
 def _epg_real_vjp_kernel(
     t1,
     t2,
@@ -13808,7 +13867,7 @@ def _epg_real_vjp_kernel(
     train_count,
     event_count,
     output_count,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shim_rows,
@@ -14159,7 +14218,7 @@ def _epg_real_vjp_kernel(
     )
 
 
-@triton.jit
+@triton.jit(do_not_specialize=["state_count"])
 def _epg_real_kernel(
     t1,
     t2,
@@ -14179,7 +14238,7 @@ def _epg_real_kernel(
     train_count,
     event_count,
     output_count,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shimmed: tl.constexpr,
@@ -14331,7 +14390,7 @@ def _epg_real_kernel(
             minus = empty
 
 
-@triton.jit
+@triton.jit(do_not_specialize=["state_count"])
 def _epg_real_jvp_kernel(
     t1,
     t2,
@@ -14359,7 +14418,7 @@ def _epg_real_jvp_kernel(
     train_count,
     event_count,
     output_count,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shimmed: tl.constexpr,
@@ -14614,7 +14673,9 @@ def _rotate_flip_phase(
     )
 
 
-@triton.jit(do_not_specialize=["profile_bins", "lineshape_bins"])
+@triton.jit(
+    do_not_specialize=["state_count", "locations", "profile_bins", "lineshape_bins"]
+)
 def _epg_kernel(
     t1,
     t2,
@@ -14659,12 +14720,12 @@ def _epg_kernel(
     washout_scale,
     profile_step,
     lineshape_step,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shim_rows,
     shimmed: tl.constexpr,
-    locations: tl.constexpr,
+    locations,
     profiled: tl.constexpr,
     profile_bins,
     dynamic: tl.constexpr,
@@ -15416,7 +15477,9 @@ def _rotate_flip_phase_jvp(
     )
 
 
-@triton.jit(do_not_specialize=["profile_bins", "lineshape_bins"])
+@triton.jit(
+    do_not_specialize=["state_count", "locations", "profile_bins", "lineshape_bins"]
+)
 def _epg_jvp_kernel(
     t1,
     t2,
@@ -15486,12 +15549,12 @@ def _epg_jvp_kernel(
     washout_scale,
     profile_step,
     lineshape_step,
-    state_count: tl.constexpr,
+    state_count,
     single_train: tl.constexpr,
     atom_stride: tl.constexpr,
     shim_rows,
     shimmed: tl.constexpr,
-    locations: tl.constexpr,
+    locations,
     profiled: tl.constexpr,
     profile_bins,
     dynamic: tl.constexpr,
@@ -17635,80 +17698,84 @@ def simulate_vjp(
         if pool_bars is not None:
             # The slots are per chunk, so each chunk starts from nothing.
             pool_bars.zero_()
-        _epg_vjp_kernel[(triton.cdiv(span, problems),)](
-            t1,
-            t2,
-            m0,
-            b1,
-            b1_phase,
-            b0,
-            inversion_efficiency,
-            diffusion,
-            velocity,
-            bound_fraction,
-            exchange_rate,
-            t1_bound,
-            pool_b_fraction,
-            pool_b_exchange,
-            t1_pool_b,
-            t2_pool_b,
-            pool_b_shift,
-            duration,
-            kind,
-            flip,
-            phase,
-            action,
-            output_index,
-            shim_index,
-            saturation,
-            rf_frequency,
-            absorption,
-            table,
-            table_rows,
-            pairs,
-            pair_rows,
-            duration_row,
-            pool_table,
-            pool_bars,
-            pool_durations,
-            row_count,
-            grad_pair,
-            grad_real,
-            grad_imag,
-            grad_tissue,
-            grad_flip,
-            grad_phase,
-            grad_duration,
-            *trajectory,
-            base,
-            base + span,
-            atom_count,
-            train_count,
-            event_count,
-            output_count,
-            geometry.flow_scale,
-            geometry.washout_scale,
-            shims,
-            1.0 if profile is None else profile.step,
-            1.0 if lineshape is None else lineshape.step,
-            state_count=state_count,
-            single_train=train_count == 1,
-            atom_stride=_atom_stride(tissue),
-            shimmed=shims > 1,
-            locations=locations,
-            profiled=profile is not None and profile.bins > 0,
-            profile_bins=0 if profile is None else profile.bins,
-            dynamic=dynamic is not None,
-            broadened=lineshape is not None and lineshape.bins > 0,
-            lineshape_bins=0 if lineshape is None else lineshape.bins,
-            pools=pools,
-            narrow=narrow,
-            tabulated=pool_table is not None,
-            block_states=block_states,
-            problems=problems,
-            num_warps=1,
-            **_feature_flags(features, geometry),
-        )
+        # The trajectory is written by one launch and walked back by the
+        # next, so each compiles one sweep instead of both.
+        for recording in (True, False):
+            _epg_vjp_kernel[(triton.cdiv(span, problems),)](
+                t1,
+                t2,
+                m0,
+                b1,
+                b1_phase,
+                b0,
+                inversion_efficiency,
+                diffusion,
+                velocity,
+                bound_fraction,
+                exchange_rate,
+                t1_bound,
+                pool_b_fraction,
+                pool_b_exchange,
+                t1_pool_b,
+                t2_pool_b,
+                pool_b_shift,
+                duration,
+                kind,
+                flip,
+                phase,
+                action,
+                output_index,
+                shim_index,
+                saturation,
+                rf_frequency,
+                absorption,
+                table,
+                table_rows,
+                pairs,
+                pair_rows,
+                duration_row,
+                pool_table,
+                pool_bars,
+                pool_durations,
+                row_count,
+                grad_pair,
+                grad_real,
+                grad_imag,
+                grad_tissue,
+                grad_flip,
+                grad_phase,
+                grad_duration,
+                *trajectory,
+                base,
+                base + span,
+                atom_count,
+                train_count,
+                event_count,
+                output_count,
+                geometry.flow_scale,
+                geometry.washout_scale,
+                shims,
+                1.0 if profile is None else profile.step,
+                1.0 if lineshape is None else lineshape.step,
+                state_count=state_count,
+                single_train=train_count == 1,
+                atom_stride=_atom_stride(tissue),
+                shimmed=shims > 1,
+                locations=locations,
+                profiled=profile is not None and profile.bins > 0,
+                profile_bins=0 if profile is None else profile.bins,
+                dynamic=dynamic is not None,
+                broadened=lineshape is not None and lineshape.bins > 0,
+                lineshape_bins=0 if lineshape is None else lineshape.bins,
+                pools=pools,
+                narrow=narrow,
+                tabulated=pool_table is not None,
+                recording=recording,
+                block_states=block_states,
+                problems=problems,
+                num_warps=1,
+                **_feature_flags(features, geometry),
+            )
     voxel = tuple(
         grad_tissue[base * atom_count : (base + rows) * atom_count]
         for base, rows in zip(
@@ -18066,80 +18133,84 @@ def simulate_vjp_into(
     problems = _problems_per_program(block_states)
     for base in range(0, total, buffers.wave):
         span = min(buffers.wave, total - base)
-        _epg_vjp_kernel[(triton.cdiv(span, problems),)](
-            t1,
-            t2,
-            m0,
-            b1,
-            b1_phase,
-            b0,
-            inversion_efficiency,
-            diffusion,
-            velocity,
-            bound_fraction,
-            exchange_rate,
-            t1_bound,
-            pool_b_fraction,
-            pool_b_exchange,
-            t1_pool_b,
-            t2_pool_b,
-            pool_b_shift,
-            duration,
-            kind,
-            flip,
-            phase,
-            action,
-            output_index,
-            shim_index,
-            saturation,
-            rf_frequency,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            0,
-            grad_real,
-            grad_imag,
-            buffers.tissue,
-            buffers.flip,
-            buffers.phase,
-            buffers.duration,
-            *buffers.trajectory,
-            base,
-            base + span,
-            atom_count,
-            train_count,
-            event_count,
-            output_count,
-            geometry.flow_scale,
-            geometry.washout_scale,
-            1,
-            1.0,
-            1.0,
-            state_count=state_count,
-            single_train=train_count == 1,
-            atom_stride=_atom_stride(tissue),
-            shimmed=False,
-            locations=1,
-            profiled=False,
-            profile_bins=0,
-            dynamic=False,
-            broadened=False,
-            lineshape_bins=0,
-            pools=0,
-            narrow=False,
-            tabulated=False,
-            block_states=block_states,
-            problems=problems,
-            num_warps=1,
-            **_feature_flags(features, geometry),
-        )
+        # The trajectory is written by one launch and walked back by the
+        # next, so each compiles one sweep instead of both.
+        for recording in (True, False):
+            _epg_vjp_kernel[(triton.cdiv(span, problems),)](
+                t1,
+                t2,
+                m0,
+                b1,
+                b1_phase,
+                b0,
+                inversion_efficiency,
+                diffusion,
+                velocity,
+                bound_fraction,
+                exchange_rate,
+                t1_bound,
+                pool_b_fraction,
+                pool_b_exchange,
+                t1_pool_b,
+                t2_pool_b,
+                pool_b_shift,
+                duration,
+                kind,
+                flip,
+                phase,
+                action,
+                output_index,
+                shim_index,
+                saturation,
+                rf_frequency,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                0,
+                grad_real,
+                grad_imag,
+                buffers.tissue,
+                buffers.flip,
+                buffers.phase,
+                buffers.duration,
+                *buffers.trajectory,
+                base,
+                base + span,
+                atom_count,
+                train_count,
+                event_count,
+                output_count,
+                geometry.flow_scale,
+                geometry.washout_scale,
+                1,
+                1.0,
+                1.0,
+                state_count=state_count,
+                single_train=train_count == 1,
+                atom_stride=_atom_stride(tissue),
+                shimmed=False,
+                locations=1,
+                profiled=False,
+                profile_bins=0,
+                dynamic=False,
+                broadened=False,
+                lineshape_bins=0,
+                pools=0,
+                narrow=False,
+                tabulated=False,
+                recording=recording,
+                block_states=block_states,
+                problems=problems,
+                num_warps=1,
+                **_feature_flags(features, geometry),
+            )
     return buffers.tissue_gradients(atom_count)
 
 
@@ -18387,55 +18458,59 @@ def simulate_vjp_jvp_into(
                 **shape,
             )
         else:
-            _epg_vjp_jvp_kernel[grid](
-                *tissue,
-                *events,
-                t1 if table is None else table,
-                kind if table_rows is None else table_rows,
-                t1 if absorption is None else absorption,
-                t1 if pairs is None else pairs,
-                kind if pair_rows is None else pair_rows,
-                t1 if pair_direction is None else pair_direction,
-                t1 if grad_pair_value is None else grad_pair_value,
-                t1 if grad_pair_tangent is None else grad_pair_tangent,
-                *tangents,
-                kind if duration_row is None else duration_row,
-                t1 if pool_table is None else pool_table,
-                t1 if pool_bars is None else pool_bars,
-                t1 if pool_durations is None else pool_durations,
-                row_count,
-                grad_real,
-                grad_imag,
-                *grad_tissue,
-                *grad_flip,
-                *grad_phase,
-                *grad_duration,
-                *trajectory,
-                base,
-                base + span,
-                atom_count,
-                train_count,
-                event_count,
-                output_count,
-                geometry.flow_scale,
-                geometry.washout_scale,
-                1.0 if profile is None else profile.step,
-                1.0 if lineshape is None else lineshape.step,
-                shim_rows=_shim_count(tissue),
-                shimmed=_shim_count(tissue) > 1,
-                locations=1 if profile is None else profile.points,
-                profiled=profile is not None and profile.bins > 0,
-                profile_bins=0 if profile is None else profile.bins,
-                dynamic=dynamic is not None,
-                directed=dynamic_direction is not None,
-                broadened=lineshape is not None and lineshape.bins > 0,
-                lineshape_bins=0 if lineshape is None else lineshape.bins,
-                pools=pools,
-                narrow=narrow,
-                tabulated=pool_table is not None,
-                **_feature_flags(features, geometry),
-                **shape,
-            )
+            # The trajectory is written by one launch and walked back by the
+            # next, so each compiles one sweep instead of both.
+            for recording in (True, False):
+                _epg_vjp_jvp_kernel[grid](
+                    *tissue,
+                    *events,
+                    t1 if table is None else table,
+                    kind if table_rows is None else table_rows,
+                    t1 if absorption is None else absorption,
+                    t1 if pairs is None else pairs,
+                    kind if pair_rows is None else pair_rows,
+                    t1 if pair_direction is None else pair_direction,
+                    t1 if grad_pair_value is None else grad_pair_value,
+                    t1 if grad_pair_tangent is None else grad_pair_tangent,
+                    *tangents,
+                    kind if duration_row is None else duration_row,
+                    t1 if pool_table is None else pool_table,
+                    t1 if pool_bars is None else pool_bars,
+                    t1 if pool_durations is None else pool_durations,
+                    row_count,
+                    grad_real,
+                    grad_imag,
+                    *grad_tissue,
+                    *grad_flip,
+                    *grad_phase,
+                    *grad_duration,
+                    *trajectory,
+                    base,
+                    base + span,
+                    atom_count,
+                    train_count,
+                    event_count,
+                    output_count,
+                    geometry.flow_scale,
+                    geometry.washout_scale,
+                    1.0 if profile is None else profile.step,
+                    1.0 if lineshape is None else lineshape.step,
+                    shim_rows=_shim_count(tissue),
+                    shimmed=_shim_count(tissue) > 1,
+                    locations=1 if profile is None else profile.points,
+                    profiled=profile is not None and profile.bins > 0,
+                    profile_bins=0 if profile is None else profile.bins,
+                    dynamic=dynamic is not None,
+                    directed=dynamic_direction is not None,
+                    broadened=lineshape is not None and lineshape.bins > 0,
+                    lineshape_bins=0 if lineshape is None else lineshape.bins,
+                    pools=pools,
+                    narrow=narrow,
+                    tabulated=pool_table is not None,
+                    recording=recording,
+                    **_feature_flags(features, geometry),
+                    **shape,
+                )
 
     # Plane 1 is the tangent part -> d/d(primal inputs); plane 0 the value part.
     return buffers.tissue_gradients(atom_count)

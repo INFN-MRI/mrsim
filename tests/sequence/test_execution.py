@@ -43,7 +43,7 @@ def _voxels_worth(kind, share):
     """A volume carrying ``share`` of the work the crossover sits at."""
     events, _prepared, _outputs = _volume(1)
     per_voxel = int(events[1].numel())
-    floor = crossover(kind, torch.device("cuda", 0), STATES)
+    floor = crossover(kind)
     return max(1, int(floor * share / per_voxel))
 
 
@@ -55,7 +55,9 @@ def test_without_a_block_a_call_is_left_where_it_is():
 
 @pytest.mark.parametrize("kind", ["forward", "jvp", "adjoint"])
 def test_work_too_small_to_repay_a_launch_stays_on_the_host(kind):
-    """Where that line falls is measured, so the size is taken from it."""
+    """Where that line falls is what the threshold says, so the size is taken
+    from it.
+    """
     voxels = _voxels_worth(kind, 1 / 8) if torch.cuda.is_available() else 4
     assert _decide(kind, voxels, target="auto").where == "cpu"
 
@@ -71,14 +73,8 @@ def test_work_that_fits_goes_across_in_one_piece(kind):
 
 @cuda_only
 def test_the_forward_pass_needs_more_work_than_the_adjoint_to_leave_the_host():
-    """Its arithmetic is cheapest, so a launch takes longest to repay.
-
-    Both sides of this are measured on whatever card is present, so it is a
-    claim about the two passes rather than about one machine.
-    """
-    card = torch.device("cuda", 0)
-
-    assert crossover("forward", card, STATES) > crossover("adjoint", card, STATES)
+    """Its arithmetic is cheapest, so a launch takes longest to repay."""
+    assert crossover("forward") > crossover("adjoint")
 
 
 @cuda_only

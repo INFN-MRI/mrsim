@@ -43,8 +43,7 @@ from typing import Any
 import torch
 
 from .._bounds import bound_of, to_free, to_natural, widen
-from .._calibrate import crossover
-from .._execution import per_voxel
+from .._execution import PER_VOXEL_CROSSOVER, per_voxel
 
 #: What the amplitude occupies, when it is carried: real part then imaginary.
 _AMPLITUDE = ("amplitude.real", "amplitude.imag")
@@ -505,12 +504,7 @@ class ModelOperator(torch.nn.Module):
                     flat,
                     bytes_per_voxel=(self.channels + 2 * contrasts) * 4,
                     work=int(flat[0].shape[0]) * contrasts,
-                    crossover=lambda device: crossover(
-                        (kind, contrasts, self.channels),
-                        device,
-                        self._probe(kind, body),
-                        contrasts,
-                    ),
+                    crossover=PER_VOXEL_CROSSOVER,
                     body=lambda chunk, device: body(
                         [value.to(device) for value in chunk]
                     ),
@@ -527,29 +521,6 @@ class ModelOperator(torch.nn.Module):
                 cached = int(self._predict(flat[:1]).shape[-1])
             self._contrast_count = cached
         return cached
-
-    def _probe(self, kind: str, body: Any) -> Any:
-        """A closure the calibrator can time, running the real work."""
-
-        def build(device: torch.device, voxels: int) -> Any:
-            # Zero is inside every bound this operator can carry, and the cost
-            # of a pass does not depend on where in the interval it is taken.
-            here = torch.zeros(voxels, self.channels, device=device)
-            arguments = [here]
-            if kind == "jvp":
-                arguments.append(torch.ones_like(here))
-            elif kind == "vjp":
-                arguments.append(
-                    torch.ones(
-                        voxels,
-                        self._contrasts(here),
-                        device=device,
-                        dtype=torch.complex64,
-                    )
-                )
-            return lambda: body(arguments)
-
-        return build
 
 
 # %% private module subroutines

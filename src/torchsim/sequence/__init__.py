@@ -32,7 +32,6 @@ from ._builders import (
     mrf_description,  # noqa: F401
     spgr_description,  # noqa: F401
 )
-from ._calibration import calibrate  # noqa: F401
 from ._description import (
     AdcRole,  # noqa: F401
     EventAction,  # noqa: F401

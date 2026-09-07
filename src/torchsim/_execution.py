@@ -244,29 +244,32 @@ def _candidate_devices(plan: _Execution) -> tuple[torch.device, ...]:
     )
 
 
+#: Work below which a per-voxel body does not repay a device launch. It came
+#: off one laptop GPU, so it is a place to start rather than a description of
+#: any particular machine; every mapping worth running is far past it.
+PER_VOXEL_CROSSOVER = 2_000_000.0
+
+
 def choose(
     *,
     work: int,
     voxels: int,
     bytes_per_voxel: int,
-    crossover: Callable[[torch.device], float],
+    crossover: float,
 ) -> _Choice | None:
     """Decide where one per-voxel problem runs, given the policy in force.
 
     Parameters
     ----------
     work:
-        How much arithmetic the problem is, in whatever unit ``crossover``
+        How much arithmetic the problem is, in the unit ``crossover``
         answers in.
     voxels:
         The independent axis, which is what a chunk is a slice of.
     bytes_per_voxel:
         Device memory one voxel needs for this pass.
     crossover:
-        Called with the first candidate device for the work below which a
-        launch does not repay itself. A callable rather than a number because
-        answering it may mean measuring the machine, and a problem that is
-        going to a named device never asks.
+        The work below which a launch does not repay itself.
 
     Returns
     -------
@@ -286,7 +289,7 @@ def choose(
     if not devices:
         return _ON_HOST
 
-    if plan.target == "auto" and work < crossover(devices[0]):
+    if plan.target == "auto" and work < crossover:
         return _ON_HOST
 
     footprint = voxels * bytes_per_voxel
@@ -366,7 +369,7 @@ def per_voxel(
     *,
     bytes_per_voxel: int,
     work: int,
-    crossover: Callable[[torch.device], float],
+    crossover: float,
     body: Callable[[Sequence[torch.Tensor], torch.device], tuple[torch.Tensor, ...]],
 ) -> tuple[torch.Tensor, ...] | None:
     """Run a per-voxel body wherever the policy in force says to.
@@ -385,8 +388,7 @@ def per_voxel(
     work:
         The problem's size, in the unit ``crossover`` answers in.
     crossover:
-        The work below which a launch does not repay itself, called with the
-        first candidate device.
+        The work below which a launch does not repay itself.
     body:
         Called as ``body(chunk, device)``, returning one or more tensors that
         share the chunk's voxel axis.
@@ -421,7 +423,7 @@ def one_device(
     work: int,
     voxels: int,
     bytes_per_voxel: int,
-    crossover: Callable[[torch.device], float],
+    crossover: float,
 ) -> torch.device | None:
     """Where a chunked reduction should run, under the policy in force.
 

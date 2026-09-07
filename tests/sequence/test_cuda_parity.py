@@ -28,16 +28,17 @@ STATES = 10
 
 
 def _probed_atoms(kind="forward", trains=64, share=8):
-    """Atoms enough to carry ``share`` of the work the probe repays itself at.
+    """Atoms enough to carry ``share`` of the work the subspace test repays
+    itself at.
 
-    That work is measured on whatever card is present, so a size written down
-    here would be a claim about one machine.
+    Taken from the threshold rather than written down, so the size follows it
+    wherever it moves.
     """
     from torchsim.sequence._calibration import detection
 
     events, _prepared, _count = _real_case(trains, "cpu", atoms=1)
     per_atom = trains * int(events[1].numel())
-    floor = detection(kind, torch.device("cuda", 0), STATES)
+    floor = detection(kind, torch.device("cuda", 0))
     return max(1, int(floor * share / per_atom))
 
 
@@ -262,16 +263,16 @@ def test_awkward_problem_counts_still_match_the_cpu_kernel(atoms):
     assert ((expected - actual.cpu()).abs().max() / expected.abs().max()) < 1e-5
 
 
-def test_a_small_problem_skips_the_probe_on_cuda():
-    """The probe costs the same everywhere; what it buys does not.
+def test_a_small_problem_skips_the_subspace_test_on_cuda():
+    """The test costs the same everywhere; what it buys does not.
 
-    A GPU clears the work behind the verdict fast enough that a probe worth
+    A GPU clears the work behind the verdict fast enough that a test worth
     running on the CPU is pure overhead here.
     """
     from torchsim.sequence._calibration import detection
 
-    assert detection("forward", torch.device("cuda", 0), STATES) > detection(
-        "forward", torch.device("cpu"), STATES
+    assert detection("forward", torch.device("cuda", 0)) > detection(
+        "forward", torch.device("cpu")
     )
 
 
