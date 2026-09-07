@@ -54,7 +54,7 @@ jobs:
       - name: Build the HTML
         run: bash scripts/build_docs.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: html
           path: docs/build/html
@@ -123,7 +123,7 @@ jobs:
         run: |
           find docs/generated/autoexamples -name '*.py.md5' -printf '%f\n' | sort
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: html-${{ env.TORCHSIM_DOCS_VERSION }}
           path: docs/build/html
