@@ -233,12 +233,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer_guide.html">Developer Guide</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explanation</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../../explanations/epg.html">Extended phase graphs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../explanations/description.html">Sequence description</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../explanations/implementation.html">How TorchSim runs it</a></li>
-</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../generated/autoexamples/index.html">Examples</a></li>
@@ -741,29 +735,32 @@
     <span class="p">)</span>
 
 
+<span class="c1">#: Work below which a per-voxel body does not repay a device launch. It came</span>
+<span class="c1">#: off one laptop GPU, so it is a place to start rather than a description of</span>
+<span class="c1">#: any particular machine; every mapping worth running is far past it.</span>
+<span class="n">PER_VOXEL_CROSSOVER</span> <span class="o">=</span> <span class="mf">2_000_000.0</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">choose</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">work</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">voxels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">bytes_per_voxel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">crossover</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">crossover</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Choice</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Decide where one per-voxel problem runs, given the policy in force.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    work:</span>
-<span class="sd">        How much arithmetic the problem is, in whatever unit ``crossover``</span>
+<span class="sd">        How much arithmetic the problem is, in the unit ``crossover``</span>
 <span class="sd">        answers in.</span>
 <span class="sd">    voxels:</span>
 <span class="sd">        The independent axis, which is what a chunk is a slice of.</span>
 <span class="sd">    bytes_per_voxel:</span>
 <span class="sd">        Device memory one voxel needs for this pass.</span>
 <span class="sd">    crossover:</span>
-<span class="sd">        Called with the first candidate device for the work below which a</span>
-<span class="sd">        launch does not repay itself. A callable rather than a number because</span>
-<span class="sd">        answering it may mean measuring the machine, and a problem that is</span>
-<span class="sd">        going to a named device never asks.</span>
+<span class="sd">        The work below which a launch does not repay itself.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -783,7 +780,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_ON_HOST</span>
 
-    <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s2">"auto"</span> <span class="ow">and</span> <span class="n">work</span> <span class="o">&lt;</span> <span class="n">crossover</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s2">"auto"</span> <span class="ow">and</span> <span class="n">work</span> <span class="o">&lt;</span> <span class="n">crossover</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_ON_HOST</span>
 
     <span class="n">footprint</span> <span class="o">=</span> <span class="n">voxels</span> <span class="o">*</span> <span class="n">bytes_per_voxel</span>
@@ -863,7 +860,7 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">bytes_per_voxel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">work</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">crossover</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">crossover</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">body</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Run a per-voxel body wherever the policy in force says to.</span>
@@ -882,8 +879,7 @@
 <span class="sd">    work:</span>
 <span class="sd">        The problem's size, in the unit ``crossover`` answers in.</span>
 <span class="sd">    crossover:</span>
-<span class="sd">        The work below which a launch does not repay itself, called with the</span>
-<span class="sd">        first candidate device.</span>
+<span class="sd">        The work below which a launch does not repay itself.</span>
 <span class="sd">    body:</span>
 <span class="sd">        Called as ``body(chunk, device)``, returning one or more tensors that</span>
 <span class="sd">        share the chunk's voxel axis.</span>
@@ -918,7 +914,7 @@
     <span class="n">work</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">voxels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">bytes_per_voxel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">crossover</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">crossover</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Where a chunked reduction should run, under the policy in force.</span>
 

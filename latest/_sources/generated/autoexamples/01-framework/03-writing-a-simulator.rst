@@ -423,7 +423,7 @@ thing a physicist would name rather than as a pulse and a spoiler.
 
       largest disagreement with the closed form: 7.45e-09
 
-    [<matplotlib.legend.Legend object at 0x7f81496fb980>]
+    [<matplotlib.legend.Legend object at 0x7f4dd8ba3500>]
 
 
 
@@ -460,7 +460,7 @@ signal it produces.
 
       49 events, 6350 ms long
 
-    [<matplotlib.legend.Legend object at 0x7f815801c9e0>]
+    [<matplotlib.legend.Legend object at 0x7f4dd8b9c590>]
 
 
 
@@ -533,7 +533,7 @@ The shipped models come with one, and yours can too:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.386 seconds)
+   **Total running time of the script:** (0 minutes 2.427 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_01-framework_03-writing-a-simulator.py:

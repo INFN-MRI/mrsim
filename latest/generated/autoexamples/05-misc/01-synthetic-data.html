@@ -238,12 +238,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Guide</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explanation</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../../../explanations/epg.html">Extended phase graphs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../explanations/description.html">Sequence description</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../explanations/implementation.html">How TorchSim runs it</a></li>
-</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Examples</a></li>
@@ -660,39 +654,36 @@ under the home directory.</p>
 <span class="n">subject</span> <span class="o">=</span> <a href="https://docs.python.org/3/library/typing.html#typing.Generic" title="typing.Generic" class="sphx-glr-backref-module-typing sphx-glr-backref-type-py-class"><span class="n">tio</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">IXITiny</span></a><span class="p">(</span><span class="nb">str</span><span class="p">(</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">CACHE</span></a><span class="p">),</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Downloading https://www.dropbox.com/s/ogxjwjxdv5mieah/ixi_tiny.zip?dl=1 to /tmp/tmpdbzjqzv7.zip
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Downloading https://www.dropbox.com/s/ogxjwjxdv5mieah/ixi_tiny.zip?dl=1 to /tmp/tmpzf2f724z.zip
 
 0it [00:00, ?it/s]
   0%|          | 0/233926107 [00:01&lt;?, ?it/s]
-  2%|▏         | 3792896/233926107 [00:01&lt;00:06, 37784409.53it/s]
-  6%|▌         | 12959744/233926107 [00:01&lt;00:03, 69036506.00it/s]
-  8%|▊         | 19283968/233926107 [00:01&lt;00:03, 61303459.78it/s]
- 12%|█▏        | 26910720/233926107 [00:01&lt;00:03, 66912018.13it/s]
- 15%|█▌        | 36126720/233926107 [00:02&lt;00:02, 71603178.82it/s]
- 20%|█▉        | 46071808/233926107 [00:02&lt;00:02, 80519502.26it/s]
- 23%|██▎       | 53878784/233926107 [00:02&lt;00:02, 79489782.10it/s]
- 27%|██▋       | 62095360/233926107 [00:02&lt;00:02, 80314410.87it/s]
- 30%|██▉       | 70017024/233926107 [00:02&lt;00:02, 78709196.92it/s]
- 33%|███▎      | 78233600/233926107 [00:02&lt;00:01, 77894592.76it/s]
- 37%|███▋      | 85975040/233926107 [00:02&lt;00:01, 74287164.57it/s]
- 40%|███▉      | 93396992/233926107 [00:02&lt;00:02, 70073431.53it/s]
- 43%|████▎     | 101384192/233926107 [00:02&lt;00:01, 70878364.95it/s]
- 47%|████▋     | 110534656/233926107 [00:03&lt;00:01, 76644290.77it/s]
- 51%|█████     | 118259712/233926107 [00:03&lt;00:01, 76650599.12it/s]
- 54%|█████▍    | 126648320/233926107 [00:03&lt;00:01, 77923946.25it/s]
- 58%|█████▊    | 135069696/233926107 [00:03&lt;00:01, 77058668.22it/s]
- 61%|██████▏   | 143491072/233926107 [00:03&lt;00:01, 76155343.94it/s]
- 65%|██████▍   | 151912448/233926107 [00:03&lt;00:01, 77892982.64it/s]
- 69%|██████▉   | 161972224/233926107 [00:03&lt;00:00, 84381429.09it/s]
- 73%|███████▎  | 170459136/233926107 [00:03&lt;00:00, 70650865.11it/s]
- 76%|███████▌  | 177922048/233926107 [00:04&lt;00:00, 66922812.54it/s]
- 80%|███████▉  | 186785792/233926107 [00:04&lt;00:00, 72469708.09it/s]
- 83%|████████▎ | 194330624/233926107 [00:04&lt;00:00, 71429134.42it/s]
- 87%|████████▋ | 202440704/233926107 [00:04&lt;00:00, 72945238.09it/s]
- 91%|█████████ | 212197376/233926107 [00:04&lt;00:00, 79747060.62it/s]
- 95%|█████████▍| 221396992/233926107 [00:04&lt;00:00, 80033713.01it/s]
- 98%|█████████▊| 229818368/233926107 [00:04&lt;00:00, 77931959.53it/s]
-233930752it [00:04, 49469263.61it/s]
+  4%|▎         | 8282112/233926107 [00:01&lt;00:02, 82811919.34it/s]
+  6%|▌         | 13156352/233926107 [00:02&lt;00:07, 28334122.92it/s]
+  9%|▉         | 21766144/233926107 [00:02&lt;00:04, 42649714.11it/s]
+ 12%|█▏        | 28311552/233926107 [00:02&lt;00:04, 48915509.87it/s]
+ 14%|█▍        | 33898496/233926107 [00:02&lt;00:04, 46408190.55it/s]
+ 17%|█▋        | 39198720/233926107 [00:02&lt;00:04, 45152030.00it/s]
+ 21%|██        | 49553408/233926107 [00:02&lt;00:03, 60427635.21it/s]
+ 24%|██▍       | 56631296/233926107 [00:02&lt;00:02, 59652049.78it/s]
+ 27%|██▋       | 63447040/233926107 [00:02&lt;00:02, 61653027.65it/s]
+ 30%|██▉       | 69885952/233926107 [00:03&lt;00:02, 59221845.70it/s]
+ 32%|███▏      | 76005376/233926107 [00:03&lt;00:03, 47325356.40it/s]
+ 37%|███▋      | 87613440/233926107 [00:03&lt;00:02, 63546000.03it/s]
+ 42%|████▏     | 98312192/233926107 [00:03&lt;00:01, 73162346.33it/s]
+ 45%|████▌     | 106315776/233926107 [00:03&lt;00:02, 62942132.68it/s]
+ 53%|█████▎    | 124657664/233926107 [00:03&lt;00:01, 91555402.49it/s]
+ 58%|█████▊    | 135028736/233926107 [00:03&lt;00:01, 92140402.27it/s]
+ 62%|██████▏   | 145096704/233926107 [00:04&lt;00:01, 57651533.99it/s]
+ 65%|██████▌   | 153018368/233926107 [00:05&lt;00:03, 25382122.13it/s]
+ 68%|██████▊   | 158834688/233926107 [00:05&lt;00:02, 27362426.70it/s]
+ 70%|███████   | 164102144/233926107 [00:05&lt;00:02, 30182390.43it/s]
+ 72%|███████▏  | 169295872/233926107 [00:05&lt;00:02, 30517447.93it/s]
+ 79%|███████▉  | 185024512/233926107 [00:05&lt;00:00, 50621814.44it/s]
+ 84%|████████▎ | 195829760/233926107 [00:05&lt;00:00, 60542105.91it/s]
+ 89%|████████▉ | 208150528/233926107 [00:05&lt;00:00, 72592214.14it/s]
+ 95%|█████████▍| 222076928/233926107 [00:05&lt;00:00, 87654356.20it/s]
+233930752it [00:06, 38006506.30it/s]
 </pre></div>
 </div>
 </section>
@@ -846,7 +837,7 @@ here because the maps are known. A real pipeline would estimate them.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>adjoint and combine 3.8s
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>adjoint and combine 4.1s
 </pre></div>
 </div>
 </section>
@@ -912,7 +903,7 @@ instead of the spiral and the sine generated here;</p></li>
 <p>The tissue table is the one thing decided rather than read. A relaxometry
 protocol on the same subject would fill it from data, which is what the
 parameter-inference notebooks do.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 16.065 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 13.812 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-05-misc-01-synthetic-data-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/firmlab-pisa/torchsim/gh-pages?urlpath=lab/tree/latest/examples/generated/autoexamples/05-misc/01-synthetic-data.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo4.svg" style="width: 150px;" />
