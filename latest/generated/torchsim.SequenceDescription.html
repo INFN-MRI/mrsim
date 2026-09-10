@@ -693,7 +693,7 @@ it, so a stream carrying shapes on a 2 microsecond raster and read on a
 <td><p>Lay operators out end to end and return the stream they make.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#torchsim.SequenceDescription.from_pulseq" title="torchsim.SequenceDescription.from_pulseq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_pulseq</span></code></a></p></td>
-<td><p>Return what one repetition of a Pulseq <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file plays.</p></td>
+<td><p>Return what one repetition of a Pulseq sequence plays.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#torchsim.SequenceDescription.plot" title="torchsim.SequenceDescription.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a></p></td>
 <td><p>Draw the stream: pulses as stems, samples as markers.</p></td>
@@ -729,12 +729,13 @@ read off it and are zero without it.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="torchsim.SequenceDescription.from_pulseq">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_pulseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/sequence/_description.html#SequenceDescription.from_pulseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.SequenceDescription.from_pulseq" title="Link to this definition">#</a></dt>
-<dd><p>Return what one repetition of a Pulseq <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file plays.</p>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_pulseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/sequence/_description.html#SequenceDescription.from_pulseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.SequenceDescription.from_pulseq" title="Link to this definition">#</a></dt>
+<dd><p>Return what one repetition of a Pulseq sequence plays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – The sequence file.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Path</em><em> or </em><em>sequence</em>) – A <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file, or a sequence in memory with pypulseq’s reading
+interface – pypulseq’s own <code class="docutils literal notranslate"><span class="pre">Sequence</span></code>, or pypulseqpp’s.</p></li>
 <li><p><strong>settings</strong> (<em>Any</em>) – <code class="docutils literal notranslate"><span class="pre">tr_index</span></code> to name which repetition to read, and the
 <code class="docutils literal notranslate"><span class="pre">subsequence_index</span></code>, <code class="docutils literal notranslate"><span class="pre">crusher_dephasing_rad</span></code> and
 <code class="docutils literal notranslate"><span class="pre">voxel_size_m</span></code> the description carries.</p></li>

@@ -223,7 +223,7 @@ value itself.
 
     published spread   sigma(T1)/T1 = 11.0%, 12.9%   sigma(T2)/T2 = 10.1%, 12.1%
     designed           sigma(T1)/T1 = 7.4%, 8.9%   sigma(T2)/T2 = 7.4%, 9.1%
-    designed in 4.9 s
+    designed in 3.2 s
 
 
 
@@ -253,7 +253,7 @@ differing only in flip angle. Before and after.
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7f4dd8c0c470>
+    <matplotlib.legend.Legend object at 0x7f8418e688f0>
 
 
 
@@ -407,7 +407,7 @@ standard deviation the bound was computed with.
 
  .. code-block:: none
 
-    38980 joint fits in 4.0 s
+    38980 joint fits in 3.3 s
 
 
 
@@ -528,7 +528,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 12.681 seconds)
+   **Total running time of the script:** (0 minutes 9.739 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_03-sequence-optimization_02-joint-relaxometry.py:

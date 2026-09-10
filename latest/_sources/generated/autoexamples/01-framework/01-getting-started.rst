@@ -119,7 +119,7 @@ will affect the resulting signal evolution
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7f4dda091910>
+    <matplotlib.legend.Legend object at 0x7f8420deab40>
 
 
 
@@ -364,8 +364,8 @@ minutes or hours.
 
  .. code-block:: none
 
-      held             0.95 ms a call
-      rebuilt anew    14.15 ms a call
+      held             0.77 ms a call
+      rebuilt anew    11.71 ms a call
 
 
 
@@ -510,7 +510,7 @@ to check that a layout laid down what you meant.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f4dd9b5f560>]
+    [<matplotlib.legend.Legend object at 0x7f842014a810>]
 
 
 
@@ -641,7 +641,7 @@ equilibrium the shipped object adds does not come along.
  .. code-block:: none
 
 
-    [<matplotlib.legend.Legend object at 0x7f4dd9651250>]
+    [<matplotlib.legend.Legend object at 0x7f84200c2e40>]
 
 
 
@@ -715,7 +715,7 @@ notebooks say what to write instead.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 9.221 seconds)
+   **Total running time of the script:** (0 minutes 6.915 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_01-framework_01-getting-started.py:

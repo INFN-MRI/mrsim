@@ -609,7 +609,8 @@ operators.</p>
 given to any simulator, and giving one is what turns its term on.</p>
 <p>A sequence that came from somewhere else is read the same way:
 <a class="reference internal" href="../generated/torchsim.model.Simulator.html#torchsim.model.Simulator.from_description" title="torchsim.model.Simulator.from_description"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_description()</span></code></a> takes the stream an MRD client decodes, and
-<a class="reference internal" href="../generated/torchsim.model.Simulator.html#torchsim.model.Simulator.from_pulseq" title="torchsim.model.Simulator.from_pulseq"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_pulseq()</span></code></a> takes a Pulseq <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file directly. Neither
+<a class="reference internal" href="../generated/torchsim.model.Simulator.html#torchsim.model.Simulator.from_pulseq" title="torchsim.model.Simulator.from_pulseq"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_pulseq()</span></code></a> takes a Pulseq <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file, or the sequence
+object a design built, directly. Neither
 walks a layout – naming the simulator is what says how the events are played.</p>
 <p>Implement <a class="reference internal" href="../generated/torchsim.model.Simulator.html#torchsim.model.Simulator.evaluate" title="torchsim.model.Simulator.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate()</span></code></a> instead when the signal has a closed
 form – a mono-exponential decay, an inversion-recovery curve, an Ernst

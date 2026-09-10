@@ -163,8 +163,8 @@ under the home directory.
 
  .. code-block:: none
 
-    Downloading https://www.dropbox.com/s/ogxjwjxdv5mieah/ixi_tiny.zip?dl=1 to /tmp/tmpzf2f724z.zip
-    0it [00:00, ?it/s]      0%|          | 0/233926107 [00:01<?, ?it/s]      4%|▎         | 8282112/233926107 [00:01<00:02, 82811919.34it/s]      6%|▌         | 13156352/233926107 [00:02<00:07, 28334122.92it/s]      9%|▉         | 21766144/233926107 [00:02<00:04, 42649714.11it/s]     12%|█▏        | 28311552/233926107 [00:02<00:04, 48915509.87it/s]     14%|█▍        | 33898496/233926107 [00:02<00:04, 46408190.55it/s]     17%|█▋        | 39198720/233926107 [00:02<00:04, 45152030.00it/s]     21%|██        | 49553408/233926107 [00:02<00:03, 60427635.21it/s]     24%|██▍       | 56631296/233926107 [00:02<00:02, 59652049.78it/s]     27%|██▋       | 63447040/233926107 [00:02<00:02, 61653027.65it/s]     30%|██▉       | 69885952/233926107 [00:03<00:02, 59221845.70it/s]     32%|███▏      | 76005376/233926107 [00:03<00:03, 47325356.40it/s]     37%|███▋      | 87613440/233926107 [00:03<00:02, 63546000.03it/s]     42%|████▏     | 98312192/233926107 [00:03<00:01, 73162346.33it/s]     45%|████▌     | 106315776/233926107 [00:03<00:02, 62942132.68it/s]     53%|█████▎    | 124657664/233926107 [00:03<00:01, 91555402.49it/s]     58%|█████▊    | 135028736/233926107 [00:03<00:01, 92140402.27it/s]     62%|██████▏   | 145096704/233926107 [00:04<00:01, 57651533.99it/s]     65%|██████▌   | 153018368/233926107 [00:05<00:03, 25382122.13it/s]     68%|██████▊   | 158834688/233926107 [00:05<00:02, 27362426.70it/s]     70%|███████   | 164102144/233926107 [00:05<00:02, 30182390.43it/s]     72%|███████▏  | 169295872/233926107 [00:05<00:02, 30517447.93it/s]     79%|███████▉  | 185024512/233926107 [00:05<00:00, 50621814.44it/s]     84%|████████▎ | 195829760/233926107 [00:05<00:00, 60542105.91it/s]     89%|████████▉ | 208150528/233926107 [00:05<00:00, 72592214.14it/s]     95%|█████████▍| 222076928/233926107 [00:05<00:00, 87654356.20it/s]    233930752it [00:06, 38006506.30it/s]                               
+    Downloading https://www.dropbox.com/s/ogxjwjxdv5mieah/ixi_tiny.zip?dl=1 to /tmp/tmpp2tnrani.zip
+    0it [00:00, ?it/s]      0%|          | 0/233926107 [00:01<?, ?it/s]      1%|▏         | 2957312/233926107 [00:01<00:07, 29572231.63it/s]      8%|▊         | 18268160/233926107 [00:01<00:02, 93144042.29it/s]     12%|█▏        | 26902528/233926107 [00:01<00:02, 87191229.06it/s]     16%|█▌        | 37289984/233926107 [00:01<00:02, 90374725.64it/s]     20%|█▉        | 46735360/233926107 [00:01<00:02, 91761017.87it/s]     24%|██▎       | 55320576/233926107 [00:02<00:02, 87848097.92it/s]     28%|██▊       | 64651264/233926107 [00:02<00:01, 87686455.22it/s]     32%|███▏      | 74776576/233926107 [00:02<00:01, 91769431.22it/s]     36%|███▌      | 83787776/233926107 [00:02<00:01, 87964117.29it/s]     40%|████      | 93773824/233926107 [00:02<00:01, 91469012.35it/s]     44%|████▍     | 102875136/233926107 [00:02<00:01, 87841663.28it/s]     48%|████▊     | 111804416/233926107 [00:02<00:01, 88256435.40it/s]     52%|█████▏    | 121503744/233926107 [00:02<00:01, 86912938.21it/s]     56%|█████▋    | 132022272/233926107 [00:02<00:01, 87687756.19it/s]     60%|██████    | 140795904/233926107 [00:03<00:01, 84730464.64it/s]     64%|██████▍   | 149848064/233926107 [00:03<00:00, 86335048.35it/s]     68%|██████▊   | 159399936/233926107 [00:03<00:00, 85219657.41it/s]     73%|███████▎  | 169918464/233926107 [00:03<00:00, 86630743.58it/s]     77%|███████▋  | 179634176/233926107 [00:03<00:00, 89540069.77it/s]     81%|████████  | 188751872/233926107 [00:03<00:00, 90003375.40it/s]     85%|████████▍ | 197779456/233926107 [00:03<00:00, 86456739.60it/s]     89%|████████▉ | 207814656/233926107 [00:03<00:00, 86294303.03it/s]     93%|█████████▎| 217858048/233926107 [00:03<00:00, 90231284.47it/s]     97%|█████████▋| 226934784/233926107 [00:04<00:00, 86755002.89it/s]    233930752it [00:05, 44976493.53it/s]                               
 
 
 
@@ -226,7 +226,7 @@ between a phantom with partial volume in it and one without.
     Downloaded https://raw.githubusercontent.com/wwu-mmll/deepmriprep/main/deepmriprep/data/models/segmentation_patch_17_model.pt to /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/deepmriprep/data/models/segmentation_patch_17_model.pt
     Downloaded https://raw.githubusercontent.com/wwu-mmll/deepmriprep/main/deepmriprep/data/models/segmentation_model.pt to /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/deepmriprep/data/models/segmentation_model.pt
     Downloaded https://raw.githubusercontent.com/wwu-mmll/deepmriprep/main/deepmriprep/data/models/warp_model.pt to /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/deepmriprep/data/models/warp_model.pt
-    128x128 slice, 5735 brain voxels; 92% are a mixture of two tissues or more
+    128x128 slice, 5733 brain voxels; 92% are a mixture of two tissues or more
 
 
 
@@ -284,9 +284,9 @@ the same subject would fill the table from data instead.
 
 
     tissue           voxels     M0  T1 (ms)  T2 (ms)
-    grey matter        2427   0.80     1100     95.0
-    white matter       2294   0.70      650     70.0
-    CSF                 571   1.00     4000   2000.0
+    grey matter        2428   0.80     1100     95.0
+    white matter       2297   0.70      650     70.0
+    CSF                 568   1.00     4000   2000.0
 
 
 
@@ -403,8 +403,8 @@ twenty-one-fold undersampled, which is how MRF is run.
 
  .. code-block:: none
 
-    400 arms built in 3.8s
-    forward NUFFT 3.6s -> (400, 8, 768)
+    400 arms built in 2.8s
+    forward NUFFT 2.3s -> (400, 8, 768)
 
 
 
@@ -459,7 +459,7 @@ here because the maps are known. A real pipeline would estimate them.
 
  .. code-block:: none
 
-    adjoint and combine 4.1s
+    adjoint and combine 2.5s
 
 
 
@@ -484,8 +484,8 @@ reads.
 
  .. code-block:: none
 
-    per-frame error inside the brain :  60.7%
-    time-course agreement            : median 0.893, tenth percentile 0.714
+    per-frame error inside the brain :  60.3%
+    time-course agreement            : median 0.894, tenth percentile 0.715
 
 
 
@@ -605,7 +605,7 @@ parameter-inference notebooks do.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 13.812 seconds)
+   **Total running time of the script:** (2 minutes 14.633 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_05-misc_01-synthetic-data.py:

@@ -1191,13 +1191,14 @@
 <div class="viewcode-block" id="SequenceDescription.from_pulseq">
 <a class="viewcode-back" href="../../../generated/torchsim.SequenceDescription.html#torchsim.SequenceDescription.from_pulseq">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_pulseq</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SequenceDescription</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return what one repetition of a Pulseq ``.seq`` file plays.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_pulseq</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SequenceDescription</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return what one repetition of a Pulseq sequence plays.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        path : str or Path</span>
-<span class="sd">            The sequence file.</span>
+<span class="sd">        source : str, Path or sequence</span>
+<span class="sd">            A ``.seq`` file, or a sequence in memory with pypulseq's reading</span>
+<span class="sd">            interface -- pypulseq's own ``Sequence``, or pypulseqpp's.</span>
 <span class="sd">        settings : Any</span>
 <span class="sd">            ``tr_index`` to name which repetition to read, and the</span>
 <span class="sd">            ``subsequence_index``, ``crusher_dephasing_rad`` and</span>
@@ -1209,7 +1210,7 @@
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">._pulseq</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_pulseq_description</span>
 
-        <span class="k">return</span> <span class="n">read_pulseq_description</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">read_pulseq_description</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SequenceDescription.plot">

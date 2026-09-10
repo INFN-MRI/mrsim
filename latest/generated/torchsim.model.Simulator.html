@@ -642,7 +642,7 @@ winding the description asks for.</p>
 <td><p>Return a simulator over a stream someone else assembled.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#torchsim.model.Simulator.from_pulseq" title="torchsim.model.Simulator.from_pulseq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_pulseq</span></code></a></p></td>
-<td><p>Return a simulator over one repetition of a Pulseq <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file.</p></td>
+<td><p>Return a simulator over one repetition of a Pulseq sequence.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">jacobian</span></code></p></td>
 <td><p>Return the signal and its derivative with respect to <code class="docutils literal notranslate"><span class="pre">diff</span></code>.</p></td>
@@ -761,8 +761,8 @@ for them.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="torchsim.model.Simulator.from_pulseq">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_pulseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">tr_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#Simulator.from_pulseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.Simulator.from_pulseq" title="Link to this definition">#</a></dt>
-<dd><p>Return a simulator over one repetition of a Pulseq <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file.</p>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_pulseq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">tr_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchsim/model/_state_machine.html#Simulator.from_pulseq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchsim.model.Simulator.from_pulseq" title="Link to this definition">#</a></dt>
+<dd><p>Return a simulator over one repetition of a Pulseq sequence.</p>
 <p>The offline half of <a class="reference internal" href="#torchsim.model.Simulator.from_description" title="torchsim.model.Simulator.from_description"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_description()</span></code></a>: the same events, read
 from the file a scanner would be given rather than from the stream it
 sends back. The file states how many blocks a repetition holds, so
@@ -771,7 +771,8 @@ how those events are to be played.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – The sequence file.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Path</em><em> or </em><em>sequence</em>) – A <code class="docutils literal notranslate"><span class="pre">.seq</span></code> file, or a sequence in memory with pypulseq’s reading
+interface – pypulseq’s own <code class="docutils literal notranslate"><span class="pre">Sequence</span></code>, or pypulseqpp’s.</p></li>
 <li><p><strong>tr_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Which repetition to read, counted in whole repetitions. Defaults to
 the file’s <code class="docutils literal notranslate"><span class="pre">TRRef</span></code> definition, and otherwise to the first
 repetition that acquires – which is refused when the repetitions
