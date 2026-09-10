@@ -776,12 +776,12 @@ class Simulator(_SignalModel):
     @classmethod
     def from_pulseq(
         cls,
-        path: Any,
+        source: Any,
         *,
         tr_index: int | None = None,
         **settings: Any,
     ) -> Simulator:
-        """Return a simulator over one repetition of a Pulseq ``.seq`` file.
+        """Return a simulator over one repetition of a Pulseq sequence.
 
         The offline half of :meth:`from_description`: the same events, read
         from the file a scanner would be given rather than from the stream it
@@ -791,8 +791,9 @@ class Simulator(_SignalModel):
 
         Parameters
         ----------
-        path : str or Path
-            The sequence file.
+        source : str, Path or sequence
+            A ``.seq`` file, or a sequence in memory with pypulseq's reading
+            interface -- pypulseq's own ``Sequence``, or pypulseqpp's.
         tr_index : int, optional
             Which repetition to read, counted in whole repetitions. Defaults to
             the file's ``TRRef`` definition, and otherwise to the first
@@ -808,7 +809,7 @@ class Simulator(_SignalModel):
         from ..sequence._pulseq import read_pulseq_description
 
         return cls.from_description(
-            read_pulseq_description(path, tr_index=tr_index), **settings
+            read_pulseq_description(source, tr_index=tr_index), **settings
         )
 
     @classmethod

@@ -111,6 +111,28 @@ def test_the_stream_is_the_blocks_the_file_lists(gradient_echo):
     assert described.tr_duration_us == pytest.approx(TR_S * 1e6)
 
 
+def test_a_sequence_in_memory_reads_as_the_file_it_writes(gradient_echo):
+    """A design hands its sequence over without writing it out first.
+
+    An even readout crosses k = 0 midway between two samples, and the file's
+    rounding decides which of the two is nearer, so an echo may land one dwell
+    apart -- the tolerance the echo-time test already allows.
+    """
+    sequence, from_file = gradient_echo
+    in_memory = SequenceDescription.from_pulseq(sequence)
+    assert [event.type for event in in_memory.events] == [
+        event.type for event in from_file.events
+    ]
+    assert np.allclose(
+        [event.timestamp_us for event in in_memory.events],
+        [event.timestamp_us for event in from_file.events],
+        rtol=0.0,
+        atol=DWELL_S * 1e6,
+    )
+    assert in_memory.tr_duration_us == pytest.approx(from_file.tr_duration_us)
+    assert sorted(in_memory.rf_definitions) == sorted(from_file.rf_definitions)
+
+
 def test_the_pulse_reads_back_at_the_angle_it_was_written_at(gradient_echo):
     """The flip is the envelope integrated on the raster the file declares."""
     _sequence, described = gradient_echo

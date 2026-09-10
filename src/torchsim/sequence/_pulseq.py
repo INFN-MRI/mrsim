@@ -41,8 +41,10 @@ _USES = {
 }
 
 
-def _read(path: str | Path) -> Any:
-    """Return the parsed sequence, or say what has to be installed to get one."""
+def _read(source: Any) -> Any:
+    """Return ``source`` if it is a sequence already, or the file it names parsed."""
+    if hasattr(source, "block_events"):
+        return source
     try:
         import pypulseq
     except ImportError as missing:  # pragma: no cover - exercised by the message
@@ -51,7 +53,7 @@ def _read(path: str | Path) -> Any:
             "require otherwise: pip install torchsim[pulseq]"
         ) from missing
     sequence = pypulseq.Sequence()
-    sequence.read(str(path))
+    sequence.read(str(source))
     return sequence
 
 
@@ -101,10 +103,12 @@ def _readouts(sequence: Any) -> list[_Readout]:
     return found
 
 
-def _shape_and_amplitude(sequence: Any, row: int) -> tuple[float, ...]:
-    """What an RF library row plays, less the phase and frequency it plays at."""
-    entry = sequence.rf_library.data[row]
-    return (float(entry[0]), *(float(value) for value in entry[1:4]))
+def _shape(pulse: Any) -> tuple[bytes, bytes]:
+    """What a pulse plays, less the amplitude, phase and frequency it plays at."""
+    signal = np.asarray(pulse.signal, dtype=np.complex128)
+    peak = float(np.abs(signal).max()) or 1.0
+    times = np.asarray(pulse.t, dtype=float)
+    return np.round(signal / peak, 9).tobytes(), np.round(times, 12).tobytes()
 
 
 def _number(sequence: Any, name: str) -> float | None:
@@ -148,9 +152,12 @@ def _tr_window(sequence: Any, tr_size: int, tr_index: int | None) -> int:
     # in what the sequence plays.
     played = {
         tuple(
-            _shape_and_amplitude(sequence, int(row))
-            for row in rows[start : start + tr_size, _RF]
-            if row
+            (_shape(pulse), round(_flip(pulse), 9))
+            for pulse in (
+                sequence.get_block(start + offset + 1).rf
+                for offset in range(tr_size)
+                if rows[start + offset, _RF]
+            )
         )
         for start in acquiring
     }
@@ -235,7 +242,7 @@ def _pulse(signal: np.ndarray, times_s: np.ndarray, raster_s: float) -> RfDefini
 def _rf_definitions(
     sequence: Any, blocks: range, raster_s: float
 ) -> tuple[dict[int, int], dict[int, RfDefinition]]:
-    """Collapse the RF library onto the shapes behind it.
+    """Collapse the RF rows onto the shapes they play.
 
     Rows differing only in amplitude, phase or frequency -- which is what RF
     spoiling writes one of per repetition -- are one pulse played differently,
@@ -248,11 +255,11 @@ def _rf_definitions(
         row = int(sequence.block_events[index][_RF])
         if not row or row in of_row:
             continue
-        key = tuple(int(value) for value in sequence.rf_library.data[row][1:4])
+        pulse = sequence.get_block(index).rf
+        key = _shape(pulse)
         if key not in by_shapes:
             identifier = len(by_shapes)
             by_shapes[key] = identifier
-            pulse = sequence.get_block(index).rf
             shape = _pulse(pulse.signal, np.asarray(pulse.t), raster_s)
             definitions[identifier] = RfDefinition(
                 **{**shape.__dict__, "id": identifier}
@@ -262,22 +269,23 @@ def _rf_definitions(
 
 
 def read_pulseq_description(
-    path: str | Path,
+    source: Any,
     *,
     tr_index: int | None = None,
     subsequence_index: int = 0,
     crusher_dephasing_rad: float = 0.0,
     voxel_size_m: float | None = None,
 ) -> SequenceDescription:
-    """Return the event stream one repetition of a ``.seq`` file plays.
+    """Return the event stream one repetition of a Pulseq sequence plays.
 
-    The file says how many blocks a repetition holds -- the ``TRSize``
+    The sequence says how many blocks a repetition holds -- the ``TRSize``
     definition a design writes -- so nothing here searches for the period.
 
     Parameters
     ----------
-    path : str or Path
-        The sequence file.
+    source : str, Path or sequence
+        A ``.seq`` file, or a sequence in memory with pypulseq's reading
+        interface -- pypulseq's own ``Sequence``, or pypulseqpp's.
     tr_index : int, optional
         Which repetition to describe, counted in whole ``TRSize`` windows.
         Defaults to the ``TRRef`` definition when the file carries one, and
@@ -303,16 +311,17 @@ def read_pulseq_description(
         If the file declares no ``TRSize``, if ``tr_index`` is out of range, or
         if the repetitions differ and none was named.
     """
-    sequence = _read(path)
+    sequence = _read(source)
+    name = source if isinstance(source, str | Path) else "this sequence"
     declared = _number(sequence, "TRSize")
     if declared is None:
         raise ValueError(
-            f"{path} declares no TRSize, so how many blocks one repetition "
+            f"{name} declares no TRSize, so how many blocks one repetition "
             "holds is not stated; write the definition from the design side"
         )
     tr_size = int(declared)
     if not 0 < tr_size <= len(sequence.block_durations):
-        raise ValueError(f"{path} declares TRSize={tr_size}, which is not a window")
+        raise ValueError(f"{name} declares TRSize={tr_size}, which is not a window")
 
     raster_s = _number(sequence, "RadiofrequencyRasterTime") or 1e-6
     readouts = _readouts(sequence)
