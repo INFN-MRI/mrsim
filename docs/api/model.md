@@ -49,7 +49,8 @@ given to any simulator, and giving one is what turns its term on.
 
 A sequence that came from somewhere else is read the same way:
 {meth}`~Simulator.from_description` takes the stream an MRD client decodes, and
-{meth}`~Simulator.from_pulseq` takes a Pulseq `.seq` file directly. Neither
+{meth}`~Simulator.from_pulseq` takes a Pulseq `.seq` file, or the sequence
+object a design built, directly. Neither
 walks a layout -- naming the simulator is what says how the events are played.
 
 Implement {meth}`~Simulator.evaluate` instead when the signal has a closed

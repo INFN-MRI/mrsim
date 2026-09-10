@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+- **A sequence in memory reads as the file it would write.**
+  `read_pulseq_description`, `SequenceDescription.from_pulseq` and
+  `Simulator.from_pulseq` take a sequence object as well as a path: pypulseq's
+  `Sequence`, or anything with its reading interface, such as pypulseqpp's. RF
+  pulses are grouped by the samples they play rather than by pypulseq's library
+  rows, so nothing reaches past that interface.
+
 ### Changed
 
 - **Both adjoint kernels compile one sweep at a time.** A reverse pass records

@@ -696,13 +696,14 @@ class SequenceDescription:
         )
 
     @classmethod
-    def from_pulseq(cls, path: Any, **settings: Any) -> SequenceDescription:
-        """Return what one repetition of a Pulseq ``.seq`` file plays.
+    def from_pulseq(cls, source: Any, **settings: Any) -> SequenceDescription:
+        """Return what one repetition of a Pulseq sequence plays.
 
         Parameters
         ----------
-        path : str or Path
-            The sequence file.
+        source : str, Path or sequence
+            A ``.seq`` file, or a sequence in memory with pypulseq's reading
+            interface -- pypulseq's own ``Sequence``, or pypulseqpp's.
         settings : Any
             ``tr_index`` to name which repetition to read, and the
             ``subsequence_index``, ``crusher_dephasing_rad`` and
@@ -714,7 +715,7 @@ class SequenceDescription:
         """
         from ._pulseq import read_pulseq_description
 
-        return read_pulseq_description(path, **settings)
+        return read_pulseq_description(source, **settings)
 
     def plot(self, axis: Any = None, *, upto_s: float | None = None) -> Any:
         """Draw the stream: pulses as stems, samples as markers.
